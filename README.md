@@ -2,7 +2,13 @@
 
 **Criador de fichas de personagem para RPG**, desenvolvido com React, TypeScript e Vite. O projeto combina uma interface temática inspirada nos quatro elementos com regras de combate, personalização de técnicas e exportação de fichas em PDF.
 
-> **Status:** beta — versão inicial do criador de personagens. Algumas regras são propostas de *playtest* e podem ser ajustadas pelo mestre.
+> **Status:** beta pública — versão inicial do criador de personagens, publicada na Vercel e em testes com jogadores. Algumas regras são propostas de *playtest* e podem ser ajustadas pelo mestre.
+
+### 🌐 Experimente o aplicativo
+
+**[Abrir Hexatombe: Avatar — versão online](https://hexatombe-avatar.vercel.app/)**
+
+Sem instalação: crie seu personagem no navegador e exporte sua ficha em PDF. O código-fonte está disponível neste repositório.
 
 ## Funcionalidades
 
@@ -75,7 +81,7 @@ npm run lint
 - [ ] Exportação/importação de dados da ficha em JSON.
 - [ ] Refinamentos de acessibilidade e experiência em telas menores.
 - [ ] Testes adicionais de compatibilidade e impressão dos PDFs.
-- [ ] Publicação de uma demonstração online.
+- [x] Publicação de uma demonstração online na Vercel.
 
 Ferramentas de preparação e gerenciamento de mesa podem ser desenvolvidas futuramente como um módulo separado.
 
