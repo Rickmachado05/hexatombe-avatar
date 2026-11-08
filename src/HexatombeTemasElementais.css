@@ -1,0 +1,140 @@
+/* HEXATOMBE: AVATAR — Fundos elementais v1
+   Importe ESTE arquivo por ultimo em src/App.tsx.
+   Nao altera regras, fotos, habilidades ou estrutura das abas.
+   A classe tema-* ja e aplicada ao <main className="app ...">.
+*/
+
+/* Cada elemento colore a atmosfera inteira, mas preserva o ritual
+   em vinho/escarlate e os detalhes de ouro antigo. */
+.app.tema-agua {
+  --hx-noite-1: #071725;
+  --hx-noite-2: #08101d;
+  --hx-nevoa-1: rgba(31, 143, 194, .43);
+  --hx-nevoa-2: rgba(18, 94, 142, .35);
+  --hx-nevoa-3: rgba(58, 100, 177, .23);
+  --hx-panel-luz: rgba(40, 114, 147, .17);
+  --hx-pontos: rgba(119, 210, 240, .68);
+  --hx-linhas: rgba(117, 205, 231, .26);
+  --hx-trama: repeating-radial-gradient(ellipse at 42% 28%, transparent 0 87px, rgba(82, 180, 226, .25) 89px, transparent 91px, transparent 145px);
+}
+.app.tema-terra {
+  --hx-noite-1: #101a13;
+  --hx-noite-2: #090f12;
+  --hx-nevoa-1: rgba(91, 139, 69, .42);
+  --hx-nevoa-2: rgba(143, 111, 51, .31);
+  --hx-nevoa-3: rgba(61, 103, 81, .27);
+  --hx-panel-luz: rgba(94, 126, 73, .17);
+  --hx-pontos: rgba(166, 198, 118, .68);
+  --hx-linhas: rgba(161, 182, 118, .22);
+  --hx-trama: repeating-linear-gradient(151deg, transparent 0 98px, rgba(147, 172, 105, .18) 99px, transparent 101px, transparent 171px);
+}
+.app.tema-fogo {
+  --hx-noite-1: #1b0d12;
+  --hx-noite-2: #0d0a13;
+  --hx-nevoa-1: rgba(204, 63, 31, .43);
+  --hx-nevoa-2: rgba(149, 30, 47, .37);
+  --hx-nevoa-3: rgba(244, 131, 52, .21);
+  --hx-panel-luz: rgba(158, 62, 39, .16);
+  --hx-pontos: rgba(247, 147, 83, .71);
+  --hx-linhas: rgba(222, 91, 56, .23);
+  --hx-trama: repeating-conic-gradient(from 12deg at 50% 29%, transparent 0deg 17deg, rgba(231, 81, 45, .16) 17.3deg 17.9deg, transparent 18.4deg 29deg);
+}
+.app.tema-ar {
+  --hx-noite-1: #0e1b24;
+  --hx-noite-2: #09121c;
+  --hx-nevoa-1: rgba(122, 191, 199, .35);
+  --hx-nevoa-2: rgba(151, 205, 217, .23);
+  --hx-nevoa-3: rgba(60, 121, 153, .29);
+  --hx-panel-luz: rgba(111, 171, 185, .15);
+  --hx-pontos: rgba(203, 241, 236, .72);
+  --hx-linhas: rgba(178, 222, 219, .23);
+  --hx-trama: repeating-radial-gradient(ellipse at 66% 24%, transparent 0 105px, rgba(184, 221, 219, .19) 107px, transparent 109px, transparent 182px);
+}
+.app.tema-neutro {
+  --hx-noite-1: #191511;
+  --hx-noite-2: #0e0e14;
+  --hx-nevoa-1: rgba(151, 106, 61, .35);
+  --hx-nevoa-2: rgba(100, 58, 68, .32);
+  --hx-nevoa-3: rgba(163, 126, 81, .22);
+  --hx-panel-luz: rgba(150, 111, 78, .15);
+  --hx-pontos: rgba(225, 192, 147, .69);
+  --hx-linhas: rgba(191, 153, 103, .24);
+  --hx-trama: repeating-radial-gradient(circle at 50% 31%, transparent 0 91px, rgba(195, 157, 103, .19) 93px, transparent 95px, transparent 155px);
+}
+
+/* Aplica em toda a pagina, inclusive na home (que tinha um fundo proprio). */
+.app,
+.app:has(.acoes) {
+  background:
+    radial-gradient(ellipse 54% 48% at 14% 35%, var(--hx-nevoa-1), transparent 78%),
+    radial-gradient(ellipse 44% 41% at 94% 64%, var(--hx-nevoa-2), transparent 79%),
+    radial-gradient(ellipse 52% 40% at 52% -6%, var(--hx-nevoa-3), transparent 76%),
+    radial-gradient(ellipse 47% 32% at 50% 110%, rgba(124, 24, 49, .18), transparent 83%),
+    linear-gradient(150deg, var(--hx-noite-1), var(--hx-noite-2) 65%, #090c15);
+  background-color: var(--hx-noite-2);
+}
+
+/* Graficos espirituais de fundo variam de elemento para elemento.
+   O anel exterior de vinho mantem a identidade de Hexatombe. */
+.app::before,
+.app:has(.acoes)::before {
+  inset: -14vmax;
+  opacity: .40;
+  background:
+    var(--hx-trama),
+    repeating-radial-gradient(circle at 50% 30%, transparent 0 135px, var(--hx-linhas) 137px, transparent 139px, transparent 208px),
+    repeating-conic-gradient(from 7deg at 50% 30%, rgba(139, 33, 56, .19) 0deg 0.6deg, transparent 0.8deg 26deg);
+  -webkit-mask-image: linear-gradient(180deg, black 0%, rgba(0,0,0,.75) 48%, transparent 96%);
+  mask-image: linear-gradient(180deg, black 0%, rgba(0,0,0,.75) 48%, transparent 96%);
+}
+
+/* Poeira elemental muda de cor, mas permanece bem discreta. */
+.app::after,
+.app:has(.acoes)::after {
+  opacity: .38;
+  background-image:
+    radial-gradient(circle, var(--hx-pontos) .8px, transparent 1.4px),
+    radial-gradient(circle, rgba(167, 59, 75, .53) .6px, transparent 1.2px);
+  background-size: 119px 137px, 193px 229px;
+  background-position: 0 0, 46px 68px;
+  -webkit-mask-image: linear-gradient(110deg, black, rgba(0,0,0,.42) 54%, black);
+  mask-image: linear-gradient(110deg, black, rgba(0,0,0,.42) 54%, black);
+}
+
+.app .aura,
+.app:has(.acoes) .aura {
+  inset: auto -12vw -35vh;
+  height: 80vh;
+  background:
+    radial-gradient(ellipse 46% 37% at 34% 45%, var(--hx-nevoa-1), transparent 77%),
+    radial-gradient(ellipse 45% 37% at 68% 56%, var(--hx-nevoa-2), transparent 76%);
+  filter: blur(48px);
+}
+
+/* O painel tambem absorve sutilmente o elemento, sem perder contraste. */
+.app .editor-identidade.editor-com-abas {
+  background:
+    radial-gradient(ellipse 75% 55% at 0% 0%, var(--hx-panel-luz), transparent 78%),
+    linear-gradient(156deg, rgba(28, 36, 53, .98), rgba(11, 17, 29, .99));
+  border-color: color-mix(in srgb, var(--elemento) 27%, #b19470 73%);
+}
+
+.app .editor-com-abas .selecao-identidade,
+.app .editor-com-abas .area-retrato,
+.app .grupo-habilidade,
+.app .resumo-ficha,
+.app .atributo {
+  box-shadow: inset 0 1px 0 rgba(242, 224, 193, .04), 0 8px 24px rgba(0, 0, 0, .12);
+}
+
+/* O painel de escolha na home recebe tambem o tom do elemento. */
+.app:has(.acoes) .detalhes {
+  background:
+    linear-gradient(105deg, var(--hx-panel-luz), rgba(13, 19, 30, .76) 68%),
+    #0d1320;
+  border-left-color: var(--elemento);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app, .app::before, .app::after, .app .aura { transition: none; }
+}

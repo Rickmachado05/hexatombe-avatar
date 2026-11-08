@@ -1,0 +1,29 @@
+/* Exportação PDF: não altera a aparência das outras abas */
+.aba-previa .botao-gerar-pdf {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 15px;
+  padding: 13px 23px;
+  border: 1px solid #d9b77a;
+  border-radius: 9px;
+  background: linear-gradient(120deg, #a07b44, #e0bd82);
+  box-shadow: 0 5px 22px rgba(99, 34, 37, 0.25);
+  color: #181019;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  cursor: pointer;
+  transition: filter .2s ease, transform .2s ease;
+}
+.aba-previa .botao-gerar-pdf:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+.aba-previa .botao-gerar-pdf:disabled { opacity: .65; cursor: progress; }
+.aba-previa .botao-gerar-pdf:focus-visible { outline: 3px solid var(--elemento); outline-offset: 3px; }
+.aba-previa .pdf-ajuda { display: block; margin-top: 9px; color: #cabd9f; font-size: 12px; }
+@media (max-width: 600px) {
+  .aba-previa .botao-gerar-pdf { width: 100%; }
+}

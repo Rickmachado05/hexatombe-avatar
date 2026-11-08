@@ -1,0 +1,171 @@
+/* Hexatombe: Avatar — Resumo da aba Prévia v1
+   Os estilos abaixo não afetam Identidade, Combate ou Habilidades. */
+.app .editor-com-abas .aba-previa {
+  color: #e6e5e8;
+  min-width: 0;
+}
+.app .editor-com-abas .aba-previa, .app .editor-com-abas .aba-previa * { box-sizing: border-box; }
+.app .editor-com-abas .aba-previa .previa-introducao { text-align: center; margin: 0 0 22px; }
+.app .editor-com-abas .aba-previa .previa-sobretitulo,
+.app .editor-com-abas .aba-previa .previa-rotulo {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  color: #d8b983;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .14em;
+}
+.app .editor-com-abas .aba-previa .previa-introducao h2 {
+  color: #edd9ae; font-family: Georgia, serif;
+  font-size: clamp(1.7rem, 2.4vw, 2.25rem);
+  margin: 8px 0 6px;
+}
+.app .editor-com-abas .aba-previa .previa-introducao p {
+  color: #b4bfcc; font-size: .9rem; margin: 0; line-height: 1.5;
+}
+/* Identidade: retrato preserva proporção 4:5 */
+.app .editor-com-abas .aba-previa .previa-identidade {
+  display: grid; grid-template-columns: minmax(145px, 200px) minmax(0, 1fr);
+  gap: clamp(16px, 3vw, 28px); align-items: start;
+  padding: clamp(18px, 3vw, 25px);
+  border: 1px solid rgba(213, 171, 103, .38); border-radius: 17px;
+  background: radial-gradient(ellipse at 10% 15%, var(--brilho), transparent 45%),
+    linear-gradient(125deg, rgba(25, 36, 53, .97), rgba(9, 15, 27, .97));
+  box-shadow: inset 0 1px rgba(254, 221, 173, .06);
+}
+.app .editor-com-abas .aba-previa .previa-retrato {
+  width: 100%; aspect-ratio: 4/5; border: 2px solid #c4a16d;
+  outline: 1px solid var(--elemento); outline-offset: 4px;
+  border-radius: 11px; overflow: hidden; background: #0a1421;
+  box-shadow: 0 4px 24px rgba(0,0,0,.4), 0 0 24px var(--brilho);
+}
+.app .editor-com-abas .aba-previa .previa-retrato img { display: block; width:100%; height:100%; object-fit:cover; }
+.app .editor-com-abas .aba-previa .previa-retrato-vazio {
+  width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;
+  background: radial-gradient(circle at 50% 45%,var(--brilho),transparent 72%);
+}
+.app .editor-com-abas .aba-previa .previa-simbolo { color:var(--elemento);font-size:3.5rem;line-height:1; }
+.app .editor-com-abas .aba-previa .previa-retrato-vazio small { color:#b4bbc4;font-size:.76rem; }
+.app .editor-com-abas .aba-previa .previa-identidade-texto { min-width:0; }
+.app .editor-com-abas .aba-previa .previa-identidade-texto h3 {
+  color:#f2dfb7;font-family:Georgia,serif;font-size:clamp(1.5rem, 3vw, 2.2rem);
+  margin:9px 0 13px;line-height:1.2;overflow-wrap:anywhere;
+}
+.app .editor-com-abas .aba-previa .previa-chips { display:flex;flex-wrap:wrap;gap:7px; }
+.app .editor-com-abas .aba-previa .previa-chips > span {
+  display:inline-flex;align-items:center;gap:5px;min-height:29px;padding:5px 10px;
+  color:#d8deeb;background:rgba(13,22,35,.75);border:1px solid rgba(186,199,219,.24);
+  border-radius:7px;font-size:.78rem;font-family:"Segoe UI",system-ui,sans-serif;
+}
+.app .editor-com-abas .aba-previa .previa-chips > .previa-chip-elemento {
+  color:var(--elemento);border-color:var(--elemento);background:var(--brilho);
+}
+.app .editor-com-abas .aba-previa .previa-historia { margin:17px 0; }
+.app .editor-com-abas .aba-previa .previa-historia strong { color:#e6d4b4;font-size:.9rem; }
+.app .editor-com-abas .aba-previa .previa-historia p { margin:7px 0;color:#c0c9d4;line-height:1.65;font-size:.89rem;white-space:pre-wrap;overflow-wrap:anywhere; }
+/* Sections */
+.app .editor-com-abas .aba-previa .previa-secao {
+  margin-top:18px;padding:clamp(16px,2.7vw,24px);
+  border:1px solid rgba(197,169,126,.23);border-radius:15px;
+  background:linear-gradient(155deg,rgba(16,26,40,.94),rgba(9,16,27,.96));
+}
+.app .editor-com-abas .aba-previa .previa-secao-topo {
+  display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:17px;
+}
+.app .editor-com-abas .aba-previa .previa-secao-topo h3 {
+  color:#ebd8b2;font:600 clamp(1.17rem,2vw,1.45rem) Georgia,serif;
+  margin:0;
+}
+.app .editor-com-abas .aba-previa .previa-secao-topo p {font-size:.8rem;color:#adbacb;margin:5px 0 0;line-height:1.4;}
+.app .editor-com-abas .aba-previa .previa-editar {
+  display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;
+  padding:8px 12px;border-radius:8px;border:1px solid rgba(197,166,117,.48);
+  color:#e5d3ac;background:rgba(34,40,49,.85);font:600 .79rem "Segoe UI",system-ui,sans-serif;
+  cursor:pointer;transition:background .2s,border-color .2s;
+}
+.app .editor-com-abas .aba-previa .previa-editar:hover { background:rgba(77,66,66,.85);border-color:var(--elemento); }
+.app .editor-com-abas .aba-previa .previa-editar:focus-visible,
+.app .editor-com-abas .aba-previa .previa-detalhes summary:focus-visible {outline:2px solid var(--elemento);outline-offset:3px;}
+.app .editor-com-abas .aba-previa .previa-atributos {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;}
+.app .editor-com-abas .aba-previa .previa-atributo {
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  min-width:0;padding:15px 8px;border-radius:10px;border:1px solid var(--estat-borda);
+  background:var(--estat-bg);font-family:"Segoe UI",system-ui,sans-serif;
+}
+.app .editor-com-abas .aba-previa .previa-hp {--estat-borda:rgba(222,111,128,.46);--estat-bg:rgba(104,38,54,.18);--estat-cor:#f5a0ac;}
+.app .editor-com-abas .aba-previa .previa-mana {--estat-borda:rgba(95,163,220,.46);--estat-bg:rgba(31,79,120,.2);--estat-cor:#9bcffd;}
+.app .editor-com-abas .aba-previa .previa-ca {--estat-borda:rgba(208,178,117,.46);--estat-bg:rgba(115,85,35,.18);--estat-cor:#eed19b;}
+.app .editor-com-abas .aba-previa .previa-estat-icone {font-size:1.25rem;color:var(--estat-cor);}
+.app .editor-com-abas .aba-previa .previa-atributo > span:nth-child(2) {font-size:.75rem;color:#bdc7d2;}
+.app .editor-com-abas .aba-previa .previa-atributo strong {font:700 clamp(1.45rem,2.3vw,1.9rem) Georgia,serif;color:var(--estat-cor);}
+.app .editor-com-abas .aba-previa .previa-regen {
+  margin:13px 0;color:#abbacc;text-align:center;font-size:.85rem;
+}
+.app .editor-com-abas .aba-previa .previa-regen strong {color:var(--elemento);margin-left:6px;}
+.app .editor-com-abas .aba-previa .previa-ataque {
+  display:flex;justify-content:space-between;align-items:center;gap:14px;
+  padding:16px;border-radius:10px;border:1px solid rgba(200,171,122,.27);
+  background:rgba(7,13,24,.6);
+}
+.app .editor-com-abas .aba-previa .previa-ataque > div:first-child {min-width:0;}
+.app .editor-com-abas .aba-previa .previa-ataque > div:first-child > strong {display:block;margin:5px 0;color:#f0e4d3;font-size:1rem;overflow-wrap:anywhere;}
+.app .editor-com-abas .aba-previa .previa-ataque p {font-size:.84rem;margin:5px 0 0;color:#bdc6d2;line-height:1.5;white-space:pre-wrap;}
+.app .editor-com-abas .aba-previa .previa-ataque-badges {display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;}
+.app .editor-com-abas .aba-previa .previa-ataque-badges > span {padding:7px 9px;background:rgba(35,50,69,.7);border:1px solid rgba(183,193,207,.3);border-radius:7px;color:#e7d8b5;white-space:nowrap;font:700 .79rem "Segoe UI",system-ui,sans-serif;}
+/* Techniques: two columns on desktop, details closed by default */
+.app .editor-com-abas .aba-previa .previa-grade-tecnicas {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+.app .editor-com-abas .aba-previa .previa-tecnica {
+  --tipo-cor:#cda383;min-width:0;position:relative;overflow:hidden;
+  padding:15px;border:1px solid rgba(199,172,138,.27);border-radius:11px;
+  background:radial-gradient(ellipse at 0 0,color-mix(in srgb,var(--tipo-cor) 10%,transparent),transparent 64%),rgba(8,16,28,.72);
+}
+.app .editor-com-abas .aba-previa .previa-tecnica[data-tipo="Ofensiva"] {--tipo-cor:#e68d7a;}
+.app .editor-com-abas .aba-previa .previa-tecnica[data-tipo="Ofensiva em área"] {--tipo-cor:#e6ae7e;}
+.app .editor-com-abas .aba-previa .previa-tecnica[data-tipo="Controle"] {--tipo-cor:#ab9be7;}
+.app .editor-com-abas .aba-previa .previa-tecnica[data-tipo="Condição"] {--tipo-cor:#e38da6;}
+.app .editor-com-abas .aba-previa .previa-tecnica[data-tipo="Defesa"] {--tipo-cor:#8cbfdc;}
+.app .editor-com-abas .aba-previa .previa-tecnica[data-tipo="Buff"] {--tipo-cor:#e9c587;}
+.app .editor-com-abas .aba-previa .previa-tecnica[data-tipo="Cura"] {--tipo-cor:#98d7b6;}
+.app .editor-com-abas .aba-previa .previa-tecnica[data-tipo="Utilidade"] {--tipo-cor:#8cd5c9;}
+.app .editor-com-abas .aba-previa .previa-tecnica::before {content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--tipo-cor);}
+.app .editor-com-abas .aba-previa .previa-tecnica-topo {display:flex;align-items:center;gap:10px;min-width:0;margin-bottom:10px;}
+.app .editor-com-abas .aba-previa .previa-tecnica-numero {flex:0 0 33px;height:33px;display:grid;place-items:center;border:1px solid var(--tipo-cor);border-radius:7px;color:var(--tipo-cor);font-family:Georgia,serif;}
+.app .editor-com-abas .aba-previa .previa-tecnica-topo > div {min-width:0;}
+.app .editor-com-abas .aba-previa .previa-tecnica-topo strong {display:block;color:#f0e4d3;overflow-wrap:anywhere;font-family:Georgia,serif;font-size:1rem;}
+.app .editor-com-abas .aba-previa .previa-tecnica-topo small {display:block;color:#bbc4d0;font-size:.77rem;margin-top:3px;}
+.app .editor-com-abas .aba-previa .previa-tecnica-chips {margin-bottom:10px;}
+.app .editor-com-abas .aba-previa .previa-tecnica-chips > span {font-size:.7rem;padding:5px 7px;min-height:25px;}
+.app .editor-com-abas .aba-previa .previa-tecnica-chips > span:first-child {color:var(--tipo-cor);border-color:color-mix(in srgb,var(--tipo-cor) 45%,transparent);}
+.app .editor-com-abas .aba-previa .previa-tecnica-efeito {display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;margin:0 0 12px;color:#b9c4d1;font-size:.82rem;}
+.app .editor-com-abas .aba-previa .previa-tecnica-efeito strong {color:#ead49f;font-size:1rem;}
+.app .editor-com-abas .aba-previa .previa-tecnica-efeito em {font-style:normal;color:#d4b0a6;}
+.app .editor-com-abas .aba-previa .previa-experimental {font:600 .7rem "Segoe UI",system-ui,sans-serif;color:#e2b799;}
+.app .editor-com-abas .aba-previa .previa-detalhes {margin-top:11px;border-top:1px solid rgba(194,171,135,.18);padding-top:9px;}
+.app .editor-com-abas .aba-previa .previa-detalhes summary {color:var(--tipo-cor);cursor:pointer;list-style:revert;font:.78rem "Segoe UI",system-ui,sans-serif;}
+.app .editor-com-abas .aba-previa .previa-detalhes-conteudo {margin-top:10px;color:#c3ccd8;font-size:.81rem;line-height:1.55;overflow-wrap:anywhere;}
+.app .editor-com-abas .aba-previa .previa-detalhes-conteudo p {margin:7px 0;white-space:pre-wrap;}
+.app .editor-com-abas .aba-previa .previa-detalhes-conteudo strong {color:#e3d2af;}
+.app .editor-com-abas .aba-previa .previa-passiva {
+  border-color:rgba(214,174,102,.46);
+  background:radial-gradient(ellipse at 0 0, rgba(115,67,75,.22), transparent 52%),linear-gradient(130deg,rgba(31,31,41,.96),rgba(10,16,28,.97));
+}
+.app .editor-com-abas .aba-previa .previa-passiva > p {font-size:.87rem;color:#c5cbd7;line-height:1.6;margin:9px 0;overflow-wrap:anywhere;white-space:pre-wrap;}
+.app .editor-com-abas .aba-previa .previa-passiva > p strong {color:#e7d5ae;}
+.app .editor-com-abas .aba-previa .previa-passiva .previa-chips {margin:0 0 14px;}
+.app .editor-com-abas .aba-previa .previa-alerta {color:#e7b6a9!important;font-size:.82rem;line-height:1.5;}
+.app .editor-com-abas .aba-previa .previa-rodape {font-size:.78rem;color:#91a0b4;text-align:center;margin:18px 0 2px;}
+@media (max-width:760px) {
+  .app .editor-com-abas .aba-previa .previa-identidade {grid-template-columns:minmax(110px,150px) minmax(0,1fr);}
+  .app .editor-com-abas .aba-previa .previa-grade-tecnicas {grid-template-columns:1fr;}
+}
+@media (max-width:520px) {
+  .app .editor-com-abas .aba-previa .previa-identidade {grid-template-columns:1fr;gap:20px;}
+  .app .editor-com-abas .aba-previa .previa-retrato {width:min(190px,100%);margin:0 auto;}
+  .app .editor-com-abas .aba-previa .previa-secao-topo {align-items:flex-start;flex-wrap:wrap;}
+  .app .editor-com-abas .aba-previa .previa-ataque {align-items:flex-start;flex-direction:column;}
+  .app .editor-com-abas .aba-previa .previa-atributos {gap:7px;}
+  .app .editor-com-abas .aba-previa .previa-atributo {padding:12px 4px;}
+  .app .editor-com-abas .aba-previa .previa-atributo > span:nth-child(2) {font-size:.65rem;text-align:center;}
+}
+@media (prefers-reduced-motion:reduce) {
+  .app .editor-com-abas .aba-previa * {transition:none!important;animation:none!important;}
+}

@@ -1,0 +1,361 @@
+/*
+  HEXATOMBE: AVATAR — Editor de Identidade, versão 1
+  Importar por último no App.tsx, depois de HexatombeHomeRitual.css.
+  Não altera regras, estados, elementos, foto nem lógica das abas.
+*/
+
+/* 1. O registro fica mais amplo, sem perder a aparência do grimório. */
+.app .editor-identidade.editor-com-abas {
+  width: min(100%, 1060px);
+  max-width: 1060px;
+  margin: 22px auto 54px;
+  padding: clamp(20px, 3.3vw, 42px);
+  border: 1px solid rgba(203, 169, 113, .34);
+  border-radius: 20px;
+  background:
+    radial-gradient(ellipse 62% 52% at 0% 0%, rgba(99, 46, 79, .11), transparent 77%),
+    linear-gradient(158deg, rgba(30, 40, 59, .98), rgba(12, 19, 32, .99));
+  box-shadow:
+    0 26px 72px rgba(0, 0, 0, .40),
+    inset 0 1px 0 rgba(243, 218, 166, .08);
+}
+
+/* 2. As abas parecem capítulos de um registro ritual. */
+.app .editor-com-abas .abas-editor {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  padding: 9px;
+  margin-bottom: 30px;
+  border-radius: 14px;
+  background: rgba(7, 13, 24, .89);
+  border: 1px solid rgba(208, 170, 114, .25);
+  box-shadow: inset 0 1px 0 rgba(255, 244, 216, .05);
+}
+.app .editor-com-abas .aba-editor {
+  min-width: 0;
+  min-height: 49px;
+  padding: 11px 8px;
+  color: #bfc7d3;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  font-size: .92rem;
+  letter-spacing: .01em;
+  transition: background .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.app .editor-com-abas .aba-editor:hover {
+  color: #f1e3c7;
+  border-color: rgba(208, 170, 114, .24);
+  background: rgba(255, 255, 255, .045);
+}
+.app .editor-com-abas .aba-editor.selecionada {
+  color: #f5e8d3;
+  border-color: var(--elemento);
+  background: linear-gradient(145deg, var(--brilho), rgba(19, 28, 44, .98));
+  box-shadow: inset 0 -2px 0 var(--elemento), 0 0 20px var(--brilho);
+}
+.app .editor-com-abas .aba-editor:focus-visible {
+  outline: 2px solid #e3c388;
+  outline-offset: 2px;
+}
+
+/* 3. Organização da aba Identidade: vínculo em cima; retrato à esquerda;
+      nome, classe e história à direita. Usa os elementos que JÁ existem. */
+.app .editor-com-abas .conteudo-aba:has(> .selecao-identidade) {
+  display: grid;
+  grid-template-columns: minmax(240px, .88fr) minmax(0, 1.55fr);
+  grid-template-areas:
+    "titulo titulo"
+    "elemento elemento"
+    "intro intro"
+    "retrato nome-label"
+    "retrato nome-input"
+    "retrato classe-label"
+    "retrato classe-input"
+    "retrato historia-label"
+    "retrato historia-input";
+  column-gap: clamp(22px, 3.4vw, 38px);
+  row-gap: 0;
+  align-items: start;
+}
+.app .editor-com-abas .conteudo-aba:has(> .selecao-identidade) > h2 {
+  grid-area: titulo;
+  margin: 2px 0 20px;
+  font-size: clamp(1.6rem, 2.4vw, 2.1rem);
+  text-align: center;
+  line-height: 1.25;
+  color: #ead5a7;
+}
+.app .editor-com-abas .conteudo-aba:has(> .selecao-identidade) > h2::after {
+  content: "";
+  display: block;
+  width: min(170px, 54%);
+  height: 1px;
+  margin: 14px auto 0;
+  background: linear-gradient(90deg, transparent, #b48372 30%, #dabd85 50%, #b48372 70%, transparent);
+}
+
+/* Vínculo elemental: um painel menor dentro do registro. */
+.app .editor-com-abas .selecao-identidade {
+  grid-area: elemento;
+  margin: 0 0 18px;
+  padding: 20px clamp(12px, 2.6vw, 24px) 24px;
+  border-radius: 14px;
+  border: 1px solid rgba(205, 168, 112, .21);
+  background: linear-gradient(155deg, rgba(12, 19, 32, .72), rgba(15, 21, 32, .45));
+}
+.app .editor-com-abas .selecao-identidade > h3 {
+  margin: 0 0 14px;
+  font-size: 1.05rem;
+  letter-spacing: .045em;
+  color: #ead5a7;
+}
+.app .editor-com-abas .selecao-identidade .elementos {
+  width: 100%;
+  max-width: 760px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: clamp(7px, 1.2vw, 12px);
+}
+.app .editor-com-abas .selecao-identidade .elemento {
+  min-height: 87px;
+  padding: 12px 5px;
+  border-radius: 10px;
+}
+.app .editor-com-abas .selecao-identidade .elemento .simbolo {
+  font-size: 1.75rem;
+}
+.app .editor-com-abas .selecao-identidade .elemento .nome {
+  font-size: .82rem;
+  line-height: 1.25;
+  text-align: center;
+}
+.app .editor-com-abas .conteudo-aba:has(> .selecao-identidade) > .descricao-editor {
+  grid-area: intro;
+  margin: 0 0 20px;
+  color: #b8bfd0;
+  text-align: left;
+  font-size: .94rem;
+}
+
+/* Retrato: destaque da identidade, moldura dourada + aura elemental. */
+.app .editor-com-abas .conteudo-aba:has(> .selecao-identidade) > .area-retrato {
+  grid-area: retrato;
+  align-self: stretch;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 29px 16px 22px;
+  border-radius: 16px;
+  border: 1px solid rgba(205, 168, 112, .28);
+  background:
+    radial-gradient(circle at 50% 33%, var(--brilho), transparent 58%),
+    linear-gradient(180deg, rgba(26, 35, 51, .84), rgba(9, 15, 26, .93));
+  box-shadow: inset 0 1px 0 rgba(238, 204, 144, .07);
+}
+.app .editor-com-abas .area-retrato::before {
+  content: "RETRATO ESPIRITUAL";
+  display: block;
+  margin: 0 0 3px;
+  color: #d6be92;
+  font-size: .75rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: .17em;
+  text-align: center;
+}
+.app .editor-com-abas .moldura-retrato {
+  width: min(100%, 224px);
+  height: auto;
+  aspect-ratio: 4 / 5;
+  margin: 7px auto 12px;
+  border: 2px solid #c9a873;
+  outline: 1px solid var(--elemento);
+  outline-offset: 6px;
+  border-radius: 12px;
+  box-shadow: 0 0 30px var(--brilho), 0 18px 33px rgba(0, 0, 0, .35);
+}
+.app .editor-com-abas .area-retrato label[for="foto-personagem"] {
+  margin: 2px 0 0;
+  font-size: .84rem;
+  color: #dfc798;
+}
+.app .editor-com-abas .area-retrato input[type="file"] {
+  width: 100%;
+  max-width: 285px;
+  font-size: .78rem;
+  color: #c4cede;
+}
+.app .editor-com-abas .area-retrato input[type="file"]::file-selector-button {
+  margin-right: 6px;
+  border-radius: 8px;
+  border: 1px solid rgba(208, 174, 122, .43);
+  background: #283249;
+  color: #ebddc3;
+  padding: 9px 12px;
+  cursor: pointer;
+}
+.app .editor-com-abas .area-retrato .botao-remover {
+  margin-top: 0;
+  padding: 9px 14px;
+  font-size: .82rem;
+}
+
+/* Campos: rótulos, espaçamento e hierarquia editorial. */
+.app .editor-com-abas .conteudo-aba:has(> .selecao-identidade) > label[for="nome-personagem"] {
+  grid-area: nome-label;
+}
+.app .editor-com-abas .conteudo-aba:has(> .selecao-identidade) > #nome-personagem {
+  grid-area: nome-input;
+}
+.app .editor-com-abas .conteudo-aba:has(> .selecao-identidade) > label[for="classe-personagem"] {
+  grid-area: classe-label;
+}
+.app .editor-com-abas .conteudo-aba:has(> .selecao-identidade) > #classe-personagem {
+  grid-area: classe-input;
+}
+.app .editor-com-abas .conteudo-aba:has(> .selecao-identidade) > label[for="historia-personagem"] {
+  grid-area: historia-label;
+}
+.app .editor-com-abas .conteudo-aba:has(> .selecao-identidade) > #historia-personagem {
+  grid-area: historia-input;
+  min-height: 164px;
+  resize: vertical;
+  line-height: 1.65;
+}
+.app .editor-com-abas .conteudo-aba:has(> .selecao-identidade) > label {
+  margin: 9px 0 7px;
+  font-size: .88rem;
+  letter-spacing: .015em;
+  color: #e4d2ad;
+}
+.app .editor-com-abas .conteudo-aba:has(> .selecao-identidade) > input,
+.app .editor-com-abas .conteudo-aba:has(> .selecao-identidade) > select,
+.app .editor-com-abas .conteudo-aba:has(> .selecao-identidade) > textarea {
+  width: 100%;
+  min-width: 0;
+  margin: 0 0 16px;
+  font-size: 1rem;
+  border-radius: 10px;
+  background: rgba(8, 17, 29, .92);
+  border-color: rgba(123, 146, 168, .41);
+}
+.app .editor-com-abas .conteudo-aba:has(> .selecao-identidade) > input:focus,
+.app .editor-com-abas .conteudo-aba:has(> .selecao-identidade) > select:focus,
+.app .editor-com-abas .conteudo-aba:has(> .selecao-identidade) > textarea:focus {
+  border-color: var(--elemento);
+  box-shadow: 0 0 0 3px var(--brilho);
+}
+
+/* 4. Rodapé do editor: hierarquia clara para a próxima etapa. */
+.app .editor-com-abas .navegacao-editor {
+  margin-top: 34px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(207, 169, 120, .23);
+}
+.app .editor-com-abas .navegacao-editor button {
+  min-height: 45px;
+  min-width: 142px;
+  border-radius: 9px;
+  padding: 11px 18px;
+}
+.app .editor-com-abas .navegacao-editor .proxima-aba {
+  border: 1px solid var(--elemento);
+  color: #111827;
+  background: var(--elemento);
+  box-shadow: 0 7px 21px var(--brilho);
+}
+
+/* 5. Tablets e celulares: coluna única; ordem original dos campos. */
+@media (max-width: 790px) {
+  .app .editor-com-abas .conteudo-aba:has(> .selecao-identidade) {
+    display: block;
+  }
+  .app .editor-com-abas .conteudo-aba:has(> .selecao-identidade) > .descricao-editor {
+    text-align: center;
+  }
+  .app .editor-com-abas .conteudo-aba:has(> .selecao-identidade) > .area-retrato {
+    max-width: 440px;
+    margin: 0 auto 24px;
+  }
+  .app .editor-com-abas .conteudo-aba:has(> .selecao-identidade) > label {
+    display: block;
+    margin-top: 17px;
+  }
+}
+@media (max-width: 610px) {
+  .app .editor-identidade.editor-com-abas {
+    padding: 16px;
+    margin-top: 16px;
+  }
+  .app .editor-com-abas .abas-editor {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+  .app .editor-com-abas .selecao-identidade {
+    padding: 16px 12px;
+  }
+  .app .editor-com-abas .selecao-identidade .elementos {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .app .editor-com-abas .selecao-identidade .elemento {
+    min-height: 83px;
+  }
+}
+@media (max-width: 380px) {
+  .app .editor-com-abas .selecao-identidade .elementos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .app .editor-com-abas .navegacao-editor button {
+    min-width: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app .editor-com-abas .aba-editor { transition: none; }
+}
+ 
+
+/* Upload de retrato personalizado */
+
+.editor-identidade .area-retrato input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.area-retrato label[for="foto-personagem"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  margin: 18px 0 4px;
+  border: 1px solid var(--elemento);
+  border-radius: 8px;
+  color: #f0dfbf;
+  background: #1b2433;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.area-retrato label[for="foto-personagem"]:hover {
+  background: #283246;
+  box-shadow: 0 0 16px var(--brilho);
+}
+
+.area-retrato:focus-within label[for="foto-personagem"] {
+  outline: 2px solid var(--elemento);
+  outline-offset: 3px;
+}

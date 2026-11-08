@@ -1,0 +1,343 @@
+/* HEXATOMBE: AVATAR — TEMA ESPIRITUAL v1
+   Importar após App.css e LayoutAbas.css.
+   Esta folha altera somente a apresentação; não modifica regras ou dados. */
+
+.app {
+  --hx-fundo: #090e18;
+  --hx-painel: #151e2d;
+  --hx-painel-alto: #1c283a;
+  --hx-texto: #f2eade;
+  --hx-suave: #b9c5d4;
+  --hx-ouro: #c8a66b;
+  --hx-ouro-claro: #ead5a7;
+  --hx-borda: rgba(202, 174, 123, .24);
+  --hx-sombra: 0 20px 65px rgba(1, 5, 14, .48);
+  color: var(--hx-texto);
+  background: radial-gradient(ellipse 68% 38% at 50% -12%, rgba(74, 57, 124, .34), transparent 72%),
+              radial-gradient(ellipse 42% 38% at -12% 40%, rgba(52, 96, 125, .18), transparent 85%),
+              radial-gradient(ellipse 50% 45% at 112% 76%, rgba(92, 56, 137, .14), transparent 80%),
+              var(--hx-fundo);
+  min-height: 100vh;
+  position: relative;
+  isolation: isolate;
+  overflow-x: clip;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  line-height: 1.52;
+}
+
+.app.tema-agua { --elemento: #72c9ec; --brilho: rgba(77, 178, 230, .24); }
+.app.tema-terra { --elemento: #9cc27e; --brilho: rgba(131, 174, 103, .22); }
+.app.tema-fogo { --elemento: #f29b6c; --brilho: rgba(235, 117, 71, .23); }
+.app.tema-ar { --elemento: #c5e9df; --brilho: rgba(150, 218, 225, .21); }
+.app.tema-neutro { --elemento: #d6bda0; --brilho: rgba(203, 170, 121, .2); }
+
+/* Grafismo circular de papel/tinta, feito em CSS para não depender de imagens. */
+.app::before {
+  content: "";
+  position: fixed;
+  inset: -16vmax;
+  z-index: -1;
+  opacity: .16;
+  pointer-events: none;
+  background: repeating-radial-gradient(circle at 50% 28%, transparent 0 72px,
+              rgba(209, 184, 135, .2) 73px, transparent 75px, transparent 118px);
+  mask-image: linear-gradient(to bottom, black, transparent 72%);
+}
+.app::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .45;
+  background-image: radial-gradient(circle, rgba(232, 217, 194, .46) .65px, transparent 1.1px);
+  background-size: 89px 101px;
+  mask-image: linear-gradient(130deg, transparent 10%, black 60%, transparent 100%);
+}
+.app .aura {
+  position: fixed;
+  inset: auto -15vw -40vh;
+  height: 68vh;
+  pointer-events: none;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, var(--brilho) 0%, transparent 67%);
+  filter: blur(32px);
+}
+
+.app .conteudo {
+  width: min(100% - 36px, 1200px);
+  margin-inline: auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* Cabeçalho de abertura: hierarquia ritualística, sem sacrificar legibilidade. */
+.app .cabecalho { text-align: center; padding: clamp(34px, 6vw, 78px) 10px 20px; }
+.app .cabecalho h1 {
+  font-family: "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  font-size: clamp(2.6rem, 8vw, 5.3rem);
+  font-weight: 600;
+  letter-spacing: .14em;
+  line-height: 1.12;
+  margin: .16em 0 0;
+  color: var(--hx-ouro-claro);
+  text-shadow: 0 0 34px rgba(205, 149, 223, .18);
+}
+.app .subtitulo, .app .universo {
+  color: var(--hx-ouro);
+  text-transform: uppercase;
+  letter-spacing: .27em;
+  font-size: .75rem;
+  font-weight: 700;
+}
+.app .selo {
+  display: grid;
+  place-items: center;
+  width: 78px;
+  height: 78px;
+  margin: 0 auto 22px;
+  border-radius: 50%;
+  border: 1px solid var(--hx-ouro);
+  outline: 1px solid rgba(200, 166, 107, .3);
+  outline-offset: 7px;
+  font-size: 2.55rem;
+  color: var(--hx-ouro-claro);
+  background: radial-gradient(circle, rgba(192, 152, 214, .13), transparent 72%);
+  box-shadow: 0 0 46px rgba(181, 126, 203, .17);
+}
+.app .linha-ritual {
+  height: 1px;
+  width: min(260px, 70vw);
+  margin: 24px auto;
+  background: linear-gradient(90deg, transparent, var(--hx-ouro), transparent);
+}
+.app .cabecalho h2, .app .detalhes h2, .app .conteudo-aba > h2,
+.app .editor-identidade h2 {
+  font-family: "Palatino Linotype", Georgia, serif;
+  color: var(--hx-ouro-claro);
+  font-weight: 500;
+  letter-spacing: .03em;
+}
+.app .introducao { color: var(--hx-suave); max-width: 560px; margin-inline: auto; }
+.app .cabecalho-compacto { padding: 18px 8px 6px; }
+.app .cabecalho-compacto h1 { font-size: clamp(1.65rem, 4vw, 2.35rem); }
+
+/* Escolha elemental — cinco placas de um mesmo ritual. */
+.app .selecao { text-align: center; margin: 10px auto 22px; }
+.app .selecao h3, .app .selecao-identidade h3 {
+  color: var(--hx-ouro-claro);
+  font-family: "Palatino Linotype", Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin: 0 0 18px;
+}
+.app .elementos {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: clamp(8px, 1.5vw, 17px);
+  width: min(100%, 885px);
+  margin: auto;
+}
+.app .elemento {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 130px;
+  padding: 20px 9px;
+  border: 1px solid var(--hx-borda);
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(35, 46, 68, .89), rgba(13, 20, 34, .95));
+  color: var(--hx-texto);
+  box-shadow: 0 9px 30px rgba(0, 0, 0, .2);
+  cursor: pointer;
+  transition: border-color .2s, transform .2s, background .2s, box-shadow .2s;
+}
+.app .elemento .simbolo { font-size: clamp(1.75rem, 3.6vw, 2.55rem); line-height: 1.2; color: var(--hx-ouro-claro); }
+.app .elemento .nome { font-size: .89rem; font-weight: 600; }
+.app .elemento:hover { transform: translateY(-3px); border-color: rgba(221, 194, 149, .65); }
+.app .elemento.ativo {
+  border-color: var(--elemento);
+  background: linear-gradient(145deg, rgba(39, 55, 78, .97), rgba(14, 25, 39, .97));
+  box-shadow: inset 0 0 0 1px var(--brilho), 0 0 30px var(--brilho);
+}
+.app .elemento.ativo .simbolo { color: var(--elemento); }
+.app .detalhes { text-align: center; margin: 32px auto 23px; }
+.app .detalhes p { color: var(--hx-suave); }
+.app .detalhes .circulo-espiritual {
+  display: grid;
+  place-items: center;
+  width: 125px;
+  height: 125px;
+  margin: 0 auto 22px;
+  border-radius: 50%;
+  border: 1px solid var(--elemento);
+  outline: 1px solid rgba(212, 193, 166, .33);
+  outline-offset: 10px;
+  background: radial-gradient(circle, var(--brilho), transparent 70%);
+  color: var(--elemento);
+  font-size: 3.5rem;
+  box-shadow: 0 0 48px var(--brilho);
+}
+.app .detalhes .mensagem { color: var(--hx-ouro); font-size: .83rem; letter-spacing: .09em; }
+.app .acoes { margin-bottom: 54px; }
+.app .botao-principal {
+  background: linear-gradient(115deg, #e6cc97, #c9a66b);
+  color: #131923;
+  border: 1px solid #efd9b1;
+  border-radius: 10px;
+  padding: 15px 38px;
+  box-shadow: 0 8px 28px rgba(168, 123, 64, .2);
+  font-weight: 750;
+  letter-spacing: .035em;
+}
+.app .botao-principal:hover { filter: brightness(1.08); transform: translateY(-2px); }
+
+/* Editor: a ficha permanece funcional, com clima de arquivo espiritual. */
+.app .editor-identidade.editor-com-abas {
+  width: min(100%, 970px);
+  max-width: 970px;
+  background: linear-gradient(155deg, rgba(29, 39, 57, .98), rgba(13, 20, 32, .98));
+  border: 1px solid var(--hx-borda);
+  border-radius: 18px;
+  box-shadow: var(--hx-sombra), inset 0 1px 0 rgba(255, 247, 222, .055);
+  padding: clamp(16px, 3.7vw, 36px);
+  margin: 22px auto 62px;
+}
+.app .abas-editor {
+  top: 10px;
+  background: rgba(17, 25, 39, .94);
+  backdrop-filter: blur(18px);
+  border: 1px solid var(--hx-borda);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .28);
+  gap: 8px;
+}
+.app .aba-editor {
+  color: var(--hx-suave);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  padding: 13px 6px;
+  font-weight: 650;
+}
+.app .aba-editor:hover { background: rgba(255, 255, 255, .045); border-color: var(--hx-borda); }
+.app .aba-editor.selecionada {
+  color: #101722;
+  background: var(--elemento);
+  border-color: var(--elemento);
+  box-shadow: 0 3px 16px var(--brilho);
+}
+.app .conteudo-aba { color: var(--hx-texto); }
+.app .descricao-editor { color: var(--hx-suave); }
+.app .selecao-identidade { border-bottom: 1px solid var(--hx-borda); }
+.app .selecao-identidade .elemento { min-height: 94px; padding: 11px 7px; }
+.app .selecao-identidade .elemento .simbolo { font-size: 1.65rem; }
+
+/* Campos e cartões compartilham o mesmo sistema de bordas e espaçamento. */
+.app .editor-identidade label { color: var(--hx-ouro-claro); font-size: .86rem; font-weight: 600; }
+.app .editor-identidade input:not([type="file"]),
+.app .editor-identidade select,
+.app .editor-identidade textarea {
+  background: #0c1624;
+  color: var(--hx-texto);
+  border: 1px solid #384a5d;
+  border-radius: 10px;
+  padding: 12px 14px;
+  min-height: 45px;
+  font-family: inherit;
+  line-height: 1.5;
+  transition: border-color .18s, box-shadow .18s;
+}
+.app .editor-identidade textarea { min-height: 92px; resize: vertical; }
+.app .editor-identidade input::placeholder, .app .editor-identidade textarea::placeholder { color: #8392a6; }
+.app .editor-identidade input:focus, .app .editor-identidade select:focus, .app .editor-identidade textarea:focus {
+  outline: none;
+  border-color: var(--elemento);
+  box-shadow: 0 0 0 3px var(--brilho);
+}
+.app .editor-identidade input[type="file"] { color: var(--hx-suave); }
+.app .editor-identidade input[type="file"]::file-selector-button {
+  color: var(--hx-texto);
+  background: #283449;
+  border: 1px solid var(--hx-borda);
+  border-radius: 7px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+.app .moldura-retrato {
+  width: 188px;
+  aspect-ratio: 4 / 5;
+  height: auto;
+  border-radius: 14px;
+  border: 2px solid var(--hx-ouro);
+  outline: 1px solid var(--elemento);
+  outline-offset: 5px;
+  background: radial-gradient(circle at 50% 20%, var(--brilho), #101827 75%);
+  box-shadow: 0 0 38px var(--brilho);
+}
+.app .moldura-retrato img { width: 100%; height: 100%; object-fit: cover; }
+.app .grupo-habilidade, .app .resumo-ficha {
+  background: rgba(11, 20, 33, .73);
+  border: 1px solid var(--hx-borda);
+  border-radius: 13px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+}
+.app .grupo-habilidade h3, .app .resumo-ficha h3, .app .previa-habilidades h3 {
+  color: var(--hx-ouro-claro);
+  font-family: "Palatino Linotype", Georgia, serif;
+  font-weight: 600;
+}
+.app .cartao-habilidade { margin: 12px 0; }
+.app .cartao-habilidade.aberta { border-color: var(--elemento); box-shadow: 0 0 27px var(--brilho); }
+.app .cabecalho-habilidade { color: var(--hx-texto); }
+.app .cabecalho-habilidade:hover { background: rgba(111, 143, 176, .095); }
+.app .numero-habilidade { background: var(--brilho); border: 1px solid var(--elemento); color: var(--elemento); }
+.app .texto-habilidade small { color: var(--hx-suave); }
+.app .corpo-habilidade { border-top: 1px solid var(--hx-borda); }
+.app .atributos-ficha { gap: clamp(8px, 2vw, 16px); }
+.app .atributo {
+  background: linear-gradient(155deg, #1e2b3e, #101a29);
+  border: 1px solid var(--hx-borda);
+  border-radius: 12px;
+  padding: 20px 8px;
+}
+.app .atributo span { color: var(--hx-suave); font-size: .78rem; letter-spacing: .07em; }
+.app .atributo strong { color: var(--elemento); font-family: Georgia, serif; font-size: clamp(1.6rem, 4vw, 2.4rem); }
+.app .regeneracao { color: var(--hx-suave); }
+.app .regeneracao strong { color: var(--elemento); }
+.app .previa-habilidades { border-color: var(--hx-borda); }
+.app .previa-skill { border-color: var(--hx-borda); }
+.app .previa-skill p { color: var(--hx-suave); }
+.app .navegacao-editor button, .app .botao-voltar, .app .botao-remover {
+  background: #192739;
+  color: var(--hx-texto);
+  border: 1px solid var(--hx-borda);
+  border-radius: 9px;
+}
+.app .navegacao-editor .proxima-aba { background: var(--elemento); color: #0d1723; border-color: var(--elemento); }
+.app .navegacao-editor button:hover, .app .botao-voltar:hover, .app .botao-remover:hover { border-color: var(--elemento); }
+.app footer { color: var(--hx-suave); text-align: center; padding: 0 12px 24px; font-size: .75rem; letter-spacing: .07em; }
+
+.app button:focus-visible { outline: 2px solid var(--hx-ouro-claro); outline-offset: 3px; }
+@media (max-width: 740px) {
+  .app .conteudo { width: min(100% - 22px, 1200px); }
+  .app .elementos { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .app .elemento { min-height: 105px; padding: 14px 7px; }
+  .app .abas-editor { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .app .selecao-identidade .elementos { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 420px) {
+  .app .cabecalho h1 { font-size: 2.45rem; letter-spacing: .09em; }
+  .app .elementos, .app .selecao-identidade .elementos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .app .editor-identidade.editor-com-abas { padding: 14px; }
+  .app .navegacao-editor button { min-width: 0; }
+  .app .atributo { padding: 15px 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app *, .app *::before, .app *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}

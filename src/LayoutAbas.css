@@ -1,0 +1,171 @@
+/* Adicione este arquivo em src/LayoutAbas.css.
+   A aparência original do App.css permanece intacta. */
+
+/* Cabeçalho compacto apenas durante a edição. */
+.cabecalho-compacto {
+  padding-top: 16px;
+  padding-bottom: 6px;
+}
+.cabecalho-compacto .selo,
+.cabecalho-compacto .subtitulo,
+.cabecalho-compacto .universo,
+.cabecalho-compacto .linha-ritual {
+  display: none;
+}
+.cabecalho-compacto h1 {
+  font-size: clamp(1.65rem, 4vw, 2.45rem);
+  margin: 0 0 10px;
+}
+
+/* Editor: a tela exibe uma etapa de cada vez. */
+.editor-identidade.editor-com-abas {
+  width: min(100%, 950px);
+  max-width: 950px;
+  padding: clamp(16px, 3vw, 30px);
+  margin-top: 18px;
+}
+.abas-editor {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 28px;
+  position: sticky;
+  top: 8px;
+  z-index: 5;
+  padding: 10px;
+  border-radius: 10px;
+  background: #1b202d;
+  border-bottom: 1px solid #414957;
+  padding-bottom: 12px;
+}
+.aba-editor {
+  border: 1px solid #414957;
+  color: #cbd0dd;
+  border-radius: 8px;
+  padding: 13px 8px;
+  background: #111620;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  transition: border-color .16s, background .16s;
+}
+.aba-editor:hover, .aba-editor:focus-visible {
+  border-color: var(--elemento);
+}
+.aba-editor.selecionada {
+  border-color: var(--elemento);
+  color: var(--elemento);
+  background: #242a38;
+}
+.conteudo-aba { min-height: 300px; }
+.conteudo-aba > h2 { margin-top: 10px; }
+.selecao-identidade {
+  margin: 15px 0 22px;
+  padding: 10px 0 22px;
+  border-bottom: 1px solid #343946;
+}
+.selecao-identidade > h3 {
+  color: var(--elemento);
+  text-align: center;
+}
+.selecao-identidade .elementos {
+  margin: 0 auto;
+}
+
+/* Lista compacta: a ficha mantém cinco técnicas e uma passiva.
+   Somente uma abre de cada vez. */
+.editor-com-abas .cartao-habilidade {
+  padding: 0;
+  overflow: hidden;
+  margin: 10px 0;
+}
+.cabecalho-habilidade {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  min-height: 72px;
+  text-align: left;
+  background: transparent;
+  color: #f0f0f3;
+  border: 0;
+  padding: 14px 16px;
+  cursor: pointer;
+  font: inherit;
+}
+.cabecalho-habilidade:hover, .cabecalho-habilidade:focus-visible {
+  background: #202838;
+  outline: 2px solid var(--elemento);
+  outline-offset: -2px;
+}
+.numero-habilidade {
+  flex: 0 0 38px;
+  display: grid;
+  place-items: center;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--elemento);
+  color: var(--elemento);
+  font-weight: 700;
+}
+.texto-habilidade {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.texto-habilidade strong {
+  overflow-wrap: anywhere;
+  font-size: 1rem;
+}
+.texto-habilidade small {
+  color: #aeb8c9;
+  font-size: .8rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.icone-expandir {
+  font-size: 1.55rem;
+  color: var(--elemento);
+}
+.corpo-habilidade {
+  border-top: 1px solid #414957;
+  padding: 8px 20px 22px;
+}
+.corpo-habilidade p { line-height: 1.55; }
+.editor-com-abas .secao-combate { margin-top: 15px; }
+.editor-com-abas .secao-combate > h3 { margin: 14px 0; }
+.editor-com-abas .resumo-ficha { margin-top: 8px; }
+
+/* Botões para seguir sem voltar até o início. */
+.navegacao-editor {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 28px;
+}
+.navegacao-editor button {
+  min-width: 145px;
+  padding: 12px 18px;
+  border: 1px solid #586071;
+  background: #111620;
+  border-radius: 8px;
+  color: #eee;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.navegacao-editor .proxima-aba {
+  margin-left: auto;
+  border-color: var(--elemento);
+  color: var(--elemento);
+}
+.navegacao-editor button:hover { filter: brightness(1.2); }
+
+@media (max-width: 650px) {
+  .abas-editor { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cabecalho-habilidade { padding: 12px 10px; gap: 10px; }
+  .corpo-habilidade { padding: 6px 12px 18px; }
+  .navegacao-editor button { min-width: 0; }
+}

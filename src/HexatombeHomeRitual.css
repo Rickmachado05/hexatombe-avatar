@@ -1,0 +1,326 @@
+/*
+ * HEXATOMBE: AVATAR — HOME RITUAL v2
+ * Visual: Ordem (estrutura) + Avatar (elementos) + Hexatombe (sacrifício).
+ * Importe APÓS App.css, LayoutAbas.css e TemaHexatombe.css.
+ * Não altera estados, habilidades nem navegação.
+ * O seletor :has(.acoes) limita a arte à tela inicial.
+ */
+
+:root {
+  color-scheme: dark;
+}
+
+/* Corrige margens brancas ocasionais do template original do Vite. */
+html, body, #root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+body { background: #070a12; }
+
+/* -------- Atmosfera: o ritual por trás da ordem -------- */
+.app:has(.acoes) {
+  --hx-sangue: #8d293b;
+  --hx-sangue-vivo: #c04d62;
+  --hx-ouro-ritual: #d8ba82;
+  min-height: 100svh;
+  background:
+    radial-gradient(ellipse 45% 31% at 51% 9%, rgba(96, 44, 93, .26), transparent 76%),
+    radial-gradient(ellipse 38% 32% at 4% 77%, rgba(118, 29, 54, .22), transparent 78%),
+    radial-gradient(ellipse 33% 46% at 99% 61%, rgba(58, 48, 107, .25), transparent 78%),
+    radial-gradient(ellipse 32% 24% at 50% 100%, var(--brilho), transparent 80%),
+    linear-gradient(160deg, #080d19 0%, #080a13 48%, #0c0c17 100%);
+}
+
+/* Duplo círculo incompleto: beleza espiritual, geometria de sacrifício. */
+.app:has(.acoes)::before {
+  inset: -14vmax;
+  opacity: .42;
+  background:
+    repeating-radial-gradient(
+      circle at 50% 31%,
+      transparent 0 99px,
+      rgba(207, 166, 121, .15) 100px,
+      transparent 102px,
+      transparent 166px
+    ),
+    repeating-conic-gradient(
+      from 7deg at 50% 31%,
+      rgba(164, 58, 79, .16) 0deg 1deg,
+      transparent 1.2deg 20deg
+    );
+  -webkit-mask-image: linear-gradient(180deg, #000 9%, rgba(0,0,0,.6) 50%, transparent 94%);
+  mask-image: linear-gradient(180deg, #000 9%, rgba(0,0,0,.6) 50%, transparent 94%);
+}
+
+/* Poeira espiritual, intencionalmente discreta para não disputar a leitura. */
+.app:has(.acoes)::after {
+  opacity: .34;
+  background-image:
+    radial-gradient(circle, rgba(219, 192, 151, .66) .7px, transparent 1.1px),
+    radial-gradient(circle, rgba(169, 62, 85, .49) .8px, transparent 1.1px);
+  background-size: 113px 139px, 173px 207px;
+  background-position: 0 0, 40px 70px;
+  -webkit-mask-image: linear-gradient(90deg, #000, transparent 55%, #000);
+  mask-image: linear-gradient(90deg, #000, transparent 55%, #000);
+}
+
+.app:has(.acoes) .aura {
+  inset: auto -15vw -36vh;
+  height: 78vh;
+  background:
+    radial-gradient(ellipse 40% 39% at 38% 49%, rgba(136, 32, 66, .22), transparent 75%),
+    radial-gradient(ellipse 47% 37% at 63% 53%, var(--brilho), transparent 77%);
+  filter: blur(40px);
+}
+
+/* -------- Cabeçalho: presença sem ocupar a tela inteira -------- */
+.app:has(.acoes) .cabecalho {
+  position: relative;
+  padding: clamp(29px, 4vw, 52px) 8px 5px;
+}
+
+/* Selo maior, com duas circunferências e um pequeno ponto de sangue ritual. */
+.app:has(.acoes) .selo {
+  position: relative;
+  isolation: isolate;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 19px;
+  border: 1px solid rgba(232, 197, 130, .76);
+  outline: 1px solid rgba(191, 145, 94, .30);
+  outline-offset: 10px;
+  background:
+    radial-gradient(circle at center, rgba(160, 67, 112, .22), transparent 65%),
+    #111422;
+  box-shadow: 0 0 35px rgba(143, 52, 92, .18), inset 0 0 14px rgba(214, 182, 134, .06);
+}
+.app:has(.acoes) .selo::before {
+  content: '';
+  position: absolute;
+  inset: -19px;
+  border: 1px dashed rgba(167, 104, 99, .30);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.app:has(.acoes) .selo::after {
+  content: '';
+  position: absolute;
+  bottom: -19px;
+  left: calc(50% - 4px);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #9b3548;
+  box-shadow: 0 0 10px rgba(184, 64, 83, .45);
+  pointer-events: none;
+}
+.app:has(.acoes) .subtitulo { margin-top: 11px; color: #bea474; }
+.app:has(.acoes) .cabecalho h1 {
+  margin: 6px 0 0;
+  font-size: clamp(2.65rem, 6.5vw, 5.15rem);
+  line-height: 1.06;
+  letter-spacing: .105em;
+  color: #efd8a9;
+  text-shadow: 0 3px 35px rgba(158, 84, 117, .20), 0 13px 46px rgba(0, 0, 0, .5);
+}
+.app:has(.acoes) .universo { margin-top: 8px; color: #c7a66d; }
+.app:has(.acoes) .linha-ritual {
+  position: relative;
+  width: min(330px, 75vw);
+  margin: 21px auto 15px;
+  background: linear-gradient(90deg, transparent, rgba(171, 60, 77, .9) 31%, #d6b985 50%, rgba(171, 60, 77, .9) 69%, transparent);
+}
+.app:has(.acoes) .cabecalho h2 {
+  font-size: clamp(1.28rem, 2.5vw, 1.55rem);
+  margin: 0 0 6px;
+  color: #e7d0a1;
+}
+.app:has(.acoes) .introducao {
+  max-width: 540px;
+  margin: 0 auto;
+  font-size: .92rem;
+  color: #b6bbca;
+}
+
+/* -------- Escolha dos elementos: foco em Avatar -------- */
+.app:has(.acoes) .selecao { margin: 24px auto 16px; }
+.app:has(.acoes) .selecao h3 {
+  font-size: 1.12rem;
+  letter-spacing: .06em;
+  margin-bottom: 16px;
+}
+.app:has(.acoes) .elementos { width: min(100%, 810px); gap: clamp(8px, 1.7vw, 15px); }
+.app:has(.acoes) .elemento {
+  position: relative;
+  overflow: hidden;
+  min-height: 115px;
+  padding: 16px 8px;
+  border: 1px solid rgba(204, 168, 127, .26);
+  border-radius: 12px;
+  background:
+    linear-gradient(155deg, rgba(46, 54, 77, .82), rgba(12, 17, 29, .97)),
+    #101725;
+  box-shadow: inset 0 1px 0 rgba(240, 220, 182, .07), 0 9px 22px rgba(1, 2, 9, .25);
+  transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+}
+.app:has(.acoes) .elemento::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(211, 173, 123, .11);
+  border-radius: 7px;
+  pointer-events: none;
+}
+.app:has(.acoes) .elemento::after {
+  content: '';
+  position: absolute;
+  left: 17%; right: 17%; bottom: 0;
+  height: 2px;
+  opacity: .38;
+  background: linear-gradient(90deg, transparent, var(--hx-cor-card, #d1b17e), transparent);
+  pointer-events: none;
+}
+.app:has(.acoes) .elemento:nth-child(1) { --hx-cor-card: #76cbed; }
+.app:has(.acoes) .elemento:nth-child(2) { --hx-cor-card: #a5c77d; }
+.app:has(.acoes) .elemento:nth-child(3) { --hx-cor-card: #ee986d; }
+.app:has(.acoes) .elemento:nth-child(4) { --hx-cor-card: #c4e7e2; }
+.app:has(.acoes) .elemento:nth-child(5) { --hx-cor-card: #d6bda0; }
+.app:has(.acoes) .elemento .simbolo {
+  color: var(--hx-cor-card);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--hx-cor-card) 24%, transparent);
+}
+.app:has(.acoes) .elemento .nome { color: #e3dfda; }
+.app:has(.acoes) .elemento:hover {
+  transform: translateY(-4px);
+  border-color: var(--hx-cor-card);
+  box-shadow: 0 8px 22px rgba(1, 2, 8, .35), 0 0 20px color-mix(in srgb, var(--hx-cor-card) 11%, transparent);
+}
+.app:has(.acoes) .elemento.ativo {
+  border-color: var(--elemento);
+  background: linear-gradient(150deg, rgba(43, 55, 76, .97), rgba(17, 23, 38, .98));
+  box-shadow: inset 0 0 0 1px var(--brilho), 0 0 30px var(--brilho), 0 12px 25px rgba(0,0,0,.3);
+}
+.app:has(.acoes) .elemento.ativo::after { opacity: 1; height: 3px; }
+
+/* -------- Selo selecionado em vez de uma segunda tela longa -------- */
+.app:has(.acoes) .detalhes {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  grid-template-rows: auto auto auto;
+  align-items: center;
+  column-gap: 24px;
+  row-gap: 3px;
+  text-align: left;
+  width: min(100%, 560px);
+  margin: 24px auto 15px;
+  padding: 16px 24px;
+  background: linear-gradient(105deg, rgba(92, 30, 52, .13), rgba(16, 22, 35, .58) 36%, rgba(12, 18, 30, .62));
+  border: 1px solid rgba(193, 157, 118, .23);
+  border-left: 2px solid rgba(151, 57, 72, .7);
+  border-radius: 14px;
+}
+.app:has(.acoes) .detalhes .circulo-espiritual {
+  grid-column: 1;
+  grid-row: 1 / 4;
+  width: 70px;
+  height: 70px;
+  margin: 0;
+  outline-offset: 5px;
+  font-size: 2.2rem;
+  background: radial-gradient(circle, var(--brilho), rgba(6, 13, 25, .45) 72%);
+}
+.app:has(.acoes) .detalhes h2 {
+  grid-column: 2;
+  margin: 0;
+  font-size: 1.35rem;
+  line-height: 1.25;
+  color: var(--elemento);
+}
+.app:has(.acoes) .detalhes p {
+  grid-column: 2;
+  margin: 2px 0 0;
+  color: #c2c2ce;
+  font-size: .87rem;
+}
+.app:has(.acoes) .detalhes .mensagem {
+  grid-column: 2;
+  font-size: .68rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #d7b386;
+}
+
+/* CTA visível logo após escolher, sem rolagem extensa. */
+.app:has(.acoes) .acoes { margin: 0 auto 30px; }
+.app:has(.acoes) .botao-principal {
+  position: relative;
+  min-width: 224px;
+  padding: 14px 34px;
+  border-radius: 9px;
+  color: #130f16;
+  background: linear-gradient(110deg, #d8bc89, #f0d8a5 46%, #cda877);
+  border: 1px solid #ebcf9a;
+  box-shadow: 0 12px 36px rgba(107, 42, 51, .27), 0 2px 14px rgba(215, 169, 102, .11);
+}
+.app:has(.acoes) .botao-principal:hover {
+  box-shadow: 0 14px 40px rgba(141, 42, 67, .3), 0 0 22px rgba(207, 171, 111, .2);
+}
+.app:has(.acoes) footer { opacity: .72; }
+
+@media (max-width: 740px) {
+  .app:has(.acoes) .cabecalho { padding-top: 34px; }
+  .app:has(.acoes) .elementos { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .app:has(.acoes) .elemento { min-height: 100px; }
+  .app:has(.acoes) .detalhes { width: min(100%, 480px); }
+}
+@media (max-width: 450px) {
+  .app:has(.acoes) .cabecalho h1 { font-size: clamp(2.1rem, 10vw, 2.6rem); letter-spacing: .07em; }
+  .app:has(.acoes) .cabecalho { padding-top: 30px; }
+  .app:has(.acoes) .elementos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .app:has(.acoes) .elemento { min-height: 94px; }
+  .app:has(.acoes) .detalhes { grid-template-columns: 54px minmax(0,1fr); padding: 12px; column-gap: 15px; }
+  .app:has(.acoes) .detalhes .circulo-espiritual { width: 52px; height: 52px; font-size: 1.6rem; }
+  .app:has(.acoes) .detalhes h2 { font-size: 1.1rem; }
+  .app:has(.acoes) .detalhes p { font-size: .8rem; }
+  .app:has(.acoes) .botao-principal { width: min(100%, 300px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app:has(.acoes) .elemento,
+  .app:has(.acoes) .botao-principal { transition: none; }
+}
+
+/* Emblema principal de Hexatombe */
+
+.emblema-central {
+  width: 150px;
+  height: 150px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emblema-central img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 50%;
+
+  filter:
+    drop-shadow(0 0 12px rgba(201, 168, 106, 0.3))
+    drop-shadow(0 0 24px rgba(122, 31, 43, 0.25));
+
+  transition: transform 0.4s ease;
+}
+
+.emblema-central:hover img {
+  transform: scale(1.06);
+}
+
+@media (max-width: 600px) {
+  .emblema-central {
+    width: 110px;
+    height: 110px;
+  }
+}
