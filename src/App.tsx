@@ -23,7 +23,7 @@ type TipoHabilidade =
   | "Cura"
   | "Utilidade";
 
-type TipoAcao = "Principal" | "Buff";
+type TipoAcao = "Principal" | "Buff" | "Pré-combate";
 type ModeloId =
   | "golpe"
   | "area"
@@ -33,6 +33,8 @@ type ModeloId =
   | "reducao"
   | "ca"
   | "buffDano"
+  | "buffAcerto"
+  | "buffIniciativa"
   | "cura"
   | "curaArea"
   | "movimento"
@@ -137,6 +139,18 @@ const regrasModelos: Record<ModeloId, RegraModelo> = {
     custo: 10, valor: "+4 dano", rotuloValor: "Bônus", maxAlvos: 1,
     regra: "Aplica ao próximo ataque que acertar neste turno. Se errar ou não atacar, o bônus é perdido; não acumula.",
   },
+  buffAcerto: {
+    nome: "Precisão de combate (+2 acerto)", tipo: "Buff", acao: "Buff",
+    custo: 12, valor: "+2 no d20 de acerto", rotuloValor: "Bônus de acerto", maxAlvos: 1,
+    regra: "Aplica a você. Use como buff opcional antes de um ataque no seu turno. Some +2 à próxima rolagem de d20 para acertar a CA neste turno, consumindo o bônus mesmo se errar. Não reduz a CA do alvo, não concede ataque extra e não acumula com outros bônus de acerto. Crítico continua exigindo 20 natural.",
+    experimental: true,
+  },
+  buffIniciativa: {
+    nome: "Preparação de iniciativa (+2)", tipo: "Buff", acao: "Pré-combate",
+    custo: 15, valor: "+2 na iniciativa", rotuloValor: "Bônus de iniciativa", maxAlvos: 1,
+    regra: "Use e pague a Mana somente antes de rolar a iniciativa de um combate iminente; escolha você ou um aliado presente. O alvo soma +2 ao d20 de iniciativa desse combate. Não acumula com outra Preparação de iniciativa para o mesmo alvo, não altera uma iniciativa já rolada e não pode ser usada durante o combate. Se não houver combate até o fim da cena, o efeito expira.",
+    experimental: true,
+  },
   cura: {
     nome: "Cura individual", tipo: "Cura", acao: "Principal",
     custo: 30, valor: "2d6+3 HP", rotuloValor: "Cura", maxAlvos: 1,
@@ -185,7 +199,7 @@ const modelosPorTipo: Record<TipoHabilidade, ModeloId[]> = {
   Controle: ["imobilizar", "empurrar"],
   Condição: ["danoContinuo"],
   Defesa: ["escudo", "reducao", "ca"],
-  Buff: ["buffDano"],
+  Buff: ["buffDano", "buffAcerto", "buffIniciativa"],
   Cura: ["cura", "curaArea"],
   Utilidade: ["movimento", "criarArma", "encantarArma"],
 };
@@ -199,6 +213,10 @@ const valorDaTecnica = (modelo: ModeloId, classe: Classe) => {
   const valor = regrasModelos[modelo].valor;
   return typeof valor === "string" ? valor : valor[classe];
 };
+
+const rotuloMomentoDeUso = (acao: TipoAcao) =>
+  acao === "Pré-combate" ? "Antes do combate (antes de rolar iniciativa)" :
+  acao === "Buff" ? "Buff opcional no turno" : "Ação principal";
 
 const criarHabilidade = (modelo: ModeloId): Habilidade => ({
   nome: "",
@@ -674,7 +692,8 @@ function App() {
               <p className="descricao-editor">
                 Os valores de Mana, dano, cura, escudo e condições são definidos pelo tipo de
                 técnica e pela classe. Criar e encantar armas respeita o dano básico e
-                o limite de um buff por turno. A descrição não concede efeitos extras.
+                o limite de um buff por turno. A preparação de iniciativa só pode ser
+                usada antes do combate. A descrição não concede efeitos extras.
               </p>
 
               {habilidades.map((habilidade, indice) => {
@@ -752,7 +771,7 @@ function App() {
                       ))}
                     </select>
 
-                    <p><strong>Uso no turno:</strong> {modelo.acao === "Buff" ? "Buff opcional" : "Ação principal"}</p>
+                    <p><strong>Momento de uso:</strong> {rotuloMomentoDeUso(modelo.acao)}</p>
                     <div className="linha-campos">
                       <div>
                         <label htmlFor={`skill-${indice}-mana`}>Custo de Mana</label>
@@ -1098,7 +1117,7 @@ function App() {
                           <div className="previa-chips previa-tecnica-chips">
                             <span>{modelo.tipo}</span>
                             <span>{custoDaTecnica(habilidade.modelo, classe)} Mana</span>
-                            <span>{modelo.acao === "Buff" ? "Buff opcional" : "Ação principal"}</span>
+                            <span>{rotuloMomentoDeUso(modelo.acao)}</span>
                           </div>
                           <p className="previa-tecnica-efeito">
                             <span>{modelo.rotuloValor}</span>
