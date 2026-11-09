@@ -34,6 +34,7 @@ type ModeloId =
   | "ca"
   | "buffDano"
   | "cura"
+  | "curaArea"
   | "movimento"
   | "danoContinuo"
   | "criarArma"
@@ -137,9 +138,15 @@ const regrasModelos: Record<ModeloId, RegraModelo> = {
     regra: "Aplica ao próximo ataque que acertar neste turno. Se errar ou não atacar, o bônus é perdido; não acumula.",
   },
   cura: {
-    nome: "Cura", tipo: "Cura", acao: "Principal",
+    nome: "Cura individual", tipo: "Cura", acao: "Principal",
     custo: 30, valor: "2d6+3 HP", rotuloValor: "Cura", maxAlvos: 1,
     regra: "Cura você ou um aliado, sem ultrapassar o HP máximo. Consome ação principal, não buff.",
+  },
+  curaArea: {
+    nome: "Cura em área (até 2 aliados)", tipo: "Cura", acao: "Principal",
+    custo: 45, valor: "1d6+3 HP", rotuloValor: "Cura por aliado", maxAlvos: 2,
+    regra: "Escolha até 2 aliados próximos, podendo incluir você. Role a cura separadamente para cada alvo selecionado. Pague o custo de Mana uma única vez e use sua ação principal. Não ultrapassa o HP máximo, não cura inimigos e não é buff.",
+    experimental: true,
   },
   movimento: {
     nome: "Passo adicional", tipo: "Utilidade", acao: "Buff",
@@ -179,7 +186,7 @@ const modelosPorTipo: Record<TipoHabilidade, ModeloId[]> = {
   Condição: ["danoContinuo"],
   Defesa: ["escudo", "reducao", "ca"],
   Buff: ["buffDano"],
-  Cura: ["cura"],
+  Cura: ["cura", "curaArea"],
   Utilidade: ["movimento", "criarArma", "encantarArma"],
 };
 
@@ -734,7 +741,7 @@ function App() {
                       onChange={(e) =>
                         atualizarHabilidade(indice, {
                           modelo: e.target.value as ModeloId,
-                          alvos: 1,
+                          alvos: e.target.value === "curaArea" ? 2 : 1,
                         })
                       }
                     >
@@ -820,7 +827,7 @@ function App() {
 
                     {modelo.maxAlvos === 2 ? (
                       <>
-                        <label htmlFor={`skill-${indice}-alvos`}>Quantidade de alvos</label>
+                        <label htmlFor={`skill-${indice}-alvos`}>{habilidade.modelo === "curaArea" ? "Quantidade de aliados" : "Quantidade de alvos"}</label>
                         <select
                           id={`skill-${indice}-alvos`}
                           value={habilidade.alvos}
@@ -830,8 +837,8 @@ function App() {
                             })
                           }
                         >
-                          <option value={1}>1 alvo</option>
-                          <option value={2}>2 alvos</option>
+                          <option value={1}>{habilidade.modelo === "curaArea" ? "1 aliado" : "1 alvo"}</option>
+                          <option value={2}>{habilidade.modelo === "curaArea" ? "2 aliados" : "2 alvos"}</option>
                         </select>
                       </>
                     ) : (
