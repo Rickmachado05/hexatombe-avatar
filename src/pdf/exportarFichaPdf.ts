@@ -594,7 +594,7 @@ export async function exportarFichaPdf(ficha: FichaPDF): Promise<void> {
     const recurso = ficha.elemento === "neutro" ? "Foco" : "Mana";
     cartaoDetalhado(
       hasText(habilidade.nome) || `Habilidade ${index + 1}`,
-      `${habilidade.categoria}  •  ${habilidade.acao === "Buff" ? "Buff opcional" : "Ação principal"}  •  ${habilidade.custo} ${recurso}  •  ${habilidade.alvos} alvo(s)`,
+      `${habilidade.categoria}  •  ${habilidade.acao === "Pré-combate" ? "Antes da iniciativa" : habilidade.acao === "Buff" ? "Buff opcional" : "Ação principal"}  •  ${habilidade.custo} ${recurso}  •  ${habilidade.alvos} alvo(s)`,
       campos,
       index + 1,
     );
