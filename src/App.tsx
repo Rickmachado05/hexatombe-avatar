@@ -242,45 +242,88 @@ type ModeloPassivaId =
   | "protecao"
   | "fluxo"
   | "instinto"
-  | "preparacao";
+  | "preparacao"
+  | "votoMare"
+  | "amparoSolidario"
+  | "resistenciaInstintiva"
+  | "sintoniaEquipe";
 
 type RegraPassiva = {
   nome: string;
+  categoria: "Ofensiva" | "Defensiva" | "Suporte";
   gatilho: string;
   efeito: string;
   limite: string;
+  experimental?: boolean;
 };
 
 const regrasPassivas: Record<ModeloPassivaId, RegraPassiva> = {
   ritmo: {
     nome: "Ritmo de Combate",
+    categoria: "Ofensiva",
     gatilho: "Acertar o mesmo alvo com ataque de alvo único em dois turnos consecutivos.",
     efeito: "+2 de dano no segundo ataque acertado.",
     limite: "Erro, troca de alvo ou ataque em área reiniciam a sequência. Não acumula e não gera ataques extras.",
   },
   protecao: {
     nome: "Proteção Espiritual",
+    categoria: "Defensiva",
     gatilho: "Acertar uma técnica ofensiva.",
     efeito: "Recebe 1d4+2 de escudo temporário.",
     limite: "No máximo uma ativação por rodada. Dura até o início do seu próximo turno. Escudos não acumulam: mantém-se o maior.",
   },
   fluxo: {
     nome: "Fluxo de Energia",
+    categoria: "Ofensiva",
     gatilho: "Acertar a técnica ativa vinculada escolhida para a passiva.",
     efeito: "O próximo ataque básico que acertar recebe +1d6 de dano.",
     limite: "No máximo uma ativação por rodada. Expira ao fim do próximo turno. Não acumula e não gera ataque extra.",
   },
   instinto: {
     nome: "Instinto Defensivo",
+    categoria: "Ofensiva",
     gatilho: "Um ataque inimigo errar você.",
     efeito: "O próximo ataque que acertar recebe +1d4 de dano.",
     limite: "No máximo uma ativação por rodada. Expira ao fim do próximo turno, mesmo se o ataque errar. Não acumula.",
   },
   preparacao: {
     nome: "Preparação Tática",
+    categoria: "Ofensiva",
     gatilho: "Acertar uma técnica de controle.",
     efeito: "O próximo ataque básico que acertar recebe +1d6 de dano.",
     limite: "No máximo uma ativação por rodada. Expira ao fim do próximo turno. Não acumula e não gera ataque extra.",
+  },
+  votoMare: {
+    nome: "Voto da Maré",
+    categoria: "Suporte",
+    gatilho: "Curar um aliado que estava com metade ou menos de seu HP máximo antes da cura.",
+    efeito: "Um aliado curado recebe +1d6 HP de cura adicional.",
+    limite: "Uma vez por combate. Em cura em área, escolha somente um aliado para o bônus. Não funciona sobre você mesmo, não ultrapassa HP máximo e não custa Mana ou ação extra.",
+    experimental: true,
+  },
+  amparoSolidario: {
+    nome: "Amparo Solidário",
+    categoria: "Suporte",
+    gatilho: "Curar um aliado com uma técnica ativa de Cura.",
+    efeito: "Um aliado curado recebe +1 CA até o início do seu próximo turno.",
+    limite: "Uma vez por combate. Se a cura atingir dois aliados, escolha somente um. Não funciona em você mesmo e não acumula com outro bônus de CA de proteção; mantenha o maior.",
+    experimental: true,
+  },
+  resistenciaInstintiva: {
+    nome: "Resistência Instintiva",
+    categoria: "Defensiva",
+    gatilho: "Na primeira vez que receber dano de um ataque inimigo direto em um combate.",
+    efeito: "Reduz o dano desse ataque em 1d4, até o mínimo de zero.",
+    limite: "Uma vez por combate. Não funciona contra dano contínuo, custo de habilidade ou ataque que errou. Não cria escudo e não consome ação.",
+    experimental: true,
+  },
+  sintoniaEquipe: {
+    nome: "Sintonia de Equipe",
+    categoria: "Suporte",
+    gatilho: "Antes da rolagem de iniciativa do combate, escolher um aliado presente.",
+    efeito: "Esse aliado recebe +1 no d20 de iniciativa para o combate.",
+    limite: "Uma vez por combate, apenas um aliado diferente de você. Não se aplica depois da iniciativa rolada e não acumula com outros bônus de iniciativa; mantenha o maior. Sem custo de Mana ou ação.",
+    experimental: true,
   },
 };
 
@@ -355,6 +398,8 @@ function App() {
     : regraPassiva.gatilho;
   const semControle = passiva.modelo === "preparacao" &&
     !habilidades.some((habilidade) => regrasModelos[habilidade.modelo].tipo === "Controle");
+  const semCura = (passiva.modelo === "votoMare" || passiva.modelo === "amparoSolidario") &&
+    !habilidades.some((habilidade) => regrasModelos[habilidade.modelo].tipo === "Cura");
 
   const carregarRetrato = (arquivo?: File) => {
     if (!arquivo) return;
@@ -439,14 +484,16 @@ function App() {
         }),
         passiva: {
           nome: passiva.nome,
-          modelo: regraPassiva.nome,
+          modelo: `${regraPassiva.categoria} - ${regraPassiva.nome}`,
           ativacao: gatilhoPassiva,
           efeito: regraPassiva.efeito,
           limites: regraPassiva.limite,
           descricao: passiva.descricao,
           aviso: passiva.modelo === "fluxo" && !vinculoPodeAcertar
             ? "A técnica vinculada precisa poder acertar um alvo."
-            : semControle ? "Esta passiva exige uma técnica de Controle." : undefined,
+            : semControle ? "Esta passiva exige uma técnica de Controle."
+            : semCura ? "Esta passiva exige uma técnica de Cura."
+            : regraPassiva.experimental ? "Passiva experimental: requer avaliação do mestre." : undefined,
         },
       });
     } catch (erro) {
@@ -910,7 +957,7 @@ function App() {
                   <span className="numero-habilidade">✦</span>
                   <span className="texto-habilidade">
                     <strong>{passiva.nome.trim() || "Habilidade Passiva"}</strong>
-                    <small>{regraPassiva.nome}</small>
+                    <small>{regraPassiva.categoria} · {regraPassiva.nome}</small>
                   </span>
                   <span className="resumo-habilidade-cabecalho">
                     <span className="etiqueta-tipo">Passiva</span>
@@ -946,7 +993,7 @@ function App() {
                       }))}
                     >
                       {(Object.keys(regrasPassivas) as ModeloPassivaId[]).map((id) => (
-                        <option key={id} value={id}>{regrasPassivas[id].nome}</option>
+                        <option key={id} value={id}>{regrasPassivas[id].categoria} — {regrasPassivas[id].nome}</option>
                       ))}
                     </select>
 
@@ -984,6 +1031,14 @@ function App() {
                       <p className="aviso-passiva" role="alert">
                         Preparação Tática precisa de ao menos uma técnica de Controle entre as cinco habilidades.
                       </p>
+                    )}
+                    {semCura && (
+                      <p className="aviso-passiva" role="alert">
+                        Esta passiva exige pelo menos uma técnica de Cura entre as cinco habilidades.
+                      </p>
+                    )}
+                    {regraPassiva.experimental && (
+                      <p className="aviso-passiva">Modelo experimental: sujeito aos testes e à aprovação do mestre.</p>
                     )}
 
                     <div className="resumo-passiva-mecanica">
@@ -1163,6 +1218,7 @@ function App() {
                   </div>
                   <div className="previa-chips">
                     <span>{regraPassiva.nome}</span>
+                    <span>{regraPassiva.categoria}</span>
                     <span>0 Mana</span>
                     <span>Sem ação</span>
                   </div>
@@ -1175,6 +1231,12 @@ function App() {
                   )}
                   {semControle && (
                     <p className="previa-alerta">Esta passiva exige uma técnica de Controle.</p>
+                  )}
+                  {semCura && (
+                    <p className="previa-alerta">Esta passiva exige uma técnica de Cura.</p>
+                  )}
+                  {regraPassiva.experimental && (
+                    <p className="previa-alerta">Passiva experimental: requer aprovação do mestre.</p>
                   )}
                 </section>
                 <p className="previa-rodape">Este resumo é para consulta no editor. Use “Gerar ficha em PDF” para exportar o pergaminho com todos os detalhes.</p>
