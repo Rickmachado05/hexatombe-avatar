@@ -259,42 +259,42 @@ type RegraPassiva = {
 
 const regrasPassivas: Record<ModeloPassivaId, RegraPassiva> = {
   ritmo: {
-    nome: "Ritmo de Combate",
+    nome: "Dano após ataques repetidos (+2)",
     categoria: "Ofensiva",
     gatilho: "Acertar o mesmo alvo com ataque de alvo único em dois turnos consecutivos.",
     efeito: "+2 de dano no segundo ataque acertado.",
     limite: "Erro, troca de alvo ou ataque em área reiniciam a sequência. Não acumula e não gera ataques extras.",
   },
   protecao: {
-    nome: "Proteção Espiritual",
+    nome: "Escudo ao acertar (1d4+2)",
     categoria: "Defensiva",
     gatilho: "Acertar uma técnica ofensiva.",
     efeito: "Recebe 1d4+2 de escudo temporário.",
     limite: "No máximo uma ativação por rodada. Dura até o início do seu próximo turno. Escudos não acumulam: mantém-se o maior.",
   },
   fluxo: {
-    nome: "Fluxo de Energia",
+    nome: "Dano básico após técnica (+1d6)",
     categoria: "Ofensiva",
     gatilho: "Acertar a técnica ativa vinculada escolhida para a passiva.",
     efeito: "O próximo ataque básico que acertar recebe +1d6 de dano.",
     limite: "No máximo uma ativação por rodada. Expira ao fim do próximo turno. Não acumula e não gera ataque extra.",
   },
   instinto: {
-    nome: "Instinto Defensivo",
+    nome: "Dano após esquiva (+1d4)",
     categoria: "Ofensiva",
     gatilho: "Um ataque inimigo errar você.",
     efeito: "O próximo ataque que acertar recebe +1d4 de dano.",
     limite: "No máximo uma ativação por rodada. Expira ao fim do próximo turno, mesmo se o ataque errar. Não acumula.",
   },
   preparacao: {
-    nome: "Preparação Tática",
+    nome: "Dano após controle (+1d6)",
     categoria: "Ofensiva",
     gatilho: "Acertar uma técnica de controle.",
     efeito: "O próximo ataque básico que acertar recebe +1d6 de dano.",
     limite: "No máximo uma ativação por rodada. Expira ao fim do próximo turno. Não acumula e não gera ataque extra.",
   },
   votoMare: {
-    nome: "Voto da Maré",
+    nome: "Cura extra em aliado ferido (+1d6)",
     categoria: "Suporte",
     gatilho: "Curar um aliado que estava com metade ou menos de seu HP máximo antes da cura.",
     efeito: "Um aliado curado recebe +1d6 HP de cura adicional.",
@@ -302,7 +302,7 @@ const regrasPassivas: Record<ModeloPassivaId, RegraPassiva> = {
     experimental: true,
   },
   amparoSolidario: {
-    nome: "Amparo Solidário",
+    nome: "Proteção ao curar aliado (+1 CA)",
     categoria: "Suporte",
     gatilho: "Curar um aliado com uma técnica ativa de Cura.",
     efeito: "Um aliado curado recebe +1 CA até o início do seu próximo turno.",
@@ -310,7 +310,7 @@ const regrasPassivas: Record<ModeloPassivaId, RegraPassiva> = {
     experimental: true,
   },
   resistenciaInstintiva: {
-    nome: "Resistência Instintiva",
+    nome: "Redução do primeiro dano (1d4)",
     categoria: "Defensiva",
     gatilho: "Na primeira vez que receber dano de um ataque inimigo direto em um combate.",
     efeito: "Reduz o dano desse ataque em 1d4, até o mínimo de zero.",
@@ -318,7 +318,7 @@ const regrasPassivas: Record<ModeloPassivaId, RegraPassiva> = {
     experimental: true,
   },
   sintoniaEquipe: {
-    nome: "Sintonia de Equipe",
+    nome: "Iniciativa para um aliado (+1)",
     categoria: "Suporte",
     gatilho: "Antes da rolagem de iniciativa do combate, escolher um aliado presente.",
     efeito: "Esse aliado recebe +1 no d20 de iniciativa para o combate.",
@@ -983,7 +983,7 @@ function App() {
                       placeholder="Ex.: Armadura Espiritual"
                     />
 
-                    <label htmlFor="passiva-modelo">Efeito mecânico</label>
+                    <label htmlFor="passiva-modelo">Efeito mecânico (disponível para qualquer elemento)</label>
                     <select
                       id="passiva-modelo"
                       value={passiva.modelo}
@@ -1029,7 +1029,7 @@ function App() {
                     )}
                     {semControle && (
                       <p className="aviso-passiva" role="alert">
-                        Preparação Tática precisa de ao menos uma técnica de Controle entre as cinco habilidades.
+                        Este modelo de passiva precisa de ao menos uma técnica de Controle entre as cinco habilidades.
                       </p>
                     )}
                     {semCura && (
