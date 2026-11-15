@@ -392,6 +392,80 @@ function validarAtributosImpeto(valor: unknown): valor is AtributosImpeto {
   return valido && pontosGastosAtributos(valor as AtributosImpeto) <= PA_INICIAL_REFERENCIA;
 }
 
+
+type ArquetipoImpeto = "Ofensivo" | "Defensor" | "Controlador" | "Suporte";
+type TalentoArquetipoId =
+  | "aberturaTatica" | "correcaoGolpe" | "dominioCorporal"
+  | "interposicao" | "absorcaoInstintiva" | "sentinela"
+  | "janelaOportunidade" | "pressaoResidual" | "leituraTerreno"
+  | "fluxoEficiente" | "sustentacaoTecnica" | "analiseAplicada";
+
+type TalentoT02 = {
+  id: TalentoArquetipoId;
+  nome: string;
+  efeito: string;
+};
+
+const ARQUETIPOS_T02: Record<
+  ArquetipoImpeto,
+  { descricao: string; talentos: TalentoT02[] }
+> = {
+  Ofensivo: {
+    descricao: "Pressão, golpes e oportunidade",
+    talentos: [
+      { id: "aberturaTatica", nome: "Abertura Tática",
+        efeito: "Uma vez por combate, após acertar, concede +1 ao próximo ataque de um aliado contra aquele alvo, dentro de um prazo narrativo curto." },
+      { id: "correcaoGolpe", nome: "Correção de Golpe",
+        efeito: "Uma vez por combate, repete o d20 de um ataque que errou e aceita o novo resultado." },
+      { id: "dominioCorporal", nome: "Domínio Corporal",
+        efeito: "Uma vez por cena, repete um teste malsucedido de Atletismo ou Acrobacia em manobra apropriada." },
+    ],
+  },
+  Defensor: {
+    descricao: "Resistência, proteção e vigilância",
+    talentos: [
+      { id: "interposicao", nome: "Interposição",
+        efeito: "Uma vez por combate, usa sua reação antes de um ataque para se tornar o alvo no lugar de um aliado ao alcance narrativo." },
+      { id: "absorcaoInstintiva", nome: "Absorção Instintiva",
+        efeito: "Uma vez por combate, usa sua reação para reduzir o dano de um impacto em 1d8 (mínimo zero)." },
+      { id: "sentinela", nome: "Sentinela",
+        efeito: "Uma vez por cena, repete um teste de Atenção ou Sobrevivência relacionado à identificação de perigos." },
+    ],
+  },
+  Controlador: {
+    descricao: "Condições, obstáculos e oportunidades",
+    talentos: [
+      { id: "janelaOportunidade", nome: "Janela de Oportunidade",
+        efeito: "Uma vez por combate, ao aplicar uma condição negativa, concede +1 ao próximo ataque de outro aliado contra o mesmo alvo." },
+      { id: "pressaoResidual", nome: "Pressão Residual",
+        efeito: "Uma vez por combate, quando um inimigo resiste ou escapa de um efeito de controle, pode impedir uma reação dele até o fim do próximo turno do alvo, desde que seja possível afetá-lo." },
+      { id: "leituraTerreno", nome: "Leitura de Terreno",
+        efeito: "Uma vez por cena, repete um teste de Atenção ou Investigação ao analisar rotas e obstáculos." },
+    ],
+  },
+  Suporte: {
+    descricao: "Assistência, buffs e técnicas especializadas",
+    talentos: [
+      { id: "fluxoEficiente", nome: "Fluxo Eficiente",
+        efeito: "Uma vez por combate, reduz em até 5 EN o custo de uma habilidade, respeitando custo mínimo de 1 EN." },
+      { id: "sustentacaoTecnica", nome: "Sustentação Técnica",
+        efeito: "Uma vez por combate, prolonga por uma rodada um buff ou proteção própria; não prolonga controle severo, dano ou cura periódica." },
+      { id: "analiseAplicada", nome: "Análise Aplicada",
+        efeito: "Uma vez por cena, repete um teste malsucedido de Medicina, Engenharia ou Investigação em procedimento especializado." },
+    ],
+  },
+};
+
+function validarEscolhaT02(arquetipo: unknown, talento: unknown): boolean {
+  if (arquetipo === undefined && talento === undefined) return true;
+  if (arquetipo === "" && (talento === "" || talento === undefined)) return true;
+  if (typeof arquetipo !== "string" ||
+    !Object.prototype.hasOwnProperty.call(ARQUETIPOS_T02, arquetipo)) return false;
+  if (talento === undefined || talento === "") return true;
+  return typeof talento === "string" &&
+    ARQUETIPOS_T02[arquetipo as ArquetipoImpeto].talentos.some((t) => t.id === talento);
+}
+
 type RascunhoFicha = {
   versao: 1;
   // Etapa visual opcional para manter compatibilidade com rascunhos anteriores.
@@ -400,6 +474,9 @@ type RascunhoFicha = {
   elemento: Elemento;
   // Opcional para importar fichas JSON produzidas antes desta atualização.
   atributosImpeto?: AtributosImpeto;
+  // Módulo T02: campos opcionais para importar fichas JSON mais antigas.
+  arquetipoImpeto?: ArquetipoImpeto | "";
+  talentoArquetipo?: TalentoArquetipoId | "";
   nome: string;
   classe: Classe;
   historia: string;
@@ -438,6 +515,7 @@ function validarFicha(valor: unknown): valor is RascunhoFicha {
     (dados.abaAtiva === undefined || abasEditor.some((aba) => aba.id === dados.abaAtiva)) &&
     elementos.some((item) => item.id === dados.elemento) &&
     (dados.atributosImpeto === undefined || validarAtributosImpeto(dados.atributosImpeto)) &&
+    validarEscolhaT02(dados.arquetipoImpeto, dados.talentoArquetipo) &&
     Object.prototype.hasOwnProperty.call(atributosPorClasse, dados.classe ?? "") &&
     typeof dados.nome === "string" &&
     typeof dados.historia === "string" &&
@@ -489,6 +567,12 @@ function App() {
   const [atributosImpeto, setAtributosImpeto] = useState<AtributosImpeto>(
     rascunhoInicial?.atributosImpeto ?? { ...ATRIBUTOS_PADRAO_IMPETO }
   );
+  const [arquetipoImpeto, setArquetipoImpeto] = useState<ArquetipoImpeto | "">(
+    rascunhoInicial?.arquetipoImpeto ?? ""
+  );
+  const [talentoArquetipo, setTalentoArquetipo] = useState<TalentoArquetipoId | "">(
+    rascunhoInicial?.talentoArquetipo ?? ""
+  );
   // Novos rascunhos retomam a tela em que o jogador estava.
   // Rascunhos da versão anterior, que não guardavam a etapa, retomam o editor
   // caso já exista nome ou história preenchidos.
@@ -535,6 +619,8 @@ function App() {
       abaAtiva,
       elemento,
       atributosImpeto,
+      arquetipoImpeto,
+      talentoArquetipo,
       nome,
       classe,
       historia,
@@ -548,7 +634,7 @@ function App() {
     } catch (erro) {
       console.warn("Não foi possível salvar o rascunho neste navegador.", erro);
     }
-  }, [mostrandoIdentidade, abaAtiva, elemento, atributosImpeto, nome, classe, historia, foto, ataqueBasico, habilidades, passiva]);
+  }, [mostrandoIdentidade, abaAtiva, elemento, atributosImpeto, arquetipoImpeto, talentoArquetipo, nome, classe, historia, foto, ataqueBasico, habilidades, passiva]);
 
 
   const exportarJson = () => {
@@ -560,6 +646,8 @@ function App() {
       abaAtiva,
       elemento,
       atributosImpeto,
+      arquetipoImpeto,
+      talentoArquetipo,
       nome,
       classe,
       historia,
@@ -620,6 +708,8 @@ function App() {
 
       setElemento(ficha.elemento);
       setAtributosImpeto(ficha.atributosImpeto ?? { ...ATRIBUTOS_PADRAO_IMPETO });
+      setArquetipoImpeto(ficha.arquetipoImpeto ?? "");
+      setTalentoArquetipo(ficha.talentoArquetipo ?? "");
       setNome(ficha.nome);
       setClasse(ficha.classe);
       setHistoria(ficha.historia);
@@ -638,6 +728,9 @@ function App() {
   };
 
 
+  const talentoT02Escolhido = arquetipoImpeto
+    ? ARQUETIPOS_T02[arquetipoImpeto].talentos.find((item) => item.id === talentoArquetipo)
+    : undefined;
   const paGastos = pontosGastosAtributos(atributosImpeto);
   const paDisponiveis = PA_INICIAL_REFERENCIA - paGastos;
 
@@ -955,7 +1048,7 @@ function App() {
               onChange={(e) => setNome(e.target.value)}
             />
 
-            <label htmlFor="classe-personagem">Classe</label>
+            <label htmlFor="classe-personagem">Perfil de combate anterior (temporário)</label>
             <select
               id="classe-personagem"
               value={classe}
@@ -980,6 +1073,67 @@ function App() {
             {abaAtiva === "combate" && (
               <section className="conteudo-aba" aria-labelledby="aba-combate">
                 <h2>Combate</h2>
+
+                <section className="painel-arquetipo-impeto" aria-label="Arquétipo e talento T02 do Ímpeto">
+                  <div className="cabecalho-arquetipo-impeto">
+                    <span className="rotulo-impeto">ÍMPETO RPG 1.0 · ARQUÉTIPOS T02</span>
+                    <h3>Arquétipo e talento exclusivo</h3>
+                    <p>Escolha um arquétipo e um dos seus três talentos iniciais.
+                      Nenhum talento ocupa espaço de habilidade ativa ou passiva,
+                      nem concede PA, PR, PC ou PX.</p>
+                  </div>
+                  <label htmlFor="arquetipo-impeto">Arquétipo</label>
+                  <select
+                    id="arquetipo-impeto"
+                    value={arquetipoImpeto}
+                    onChange={(evento) => {
+                      const proximo = evento.target.value as ArquetipoImpeto | "";
+                      setArquetipoImpeto(proximo);
+                      setTalentoArquetipo("");
+                    }}
+                  >
+                    <option value="">Escolha um arquétipo</option>
+                    {(Object.keys(ARQUETIPOS_T02) as ArquetipoImpeto[]).map((arquetipo) => (
+                      <option key={arquetipo} value={arquetipo}>
+                        {arquetipo} — {ARQUETIPOS_T02[arquetipo].descricao}
+                      </option>
+                    ))}
+                  </select>
+                  {arquetipoImpeto ? (
+                    <fieldset className="grupo-talentos-impeto">
+                      <legend>Escolha um talento de {arquetipoImpeto}</legend>
+                      {ARQUETIPOS_T02[arquetipoImpeto].talentos.map((talento) => (
+                        <label
+                          className={`cartao-talento-impeto ${talentoArquetipo === talento.id ? "selecionado" : ""}`}
+                          key={talento.id}
+                        >
+                          <input
+                            type="radio"
+                            name="talento-arquetipo"
+                            checked={talentoArquetipo === talento.id}
+                            onChange={() => setTalentoArquetipo(talento.id)}
+                          />
+                          <span>
+                            <strong>{talento.nome}</strong>
+                            <small>{talento.efeito}</small>
+                          </span>
+                        </label>
+                      ))}
+                    </fieldset>
+                  ) : (
+                    <p className="nota-talento-impeto">O arquétipo ainda não foi escolhido.</p>
+                  )}
+                  <p className="nota-talento-impeto">
+                    Limites T02: efeitos semelhantes não acumulam automaticamente.
+                    Talentos que pedem reação usam a reação normal; nenhum concede
+                    ação principal extra. Valores sujeitos ao playtest.
+                  </p>
+                  {arquetipoImpeto && !talentoArquetipo && (
+                    <p className="alerta-talento-impeto" role="status">
+                      Falta selecionar um dos três talentos deste arquétipo.
+                    </p>
+                  )}
+                </section>
 
                 <section className="painel-atributos-impeto" aria-label="Oito atributos do Ímpeto RPG">
                   <div className="painel-impeto-topo">
@@ -1461,6 +1615,17 @@ function App() {
                     <button className="previa-editar" type="button" onClick={() => setAbaAtiva("combate")}>
                       Editar combate
                     </button>
+                  </div>
+
+                  <div className="previa-arquetipo-impeto">
+                    <strong>Ímpeto RPG · Arquétipo T02</strong>
+                    <p>{arquetipoImpeto || "Ainda não escolhido"}</p>
+                    {talentoT02Escolhido ? (
+                      <p><strong>{talentoT02Escolhido.nome}:</strong> {talentoT02Escolhido.efeito}</p>
+                    ) : (
+                      <small>Nenhum talento T02 selecionado.</small>
+                    )}
+                    <small>Talento independente das cinco ativas e da passiva. Não incluído no PDF legado nesta etapa.</small>
                   </div>
                   <div className="previa-impeto-atributos">
                     <strong>Ímpeto RPG · Atributos universais</strong>
