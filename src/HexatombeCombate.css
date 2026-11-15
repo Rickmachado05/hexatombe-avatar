@@ -865,3 +865,140 @@
 @media (max-width: 740px) {
   .app .editor-com-abas .grade-vantagens-v01 { grid-template-columns: 1fr; }
 }
+
+
+/* Hexatombe: Avatar — módulo opcional D01 com gatilho por atributo >= 12. */
+.app .editor-com-abas .painel-derivacao-d01 {
+  margin: 0 0 26px;
+  padding: clamp(14px, 2.3vw, 24px);
+  border: 1px solid rgba(206, 172, 112, .42);
+  border-radius: 15px;
+  background: linear-gradient(145deg, rgba(25, 35, 53, .97), rgba(10, 17, 30, .97));
+}
+.app .editor-com-abas .cabecalho-derivacao-d01 h3 {
+  margin: 6px 0 9px;
+  color: #f1dfbd;
+  font-size: clamp(1.12rem, 2vw, 1.5rem);
+}
+.app .editor-com-abas .cabecalho-derivacao-d01 p,
+.app .editor-com-abas .aviso-derivacao-d01 {
+  margin: 9px 0 16px;
+  color: #bdc8d6;
+  font: .84rem/1.6 "Segoe UI", system-ui, sans-serif;
+}
+.app .editor-com-abas .aviso-derivacao-d01 {
+  padding: 13px 15px;
+  border: 1px solid rgba(218, 171, 102, .4);
+  border-radius: 9px;
+  background: rgba(10, 20, 33, .8);
+  color: #e3ca9f;
+}
+.app .editor-com-abas .grupo-derivacoes-d01 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0;
+  margin: 10px 0 16px;
+  border: 0;
+  min-width: 0;
+}
+.app .editor-com-abas .grupo-derivacoes-d01 legend {
+  color: #e9d4b1;
+  padding: 0 0 12px;
+  font-weight: 650;
+  font-size: .85rem;
+}
+.app .editor-com-abas .opcao-derivacao-d01 {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 13px 14px;
+  border: 1px solid rgba(199, 167, 120, .29);
+  border-radius: 10px;
+  background: rgba(8, 16, 28, .8);
+  cursor: pointer;
+}
+.app .editor-com-abas .opcao-derivacao-d01.selecionada {
+  border-color: var(--elemento);
+  background: linear-gradient(115deg, var(--brilho), rgba(14, 23, 36, .95));
+}
+.app .editor-com-abas .opcao-derivacao-d01 input {
+  margin: 3px 0 0;
+  flex: 0 0 auto;
+  width: 17px;
+  height: 17px;
+  accent-color: var(--elemento);
+}
+.app .editor-com-abas .opcao-derivacao-d01 strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #f0dfc0;
+  font-size: .87rem;
+}
+.app .editor-com-abas .opcao-derivacao-d01 small {
+  display: block;
+  color: #bcc8d7;
+  font-size: .77rem;
+  line-height: 1.55;
+}
+.app .editor-com-abas .detalhes-derivacao-d01 {
+  display: grid;
+  gap: 12px;
+  border-top: 1px solid rgba(201, 168, 119, .23);
+  padding: 16px 0 0;
+}
+.app .editor-com-abas .detalhes-derivacao-d01 label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #e9d6b6;
+  font-size: .84rem;
+  font-weight: 600;
+}
+.app .editor-com-abas .detalhes-derivacao-d01 select,
+.app .editor-com-abas .detalhes-derivacao-d01 textarea {
+  max-width: 100%;
+  width: 100%;
+  padding: 10px 12px;
+  color: #f3e5cf;
+  background: #101c2e;
+  border: 1px solid rgba(173, 164, 153, .5);
+  border-radius: 8px;
+  font: .84rem/1.5 "Segoe UI", system-ui, sans-serif;
+  box-sizing: border-box;
+}
+.app .editor-com-abas .detalhes-derivacao-d01 textarea {
+  min-height: 70px;
+  resize: vertical;
+}
+.app .editor-com-abas .detalhes-derivacao-d01 small {
+  color: #bcae93;
+  line-height: 1.55;
+  font-size: .76rem;
+}
+.app .editor-com-abas .previa-derivacao-d01 {
+  padding: 12px 15px;
+  margin: 0 0 15px;
+  border: 1px solid rgba(204, 167, 114, .34);
+  border-radius: 9px;
+  background: rgba(13, 24, 38, .84);
+}
+.app .editor-com-abas .previa-derivacao-d01 strong {
+  color: #ecd5ae;
+}
+.app .editor-com-abas .previa-derivacao-d01 p {
+  color: #dbe3ea;
+  margin: 8px 0;
+  font-size: .86rem;
+  line-height: 1.55;
+}
+.app .editor-com-abas .previa-derivacao-d01 small {
+  color: #bfc9d3;
+  font-size: .78rem;
+  line-height: 1.5;
+}
+@media (max-width: 690px) {
+  .app .editor-com-abas .grupo-derivacoes-d01 {
+    grid-template-columns: 1fr;
+  }
+}
