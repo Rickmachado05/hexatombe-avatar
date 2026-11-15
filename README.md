@@ -12,11 +12,11 @@ Sem instalação: crie seu personagem no navegador, exporte o pergaminho em PDF 
 
 ## Funcionalidades
 
-- **Identidade:** nome, elemento, classe, retrato e história do personagem.
+- **Identidade:** nome, elemento, retrato e história do personagem.
 - **Cinco identidades elementais:** Água, Terra, Fogo, Ar e Não Dobrador, com temas visuais próprios.
-- **Classes:** Lutador, Linha de Frente e Conjurador.
-- **Combate:** atributos por classe, ataque básico, pontos de vida, recurso de técnicas (Mana/Foco), CA e regeneração (estrutura anterior em processo de adaptação).
-- **Ímpeto 1.0 (migração incremental):** editor dividido em Identidade, Arquétipo, Atributos, Perícias, Habilidades e Prévia. Oito atributos universais com base 8, teto 14 e 28 PA de referência. Quatro arquétipos T02 com três talentos cada, separados das habilidades e da passiva. As 16 perícias universais são agrupadas em Físicas, Exploração, Conhecimento e Sociais, com 4 PT de referência (Treinado +2 por 1 PT, Especialista +4 por 2 PT totais). **Pontos de Recursos (PR):** painel de referência experimental com 20 PR para investir em HP, Energia, CA Base, Ataque Base e regeneração, com custos progressivos e conferência do saldo. Tudo é salvo no navegador e no JSON. Os valores antigos de combate e o PDF ainda não foram migrados.
+- **Arquétipos:** Ofensivo, Defensor, Controlador e Suporte, com talentos T02.
+- **Recursos:** HP, Energia (EN), CA Base, Ataque Base e regeneração calculados pelos PR, sem perfis fixos de combate. O Ataque Básico continua com nome e descrição editáveis.
+- **Ímpeto 1.0 (migração incremental):** editor dividido em Identidade, Arquétipo, Atributos, Perícias, Habilidades e Prévia. Oito atributos universais com base 8, teto 14 e 28 PA de referência. Quatro arquétipos T02 com três talentos cada, separados das habilidades e da passiva. As 16 perícias universais são agrupadas em Físicas, Exploração, Conhecimento e Sociais, com 4 PT de referência (Treinado +2 por 1 PT, Especialista +4 por 2 PT totais). **Pontos de Recursos (PR):** painel de referência experimental com 20 PR para investir em HP, Energia, CA Base, Ataque Base e regeneração, com custos progressivos e conferência do saldo. Tudo é salvo no navegador e no JSON. Os valores antigos fixos de combate já foram removidos do editor; as técnicas antigas e o layout do PDF ainda aguardam migração.
 - **Técnicas:** cinco habilidades ativas personalizáveis a partir de modelos com custos, efeitos e limitações mecânicas.
 - **Passiva:** personalização narrativa com modelos de ativação e efeito.
 - **Prévia:** consulta da ficha montada antes da exportação.
@@ -62,9 +62,9 @@ npm run lint
 ## Como usar
 
 1. Escolha o elemento do personagem.
-2. Preencha a identidade, selecione a classe e adicione um retrato, se desejar.
+2. Preencha a identidade e adicione um retrato, se desejar. Não existe mais seleção de perfil de combate.
 3. Na aba **Arquétipo**, escolha um dos quatro arquétipos do Ímpeto e um de seus três talentos T02.
-4. Na aba **Atributos**, distribua os 28 PA de referência entre os oito atributos e os **20 PR de referência** entre HP, Energia, CA Base, Ataque Base e regeneração. Esses recursos novos aparecem em painel próprio; as estatísticas antigas de Avatar permanecem em uso até a configuração avançada ser definida.
+4. Na aba **Atributos**, distribua os 28 PA de referência entre os oito atributos e os **20 PR de referência** entre HP, Energia, CA Base, Ataque Base e regeneração. Os recursos calculados pelos PR são os únicos mostrados no editor, e o Ataque Básico usa o dano adquirido por PR. A escala avançada de Avatar ainda será calibrada.
 5. Na aba **Perícias**, distribua 4 PT de referência: Não treinado (+0), Treinado (+2) ou Especialista (+4).
 6. Na aba **Habilidades**, personalize as cinco técnicas e a habilidade passiva.
 7. Revise o resultado em **Prévia**.
@@ -72,6 +72,10 @@ npm run lint
 9. Para recuperar uma ficha, clique em **Importar ficha JSON** na página inicial (ou **Importar JSON** no editor) e escolha o arquivo exportado. A importação substitui o rascunho atual após confirmação.
 
 **Salvamento de rascunho:** o editor salva automaticamente a ficha em edição no armazenamento local deste navegador, incluindo retrato, técnicas e passiva. Ao reabrir o site no mesmo navegador, é possível continuar a edição. Isso não é backup em nuvem: limpar os dados do navegador pode apagar o rascunho. **Exporte JSON para manter um arquivo editável independente**; o PDF serve para consulta e impressão, não para reimportação.
+
+**Compatibilidade:** fichas antigas podem conter a propriedade `classe` (Lutador, Linha de Frente ou Conjurador). Ela é aceita para leitura mas ignorada pelo criador atual, que não a exporta mais.
+
+**PDF:** ainda usa o layout antigo. Os dados de HP, Energia, CA, regeneração e dano básico enviados para exportação já vêm dos PR, mas o documento ainda não traz os novos oito atributos, perícias ou talentos T02.
 
 **Formato do JSON:** arquivo identificado por `formato: "hexatombe-avatar-ficha"`, `versaoFormato: 1` e o objeto `ficha`. O editor valida a estrutura antes de substituir os dados atuais e aceita também o objeto de rascunho v1 sem invólucro. Os campos novos `atributosImpeto`, `recursosImpeto`, `arquetipoImpeto`, `talentoArquetipo` e `periciasImpeto` são opcionais para preservar a importação de JSON antigos. O valor legado `abaAtiva: "combate"` é convertido para a aba `atributos`. O limite de importação é 8 MB. A compatibilidade automática com o **Portal do Mestre** depende de integração específica no importador daquela plataforma.
 
