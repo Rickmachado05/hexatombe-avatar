@@ -145,10 +145,12 @@ export function CombateImpeto(props:Props){
             <label className="impeto-check">
               <input type="checkbox" checked={a.distante}
                 onChange={e=>editarAtiva(i,{distante:e.target.checked})}/>
-              <span>Alcance à distância (+25% no custo em PC)</span>
+              <span>Alcance ampliado (+25% PC)</span>
             </label>
-            <small>Permite usar a habilidade contra alvos mais afastados do que o alcance próximo.
-              A distância é definida pelo mestre conforme a cena; não é ilimitada nem medida em metros fixos.</small>
+            <small>Permite atingir alvos mais afastados que o alcance narrativo normal da habilidade,
+              quando fizer sentido no cenário e o mestre permitir. Não há distância fixa em metros,
+              nem alcance ilimitado: obstáculos e condições da cena continuam valendo.
+              O aumento de 25% é no custo de criação em PC; o custo de EN pode mudar conforme o PC final.</small>
           </div>
           {a.ativacao==="reacao"&&<CampoTexto titulo="Gatilho da reação" valor={a.gatilho}
             alterar={v=>editarAtiva(i,{gatilho:v})}
