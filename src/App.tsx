@@ -198,10 +198,6 @@ const valorDaTecnica = (modelo: ModeloId, danoBasicoAtual?: string) => {
   return typeof valor === "string" ? valor : valor[MODELO_TECNICA_LEGADO];
 };
 
-const rotuloMomentoDeUso = (acao: TipoAcao) =>
-  acao === "Pré-combate" ? "Antes do combate (antes de rolar iniciativa)" :
-  acao === "Buff" ? "Buff opcional no turno" : "Ação principal";
-
 const criarHabilidade = (modelo: ModeloId): Habilidade => ({
   nome: "",
   modelo,
