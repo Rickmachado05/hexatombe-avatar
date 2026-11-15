@@ -17,7 +17,7 @@ type Props = {
 };
 
 const OPCOES_DADOS: Dado[]=[4,6,8,10,12];
-const OPCOES_PX:ClassePX[]=["pontual","especializada","complexa","ampla","extraordinaria"];
+const OPCOES_PX:Exclude<ClassePX,"nenhum">[]=["pontual","especializada","complexa","ampla","extraordinaria"];
 const TIPO_ATIVACAO:Record<Ativacao,string>={
   principal:"Ação principal",buff:"Buff rápido (até 1/turno)",
   reacao:"Reação (até 1/rodada)"
