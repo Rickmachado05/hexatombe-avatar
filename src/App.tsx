@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import { exportarFichaPdf } from "./pdf/exportarFichaPdf";
+import {
+  novaExploracao, migrarAtivas, migrarPassiva, validaConstrucao
+} from "./impeto/habilidades";
+import type { Perfil, Ativa, Passiva, Exploracao } from "./impeto/habilidades";
+import { CombateImpeto, ExploracaoImpeto, ResumoHabilidadesImpeto } from "./impeto/HabilidadesEditor";
 import "./HexatombePdf.css";
 import "./App.css";
 import "./LayoutAbas.css";
@@ -179,19 +184,7 @@ const regrasModelos: Record<ModeloId, RegraModelo> = {
   },
 };
 
-const modelosPorTipo: Record<TipoHabilidade, ModeloId[]> = {
-  Ofensiva: ["golpe"],
-  "Ofensiva em área": ["area"],
-  Controle: ["imobilizar", "empurrar"],
-  Condição: ["danoContinuo"],
-  Defesa: ["escudo", "reducao", "ca"],
-  Buff: ["buffDano", "buffAcerto", "buffIniciativa"],
-  Cura: ["cura", "curaArea"],
-  Utilidade: ["movimento", "criarArma", "encantarArma"],
-};
-
-// Os modelos antigos de habilidades permanecem provisórios até a atualização H06.
-// Não há perfil de combate selecionável nem recursos derivados de classe.
+// O catálogo anterior permanece apenas para a compatibilidade dos JSONs e do PDF.
 const MODELO_TECNICA_LEGADO: PerfilLegadoTecnica = "Lutador";
 
 const custoDaTecnica = (modelo: ModeloId) => {
@@ -318,7 +311,7 @@ const regrasPassivas: Record<ModeloPassivaId, RegraPassiva> = {
   },
 };
 
-type AbaEditor = "identidade" | "arquetipo" | "atributos" | "pericias" | "habilidades" | "previa";
+type AbaEditor = "identidade" | "arquetipo" | "atributos" | "pericias" | "habilidades" | "exploracao" | "previa";
 
 const abasEditor: { id: AbaEditor; nome: string }[] = [
   { id: "identidade", nome: "Identidade" },
@@ -326,6 +319,7 @@ const abasEditor: { id: AbaEditor; nome: string }[] = [
   { id: "atributos", nome: "Atributos" },
   { id: "pericias", nome: "Perícias" },
   { id: "habilidades", nome: "Habilidades" },
+  { id: "exploracao", nome: "Exploração" },
   { id: "previa", nome: "Prévia" },
 ];
 
@@ -577,6 +571,11 @@ type RascunhoFicha = {
   ataqueBasico: { nome: string; descricao: string };
   habilidades: Habilidade[];
   passiva: PassivaEditavel;
+  // H06/H04.1/PX: opcionais para recuperar JSONs exportados antes da atualização.
+  perfilHabilidades?: Perfil;
+  ativasImpeto?: Ativa[];
+  passivaImpeto?: Passiva;
+  exploracaoImpeto?: Exploracao[];
 };
 
 const CHAVE_RASCUNHO = "hexatombe-avatar:rascunho:v1";
@@ -630,7 +629,17 @@ function validarFicha(valor: unknown): valor is RascunhoFicha {
     typeof dados.passiva.descricao === "string" &&
     Number.isInteger(dados.passiva.habilidadeVinculada) &&
     dados.passiva.habilidadeVinculada >= 0 &&
-    dados.passiva.habilidadeVinculada <= 4;
+    dados.passiva.habilidadeVinculada <= 4 &&
+    ((dados.perfilHabilidades === undefined &&
+      dados.ativasImpeto === undefined &&
+      dados.passivaImpeto === undefined &&
+      dados.exploracaoImpeto === undefined) ||
+      (dados.perfilHabilidades !== undefined &&
+        dados.ativasImpeto !== undefined &&
+        dados.passivaImpeto !== undefined &&
+        dados.exploracaoImpeto !== undefined &&
+        validaConstrucao(dados.perfilHabilidades, dados.ativasImpeto,
+          dados.passivaImpeto, dados.exploracaoImpeto)));
 }
 
 function carregarRascunho(): RascunhoFicha | null {
@@ -688,7 +697,6 @@ function App() {
   const [foto, setFoto] = useState(rascunhoInicial?.foto ?? "");
   const [abaAtiva, setAbaAtiva] = useState<AbaEditor>(normalizarAbaEditor(rascunhoInicial?.abaAtiva));
   const [exportandoPdf, setExportandoPdf] = useState(false);
-  const [habilidadeAberta, setHabilidadeAberta] = useState<number | "passiva" | null>(0);
 
   // Os hooks devem ficar dentro do componente App.
   const [ataqueBasico, setAtaqueBasico] = useState(
@@ -714,6 +722,29 @@ function App() {
     }
   );
 
+  // O modelo H06 é independente dos registros antigos preservados para
+  // importação e exportação PDF até a diagramação definitiva.
+  const [perfilHabilidades, setPerfilHabilidades] = useState<Perfil>(
+    rascunhoInicial?.perfilHabilidades ?? "avatar"
+  );
+  const [ativasImpeto, setAtivasImpeto] = useState<Ativa[]>(() =>
+    rascunhoInicial?.ativasImpeto ?? migrarAtivas(
+      rascunhoInicial?.habilidades ?? [
+        criarHabilidade("golpe"), criarHabilidade("area"),
+        criarHabilidade("imobilizar"), criarHabilidade("ca"), criarHabilidade("buffDano")
+      ]
+    )
+  );
+  const [passivaImpeto, setPassivaImpeto] = useState<Passiva>(() =>
+    rascunhoInicial?.passivaImpeto ?? migrarPassiva(
+      rascunhoInicial?.passiva ?? {nome:"",modelo:"",descricao:""}
+    )
+  );
+  const [exploracaoImpeto, setExploracaoImpeto] = useState<Exploracao[]>(
+    rascunhoInicial?.exploracaoImpeto ?? []
+  );
+  const [alertaConstrutor, setAlertaConstrutor] = useState("");
+
   useEffect(() => {
     const rascunho: RascunhoFicha = {
       versao: 1,
@@ -731,13 +762,17 @@ function App() {
       ataqueBasico,
       habilidades,
       passiva,
+      perfilHabilidades,
+      ativasImpeto,
+      passivaImpeto,
+      exploracaoImpeto,
     };
     try {
       window.localStorage.setItem(CHAVE_RASCUNHO, JSON.stringify(rascunho));
     } catch (erro) {
       console.warn("Não foi possível salvar o rascunho neste navegador.", erro);
     }
-  }, [mostrandoIdentidade, abaAtiva, elemento, atributosImpeto, recursosImpeto, periciasImpeto, arquetipoImpeto, talentoArquetipo, nome, historia, foto, ataqueBasico, habilidades, passiva]);
+  }, [mostrandoIdentidade, abaAtiva, elemento, atributosImpeto, recursosImpeto, periciasImpeto, arquetipoImpeto, talentoArquetipo, nome, historia, foto, ataqueBasico, habilidades, passiva, perfilHabilidades, ativasImpeto, passivaImpeto, exploracaoImpeto]);
 
 
   const exportarJson = () => {
@@ -759,6 +794,10 @@ function App() {
       ataqueBasico,
       habilidades,
       passiva,
+      perfilHabilidades,
+      ativasImpeto,
+      passivaImpeto,
+      exploracaoImpeto,
     };
     const pacote = {
       formato: FORMATO_JSON,
@@ -822,8 +861,14 @@ function App() {
       setAtaqueBasico({ ...ficha.ataqueBasico });
       setHabilidades(ficha.habilidades.map((habilidade) => ({ ...habilidade })));
       setPassiva({ ...ficha.passiva });
+      setPerfilHabilidades(ficha.perfilHabilidades ?? "avatar");
+      setAtivasImpeto(ficha.ativasImpeto ??
+        migrarAtivas(ficha.habilidades));
+      setPassivaImpeto(ficha.passivaImpeto ??
+        migrarPassiva(ficha.passiva));
+      setExploracaoImpeto(ficha.exploracaoImpeto ?? []);
+      setAlertaConstrutor("");
       setAbaAtiva(normalizarAbaEditor(ficha.abaAtiva));
-      setHabilidadeAberta(0);
       setMostrandoIdentidade(true);
       window.alert("Ficha importada! Você pode continuar editando ou gerar o PDF.");
     } catch (erro) {
@@ -889,15 +934,62 @@ function App() {
     });
   };
 
-  const atualizarHabilidade = (
-    indice: number,
-    alteracoes: Partial<Habilidade>
-  ) => {
-    setHabilidades((anteriores) =>
-      anteriores.map((habilidade, i) =>
-        i === indice ? { ...habilidade, ...alteracoes } : habilidade
-      )
-    );
+  const informarLimite = () => setAlertaConstrutor(
+    "A alteração ultrapassaria o orçamento ou o limite individual da configuração atual. " +
+    "Reduza outro componente ou use uma configuração experimental autorizada pelo mestre."
+  );
+
+  const alterarPerfilHabilidades = (novo: Perfil) => {
+    if (!validaConstrucao(novo, ativasImpeto, passivaImpeto, exploracaoImpeto)) {
+      informarLimite();
+      return;
+    }
+    setPerfilHabilidades(novo);
+    setAlertaConstrutor("");
+  };
+  const editarAtivaImpeto = (indice:number, campos:Partial<Ativa>) => {
+    const novas = ativasImpeto.map((a,i)=>i===indice?{...a,...campos}:a);
+    if (!validaConstrucao(perfilHabilidades, novas, passivaImpeto, exploracaoImpeto)) {
+      informarLimite(); return;
+    }
+    setAtivasImpeto(novas);
+    setAlertaConstrutor("");
+  };
+  const editarPassivaImpeto = (campos:Partial<Passiva>) => {
+    const nova = {...passivaImpeto,...campos};
+    if (!validaConstrucao(perfilHabilidades, ativasImpeto, nova, exploracaoImpeto)) {
+      informarLimite(); return;
+    }
+    setPassivaImpeto(nova);
+    setAlertaConstrutor("");
+  };
+  const editarExploracaoImpeto = (indice:number,campos:Partial<Exploracao>) => {
+    const novas = exploracaoImpeto.map((e,i)=>i===indice?{...e,...campos}:e);
+    if (!validaConstrucao(perfilHabilidades, ativasImpeto, passivaImpeto, novas)) {
+      informarLimite(); return;
+    }
+    setExploracaoImpeto(novas);
+    setAlertaConstrutor("");
+  };
+  const adicionarExploracaoImpeto = () => {
+    const novas = [...exploracaoImpeto, novaExploracao()];
+    if(!validaConstrucao(perfilHabilidades,ativasImpeto,passivaImpeto,novas)) {
+      informarLimite(); return;
+    }
+    setExploracaoImpeto(novas);
+    setAlertaConstrutor("");
+  };
+  const removerExploracaoImpeto = (indice:number) => {
+    setExploracaoImpeto(exploracaoImpeto.filter((_,i)=>i!==indice));
+    setAlertaConstrutor("");
+  };
+  const propsConstrutor = {
+    perfil:perfilHabilidades, ativas:ativasImpeto, passiva:passivaImpeto,
+    exploracao:exploracaoImpeto, alterarPerfil:alterarPerfilHabilidades,
+    editarAtiva:editarAtivaImpeto, editarPassiva:editarPassivaImpeto,
+    editarExploracao:editarExploracaoImpeto,
+    adicionarExploracao:adicionarExploracaoImpeto,
+    removerExploracao:removerExploracaoImpeto,
   };
 
   const selecionado = elementos.find((item) => item.id === elemento)!;
@@ -958,6 +1050,7 @@ function App() {
 
   const gerarPdf = async () => {
     if (exportandoPdf) return;
+    if (!window.confirm("O PDF ainda utiliza o modelo anterior de habilidades e não inclui as técnicas H06/PX nem os novos atributos. Para preservar a ficha editável atual, exporte JSON. Deseja gerar o PDF antigo mesmo assim?")) return;
     setExportandoPdf(true);
     try {
       await exportarFichaPdf({
@@ -1485,342 +1578,15 @@ function App() {
 
             {abaAtiva === "habilidades" && (
               <section className="conteudo-aba aba-habilidades" aria-labelledby="aba-habilidades">
-                <h2>Habilidades</h2>
-                <div className="panorama-habilidades" aria-label="Estrutura da ficha">
-                  <span><strong>05</strong> técnicas ativas</span>
-                  <span><strong>01</strong> passiva</span>
-                  <span className="estado-playtest">Valores em playtest</span>
-                </div>
-                <section className="secao-combate">
-              <h3 className="titulo-tecnicas">Habilidades Ativas</h3>
-              <p className="descricao-editor">
-                As técnicas desta seção ainda usam os modelos experimentais antigos
-                e serão atualizadas pelo construtor de habilidades do Ímpeto.
-                Os recursos e o ataque básico já usam PR; as técnicas não concedem
-                ações extras e a descrição narrativa não altera os efeitos.
-              </p>
+                <CombateImpeto {...propsConstrutor} />
+                {alertaConstrutor && <p className="impeto-alerta" role="alert">{alertaConstrutor}</p>}
+              </section>
+            )}
 
-              {habilidades.map((habilidade, indice) => {
-                const modelo = regrasModelos[habilidade.modelo];
-                return (
-                  <div
-                    className={`grupo-habilidade cartao-habilidade ${habilidadeAberta === indice ? "aberta" : ""}`}
-                    key={indice}
-                    data-tipo={modelo.tipo}
-                  >
-                    <button
-                      type="button"
-                      className="cabecalho-habilidade"
-                      aria-expanded={habilidadeAberta === indice}
-                      aria-controls={`corpo-habilidade-${indice}`}
-                      onClick={() => setHabilidadeAberta(habilidadeAberta === indice ? null : indice)}
-                    >
-                      <span className="numero-habilidade">{indice + 1}</span>
-                      <span className="texto-habilidade">
-                        <strong>{habilidade.nome.trim() || `Habilidade ${indice + 1}`}</strong>
-                        <small>{modelo.nome}</small>
-                      </span>
-                      <span className="resumo-habilidade-cabecalho">
-                        <span className="etiqueta-tipo">{modelo.tipo}</span>
-                        <span className="etiqueta-mana">{custoDaTecnica(habilidade.modelo)} EN</span>
-                        <span className="etiqueta-valor">{valorDaTecnica(habilidade.modelo, recursosCalculados.ataque)}</span>
-                      </span>
-                      <span className="icone-expandir" aria-hidden="true">{habilidadeAberta === indice ? "−" : "+"}</span>
-                    </button>
-                    {habilidadeAberta === indice && (
-                      <div id={`corpo-habilidade-${indice}`} className="corpo-habilidade">
-
-                    <label htmlFor={`skill-${indice}-nome`}>Nome</label>
-                    <input
-                      id={`skill-${indice}-nome`}
-                      value={habilidade.nome}
-                      onChange={(e) =>
-                        atualizarHabilidade(indice, { nome: e.target.value })
-                      }
-                      placeholder="Ex: Barreira de Rocha"
-                    />
-
-                    <label htmlFor={`skill-${indice}-tipo`}>Categoria</label>
-                    <select
-                      id={`skill-${indice}-tipo`}
-                      value={modelo.tipo}
-                      onChange={(e) => {
-                        const tipo = e.target.value as TipoHabilidade;
-                        atualizarHabilidade(indice, {
-                          modelo: modelosPorTipo[tipo][0],
-                          alvos: 1,
-                        });
-                      }}
-                    >
-                      {(Object.keys(modelosPorTipo) as TipoHabilidade[]).map(
-                        (tipo) => <option key={tipo} value={tipo}>{tipo}</option>
-                      )}
-                    </select>
-
-                    <label htmlFor={`skill-${indice}-modelo`}>Efeito mecânico</label>
-                    <select
-                      id={`skill-${indice}-modelo`}
-                      value={habilidade.modelo}
-                      onChange={(e) =>
-                        atualizarHabilidade(indice, {
-                          modelo: e.target.value as ModeloId,
-                          alvos: e.target.value === "curaArea" ? 2 : 1,
-                        })
-                      }
-                    >
-                      {modelosPorTipo[modelo.tipo].map((opcao) => (
-                        <option key={opcao} value={opcao}>
-                          {regrasModelos[opcao].nome}
-                        </option>
-                      ))}
-                    </select>
-
-                    <p><strong>Momento de uso:</strong> {rotuloMomentoDeUso(modelo.acao)}</p>
-                    <div className="linha-campos">
-                      <div>
-                        <label htmlFor={`skill-${indice}-mana`}>Custo de EN</label>
-                        <input
-                          id={`skill-${indice}-mana`}
-                          type="number"
-                          value={custoDaTecnica(habilidade.modelo)}
-                          readOnly
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor={`skill-${indice}-valor`}>
-                          {modelo.rotuloValor}
-                        </label>
-                        <input
-                          id={`skill-${indice}-valor`}
-                          value={valorDaTecnica(habilidade.modelo, recursosCalculados.ataque)}
-                          readOnly
-                        />
-                      </div>
-                    </div>
-
-                    {modelo.valorAdicional && (
-                      <p className="efeito-extra-habilidade">
-                        <strong>{modelo.rotuloAdicional}:</strong>{" "}
-                        {modelo.valorAdicional}
-                      </p>
-                    )}
-
-                    {habilidade.modelo === "danoContinuo" && (
-                      <>
-                        <label htmlFor={`skill-${indice}-condicao`}>
-                          Nome da condição (apenas narrativo)
-                        </label>
-                        <input
-                          id={`skill-${indice}-condicao`}
-                          value={habilidade.nomeCondicao}
-                          onChange={(e) =>
-                            atualizarHabilidade(indice, { nomeCondicao: e.target.value })
-                          }
-                          placeholder={`Ex.: ${condicaoSugeridaPorElemento[elemento]}`}
-                          maxLength={60}
-                        />
-                        <p>
-                          <strong>Importante:</strong> o nome não muda a mecânica.
-                          Dano contínuo de 1d4 uma vez, sem efeitos extras.
-                        </p>
-                      </>
-                    )}
-
-                    {(habilidade.modelo === "criarArma" ||
-                      habilidade.modelo === "encantarArma") && (
-                      <>
-                        <label htmlFor={`skill-${indice}-arma`}>
-                          {habilidade.modelo === "criarArma"
-                            ? "Nome da arma criada ou preparada"
-                            : "Nome da arma encantada ou reforçada"}
-                        </label>
-                        <input
-                          id={`skill-${indice}-arma`}
-                          value={habilidade.nomeArma}
-                          onChange={(e) =>
-                            atualizarHabilidade(indice, { nomeArma: e.target.value })
-                          }
-                          placeholder={elemento === "neutro"
-                            ? "Ex.: Lança retrátil"
-                            : "Ex.: Espada de gelo, lança de pedra..."}
-                          maxLength={80}
-                        />
-                      </>
-                    )}
-
-                    {modelo.maxAlvos === 2 ? (
-                      <>
-                        <label htmlFor={`skill-${indice}-alvos`}>{habilidade.modelo === "curaArea" ? "Quantidade de aliados" : "Quantidade de alvos"}</label>
-                        <select
-                          id={`skill-${indice}-alvos`}
-                          value={habilidade.alvos}
-                          onChange={(e) =>
-                            atualizarHabilidade(indice, {
-                              alvos: Number(e.target.value) as 1 | 2,
-                            })
-                          }
-                        >
-                          <option value={1}>{habilidade.modelo === "curaArea" ? "1 aliado" : "1 alvo"}</option>
-                          <option value={2}>{habilidade.modelo === "curaArea" ? "2 aliados" : "2 alvos"}</option>
-                        </select>
-                      </>
-                    ) : (
-                      <p><strong>Alvos:</strong> 1</p>
-                    )}
-
-                    <p className="regra-habilidade"><strong>Regra:</strong> {modelo.regra}</p>
-                    {modelo.experimental && (
-                      <p className="nota-playtest"><strong>Em playtest:</strong> valor provisório, sujeito à aprovação do mestre.</p>
-                    )}
-
-                    <label htmlFor={`skill-${indice}-efeito`}>Descrição narrativa</label>
-                    <textarea
-                      id={`skill-${indice}-efeito`}
-                      rows={3}
-                      value={habilidade.efeito}
-                      onChange={(e) =>
-                        atualizarHabilidade(indice, { efeito: e.target.value })
-                      }
-                      placeholder="Como seu personagem realiza essa técnica?"
-                    />
-
-                    <label htmlFor={`skill-${indice}-limites`}>Observações para o mestre</label>
-                    <textarea
-                      id={`skill-${indice}-limites`}
-                      rows={2}
-                      value={habilidade.limitacoes}
-                      onChange={(e) =>
-                        atualizarHabilidade(indice, { limitacoes: e.target.value })
-                      }
-                      placeholder="Condições narrativas ou ideias para revisão"
-                    />
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-
-              <div
-                className={`grupo-habilidade cartao-habilidade ${habilidadeAberta === "passiva" ? "aberta" : ""}`}
-                data-tipo="Passiva"
-              >
-                <button
-                  type="button"
-                  className="cabecalho-habilidade"
-                  aria-expanded={habilidadeAberta === "passiva"}
-                  aria-controls="corpo-passiva"
-                  onClick={() => setHabilidadeAberta(habilidadeAberta === "passiva" ? null : "passiva")}
-                >
-                  <span className="numero-habilidade">✦</span>
-                  <span className="texto-habilidade">
-                    <strong>{passiva.nome.trim() || "Habilidade Passiva"}</strong>
-                    <small>{regraPassiva.categoria} · {regraPassiva.nome}</small>
-                  </span>
-                  <span className="resumo-habilidade-cabecalho">
-                    <span className="etiqueta-tipo">Passiva</span>
-                    <span className="etiqueta-mana">0 EN</span>
-                    <span className="etiqueta-valor">Sem ação</span>
-                  </span>
-                  <span className="icone-expandir" aria-hidden="true">
-                    {habilidadeAberta === "passiva" ? "−" : "+"}
-                  </span>
-                </button>
-
-                {habilidadeAberta === "passiva" && (
-                  <div id="corpo-passiva" className="corpo-habilidade">
-                    <label htmlFor="passiva-nome">Nome da passiva</label>
-                    <input
-                      id="passiva-nome"
-                      value={passiva.nome}
-                      maxLength={80}
-                      onChange={(e) => setPassiva((anterior) => ({
-                        ...anterior,
-                        nome: e.target.value,
-                      }))}
-                      placeholder="Ex.: Armadura Espiritual"
-                    />
-
-                    <label htmlFor="passiva-modelo">Efeito mecânico (disponível para qualquer elemento)</label>
-                    <select
-                      id="passiva-modelo"
-                      value={passiva.modelo}
-                      onChange={(e) => setPassiva((anterior) => ({
-                        ...anterior,
-                        modelo: e.target.value as ModeloPassivaId,
-                      }))}
-                    >
-                      {(Object.keys(regrasPassivas) as ModeloPassivaId[]).map((id) => (
-                        <option key={id} value={id}>{regrasPassivas[id].categoria} — {regrasPassivas[id].nome}</option>
-                      ))}
-                    </select>
-
-                    {passiva.modelo === "fluxo" && (
-                      <>
-                        <label htmlFor="passiva-vinculo">Técnica ativa vinculada</label>
-                        <select
-                          id="passiva-vinculo"
-                          value={passiva.habilidadeVinculada}
-                          onChange={(e) => setPassiva((anterior) => ({
-                            ...anterior,
-                            habilidadeVinculada: Number(e.target.value),
-                          }))}
-                        >
-                          {habilidades.map((habilidade, indice) => (
-                            <option
-                              key={indice}
-                              value={indice}
-                              disabled={![
-                                "Ofensiva", "Ofensiva em área", "Controle", "Condição",
-                              ].includes(regrasModelos[habilidade.modelo].tipo)}
-                            >
-                              {indice + 1}. {habilidade.nome.trim() || `Habilidade ${indice + 1}`}
-                            </option>
-                          ))}
-                        </select>
-                        {!vinculoPodeAcertar && (
-                          <p className="aviso-passiva" role="alert">
-                            Escolha uma técnica ofensiva, de controle ou de condição que possa acertar um alvo.
-                          </p>
-                        )}
-                      </>
-                    )}
-                    {semControle && (
-                      <p className="aviso-passiva" role="alert">
-                        Este modelo de passiva precisa de ao menos uma técnica de Controle entre as cinco habilidades.
-                      </p>
-                    )}
-                    {semCura && (
-                      <p className="aviso-passiva" role="alert">
-                        Esta passiva exige pelo menos uma técnica de Cura entre as cinco habilidades.
-                      </p>
-                    )}
-                    {regraPassiva.experimental && (
-                      <p className="aviso-passiva">Modelo experimental: sujeito aos testes e à aprovação do mestre.</p>
-                    )}
-
-                    <div className="resumo-passiva-mecanica">
-                      <p><strong>Condição de ativação:</strong> {gatilhoPassiva}</p>
-                      <p><strong>Efeito:</strong> {regraPassiva.efeito}</p>
-                      <p><strong>Limites:</strong> {regraPassiva.limite}</p>
-                      <p><strong>Custo:</strong> 0 EN · não consome ação.</p>
-                    </div>
-
-                    <label htmlFor="passiva-descricao">Descrição narrativa</label>
-                    <textarea
-                      id="passiva-descricao"
-                      rows={3}
-                      value={passiva.descricao}
-                      onChange={(e) => setPassiva((anterior) => ({
-                        ...anterior,
-                        descricao: e.target.value,
-                      }))}
-                      placeholder="Como essa passiva se manifesta no seu personagem?"
-                    />
-                    <p className="aviso-passiva">A descrição não modifica os bônus, os gatilhos ou as limitações mecânicas.</p>
-                  </div>
-                )}
-              </div>
-            </section>
+            {abaAtiva === "exploracao" && (
+              <section className="conteudo-aba aba-exploracao" aria-labelledby="aba-exploracao">
+                <ExploracaoImpeto {...propsConstrutor} />
+                {alertaConstrutor && <p className="impeto-alerta" role="alert">{alertaConstrutor}</p>}
               </section>
             )}
 
@@ -1942,97 +1708,13 @@ function App() {
                   </div>
                 </section>
 
-                <section className="previa-secao" aria-labelledby="previa-titulo-habilidades">
-                  <div className="previa-secao-topo">
-                    <div>
-                      <h3 id="previa-titulo-habilidades">Técnicas ativas</h3>
-                      <p>Cinco técnicas. Abra os detalhes para consultar regras e efeitos.</p>
-                    </div>
-                    <button className="previa-editar" type="button" onClick={() => setAbaAtiva("habilidades")}>
-                      Editar habilidades
-                    </button>
-                  </div>
-                  <div className="previa-grade-tecnicas">
-                    {habilidades.map((habilidade, indice) => {
-                      const modelo = regrasModelos[habilidade.modelo];
-                      return (
-                        <article key={indice} className="previa-tecnica" data-tipo={modelo.tipo}>
-                          <div className="previa-tecnica-topo">
-                            <span className="previa-tecnica-numero">{indice + 1}</span>
-                            <div>
-                              <strong>{habilidade.nome.trim() || `Habilidade ${indice + 1}`}</strong>
-                              <small>{modelo.nome}</small>
-                            </div>
-                          </div>
-                          <div className="previa-chips previa-tecnica-chips">
-                            <span>{modelo.tipo}</span>
-                            <span>{custoDaTecnica(habilidade.modelo)} EN</span>
-                            <span>{rotuloMomentoDeUso(modelo.acao)}</span>
-                          </div>
-                          <p className="previa-tecnica-efeito">
-                            <span>{modelo.rotuloValor}</span>
-                            <strong>{valorDaTecnica(habilidade.modelo, recursosCalculados.ataque)}</strong>
-                            {modelo.valorAdicional && <em> + {modelo.valorAdicional}</em>}
-                          </p>
-                          {modelo.experimental && <span className="previa-experimental">Em playtest</span>}
-                          <details className="previa-detalhes">
-                            <summary>Ver regras e descrição</summary>
-                            <div className="previa-detalhes-conteudo">
-                              <p><strong>Alvos:</strong> {modelo.maxAlvos === 2 ? habilidade.alvos : 1}</p>
-                              {modelo.valorAdicional && <p><strong>{modelo.rotuloAdicional}:</strong> {modelo.valorAdicional}</p>}
-                              {habilidade.modelo === "danoContinuo" && (
-                                <p><strong>Condição:</strong> {habilidade.nomeCondicao.trim() || condicaoSugeridaPorElemento[elemento]}</p>
-                              )}
-                              {(habilidade.modelo === "criarArma" || habilidade.modelo === "encantarArma") && (
-                                <p><strong>Arma:</strong> {habilidade.nomeArma.trim() || "Não definida"}</p>
-                              )}
-                              <p><strong>Regra:</strong> {modelo.regra}</p>
-                              {habilidade.efeito.trim() && <p><strong>Descrição narrativa:</strong> {habilidade.efeito}</p>}
-                              {habilidade.limitacoes.trim() && <p><strong>Observações:</strong> {habilidade.limitacoes}</p>}
-                              {modelo.experimental && <p className="previa-alerta">Requer aprovação do mestre.</p>}
-                            </div>
-                          </details>
-                        </article>
-                      );
-                    })}
-                  </div>
-                </section>
-
-                <section className="previa-secao previa-passiva" aria-labelledby="previa-titulo-passiva">
-                  <div className="previa-secao-topo">
-                    <div>
-                      <span className="previa-rotulo">✦ DOM ESPIRITUAL</span>
-                      <h3 id="previa-titulo-passiva">{passiva.nome.trim() || regraPassiva.nome}</h3>
-                    </div>
-                    <button className="previa-editar" type="button" onClick={() => {
-                      setAbaAtiva("habilidades");
-                      setHabilidadeAberta("passiva");
-                    }}>
-                      Editar passiva
-                    </button>
-                  </div>
-                  <div className="previa-chips">
-                    <span>{regraPassiva.nome}</span>
-                    <span>{regraPassiva.categoria}</span>
-                    <span>0 EN</span>
-                    <span>Sem ação</span>
-                  </div>
-                  <p><strong>Ativação:</strong> {gatilhoPassiva}</p>
-                  <p><strong>Efeito:</strong> {regraPassiva.efeito}</p>
-                  <p><strong>Limitações:</strong> {regraPassiva.limite}</p>
-                  {passiva.descricao.trim() && <p><strong>Descrição:</strong> {passiva.descricao}</p>}
-                  {passiva.modelo === "fluxo" && !vinculoPodeAcertar && (
-                    <p className="previa-alerta">A técnica vinculada precisa poder acertar um alvo.</p>
-                  )}
-                  {semControle && (
-                    <p className="previa-alerta">Esta passiva exige uma técnica de Controle.</p>
-                  )}
-                  {semCura && (
-                    <p className="previa-alerta">Esta passiva exige uma técnica de Cura.</p>
-                  )}
-                  {regraPassiva.experimental && (
-                    <p className="previa-alerta">Passiva experimental: requer aprovação do mestre.</p>
-                  )}
+                <section className="previa-secao" aria-label="Resumo de habilidades e exploração">
+                  <ResumoHabilidadesImpeto perfil={perfilHabilidades} ativas={ativasImpeto}
+                    passiva={passivaImpeto} exploracao={exploracaoImpeto} />
+                  <button className="previa-editar" type="button"
+                    onClick={() => setAbaAtiva("habilidades")}>Editar habilidades</button>
+                  <button className="previa-editar" type="button"
+                    onClick={() => setAbaAtiva("exploracao")}>Editar exploração</button>
                 </section>
                 <p className="previa-rodape">Este resumo é para consulta no editor. Gere um PDF para impressão ou exporte um JSON para continuar a edição depois.</p>
               </section>
