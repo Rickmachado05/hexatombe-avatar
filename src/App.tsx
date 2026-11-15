@@ -13,7 +13,7 @@ import "./HexatombeHabilidades.css";
 import "./HexatombePrevia.css";
 
 type Elemento = "agua" | "terra" | "fogo" | "ar" | "neutro";
-type Classe = "Lutador" | "Linha de Frente" | "Conjurador";
+type PerfilLegadoTecnica = "Lutador" | "Linha de Frente" | "Conjurador";
 type TipoHabilidade =
   | "Ofensiva"
   | "Ofensiva em área"
@@ -57,8 +57,8 @@ type RegraModelo = {
   nome: string;
   tipo: TipoHabilidade;
   acao: TipoAcao;
-  custo: number | Record<Classe, number>;
-  valor: string | Record<Classe, string>;
+  custo: number | Record<PerfilLegadoTecnica, number>;
+  valor: string | Record<PerfilLegadoTecnica, string>;
   rotuloValor: string;
   valorAdicional?: string;
   rotuloAdicional?: string;
@@ -74,21 +74,6 @@ const elementos = [
   { id: "ar", nome: "Ar", simbolo: "气", descricao: "Liberdade, movimento e espiritualidade." },
   { id: "neutro", nome: "Não Dobrador", simbolo: "✦", descricao: "Disciplina, técnica e perseverança." },
 ] as const;
-
-const atributosPorClasse: Record<
-  Classe,
-  { hp: number; mana: number; ca: number; regeneracao: string }
-> = {
-  Lutador: { hp: 135, mana: 130, ca: 10, regeneracao: "1d4" },
-  "Linha de Frente": { hp: 145, mana: 120, ca: 11, regeneracao: "1d6" },
-  Conjurador: { hp: 130, mana: 180, ca: 10, regeneracao: "1d10" },
-};
-
-const danoBasicoPorClasse: Record<Classe, string> = {
-  Lutador: "2d6+6",
-  "Linha de Frente": "1d10+6",
-  Conjurador: "2d6+6",
-};
 
 // Modelos de combate baseados nas fichas-piloto v1.0 e no guia v0.8.
 // Escudo ATIVO é uma proposta de playtest, ainda não validada em mesa.
@@ -149,7 +134,7 @@ const regrasModelos: Record<ModeloId, RegraModelo> = {
   buffIniciativa: {
     nome: "Preparação de iniciativa (+2)", tipo: "Buff", acao: "Pré-combate",
     custo: 15, valor: "+2 na iniciativa", rotuloValor: "Bônus de iniciativa", maxAlvos: 1,
-    regra: "Use e pague a Mana somente antes de rolar a iniciativa de um combate iminente; escolha você ou um aliado presente. O alvo soma +2 ao d20 de iniciativa desse combate. Não acumula com outra Preparação de iniciativa para o mesmo alvo, não altera uma iniciativa já rolada e não pode ser usada durante o combate. Se não houver combate até o fim da cena, o efeito expira.",
+    regra: "Use e pague a EN somente antes de rolar a iniciativa de um combate iminente; escolha você ou um aliado presente. O alvo soma +2 ao d20 de iniciativa desse combate. Não acumula com outra Preparação de iniciativa para o mesmo alvo, não altera uma iniciativa já rolada e não pode ser usada durante o combate. Se não houver combate até o fim da cena, o efeito expira.",
     experimental: true,
   },
   cura: {
@@ -160,7 +145,7 @@ const regrasModelos: Record<ModeloId, RegraModelo> = {
   curaArea: {
     nome: "Cura em área (até 2 aliados)", tipo: "Cura", acao: "Principal",
     custo: 45, valor: "1d6+3 HP", rotuloValor: "Cura por aliado", maxAlvos: 2,
-    regra: "Escolha até 2 aliados próximos, podendo incluir você. Role a cura separadamente para cada alvo selecionado. Pague o custo de Mana uma única vez e use sua ação principal. Não ultrapassa o HP máximo, não cura inimigos e não é buff.",
+    regra: "Escolha até 2 aliados próximos, podendo incluir você. Role a cura separadamente para cada alvo selecionado. Pague o custo de EN uma única vez e use sua ação principal. Não ultrapassa o HP máximo, não cura inimigos e não é buff.",
     experimental: true,
   },
   movimento: {
@@ -183,7 +168,7 @@ const regrasModelos: Record<ModeloId, RegraModelo> = {
     custo: 10,
     valor: { Lutador: "2d6+6", "Linha de Frente": "1d10+6", Conjurador: "2d6+6" },
     rotuloValor: "Dano ao usar como ataque básico", maxAlvos: 1,
-    regra: "Cria uma arma com o elemento (ou prepara equipamento, para não dobradores) até o fim da cena. Usá-la substitui seu ataque básico normal: mesmo dano da classe, sem ataque extra e sem bônus. No máximo uma arma criada/preparada ativa por personagem; criar outra substitui a anterior. O mestre decide se a forma e o material são plausíveis.",
+    regra: "Cria uma arma com o elemento (ou prepara equipamento, para não dobradores) até o fim da cena. Usá-la substitui seu ataque básico normal: mesmo dano do Ataque Básico atual, sem ataque extra e sem bônus. No máximo uma arma criada/preparada ativa por personagem; criar outra substitui a anterior. O mestre decide se a forma e o material são plausíveis.",
     experimental: true,
   },
   encantarArma: {
@@ -205,14 +190,19 @@ const modelosPorTipo: Record<TipoHabilidade, ModeloId[]> = {
   Utilidade: ["movimento", "criarArma", "encantarArma"],
 };
 
-const custoDaTecnica = (modelo: ModeloId, classe: Classe) => {
+// Os modelos antigos de habilidades permanecem provisórios até a atualização H06.
+// Não há perfil de combate selecionável nem recursos derivados de classe.
+const MODELO_TECNICA_LEGADO: PerfilLegadoTecnica = "Lutador";
+
+const custoDaTecnica = (modelo: ModeloId) => {
   const custo = regrasModelos[modelo].custo;
-  return typeof custo === "number" ? custo : custo[classe];
+  return typeof custo === "number" ? custo : custo[MODELO_TECNICA_LEGADO];
 };
 
-const valorDaTecnica = (modelo: ModeloId, classe: Classe) => {
+const valorDaTecnica = (modelo: ModeloId, danoBasicoAtual?: string) => {
+  if (modelo === "criarArma" && danoBasicoAtual) return danoBasicoAtual;
   const valor = regrasModelos[modelo].valor;
-  return typeof valor === "string" ? valor : valor[classe];
+  return typeof valor === "string" ? valor : valor[MODELO_TECNICA_LEGADO];
 };
 
 const rotuloMomentoDeUso = (acao: TipoAcao) =>
@@ -299,7 +289,7 @@ const regrasPassivas: Record<ModeloPassivaId, RegraPassiva> = {
     categoria: "Suporte",
     gatilho: "Curar um aliado que estava com metade ou menos de seu HP máximo antes da cura.",
     efeito: "Um aliado curado recebe +1d6 HP de cura adicional.",
-    limite: "Uma vez por combate. Em cura em área, escolha somente um aliado para o bônus. Não funciona sobre você mesmo, não ultrapassa HP máximo e não custa Mana ou ação extra.",
+    limite: "Uma vez por combate. Em cura em área, escolha somente um aliado para o bônus. Não funciona sobre você mesmo, não ultrapassa HP máximo e não custa EN ou ação extra.",
     experimental: true,
   },
   amparoSolidario: {
@@ -323,7 +313,7 @@ const regrasPassivas: Record<ModeloPassivaId, RegraPassiva> = {
     categoria: "Suporte",
     gatilho: "Antes da rolagem de iniciativa do combate, escolher um aliado presente.",
     efeito: "Esse aliado recebe +1 no d20 de iniciativa para o combate.",
-    limite: "Uma vez por combate, apenas um aliado diferente de você. Não se aplica depois da iniciativa rolada e não acumula com outros bônus de iniciativa; mantenha o maior. Sem custo de Mana ou ação.",
+    limite: "Uma vez por combate, apenas um aliado diferente de você. Não se aplica depois da iniciativa rolada e não acumula com outros bônus de iniciativa; mantenha o maior. Sem custo de EN ou ação.",
     experimental: true,
   },
 };
@@ -581,7 +571,7 @@ type RascunhoFicha = {
   arquetipoImpeto?: ArquetipoImpeto | "";
   talentoArquetipo?: TalentoArquetipoId | "";
   nome: string;
-  classe: Classe;
+  classe?: PerfilLegadoTecnica; // campo de JSON anterior, ignorado em novas fichas
   historia: string;
   foto: string;
   ataqueBasico: { nome: string; descricao: string };
@@ -621,7 +611,9 @@ function validarFicha(valor: unknown): valor is RascunhoFicha {
     (dados.recursosImpeto === undefined || validarRecursosImpeto(dados.recursosImpeto)) &&
     (dados.periciasImpeto === undefined || validarPericiasImpeto(dados.periciasImpeto)) &&
     validarEscolhaT02(dados.arquetipoImpeto, dados.talentoArquetipo) &&
-    Object.prototype.hasOwnProperty.call(atributosPorClasse, dados.classe ?? "") &&
+    (dados.classe === undefined ||
+      (typeof dados.classe === "string" &&
+        ["Lutador", "Linha de Frente", "Conjurador"].includes(dados.classe))) &&
     typeof dados.nome === "string" &&
     typeof dados.historia === "string" &&
     typeof dados.foto === "string" &&
@@ -692,7 +684,6 @@ function App() {
       Boolean(rascunhoInicial?.nome.trim() || rascunhoInicial?.historia.trim())
   );
   const [nome, setNome] = useState(rascunhoInicial?.nome ?? "");
-  const [classe, setClasse] = useState<Classe>(rascunhoInicial?.classe ?? "Lutador");
   const [historia, setHistoria] = useState(rascunhoInicial?.historia ?? "");
   const [foto, setFoto] = useState(rascunhoInicial?.foto ?? "");
   const [abaAtiva, setAbaAtiva] = useState<AbaEditor>(normalizarAbaEditor(rascunhoInicial?.abaAtiva));
@@ -735,7 +726,6 @@ function App() {
       arquetipoImpeto,
       talentoArquetipo,
       nome,
-      classe,
       historia,
       foto,
       ataqueBasico,
@@ -747,12 +737,12 @@ function App() {
     } catch (erro) {
       console.warn("Não foi possível salvar o rascunho neste navegador.", erro);
     }
-  }, [mostrandoIdentidade, abaAtiva, elemento, atributosImpeto, recursosImpeto, periciasImpeto, arquetipoImpeto, talentoArquetipo, nome, classe, historia, foto, ataqueBasico, habilidades, passiva]);
+  }, [mostrandoIdentidade, abaAtiva, elemento, atributosImpeto, recursosImpeto, periciasImpeto, arquetipoImpeto, talentoArquetipo, nome, historia, foto, ataqueBasico, habilidades, passiva]);
 
 
   const exportarJson = () => {
     // Exporta os campos editáveis, sem depender de PDF ou das tabelas
-    // de atributos calculados a partir da classe.
+    // do registro atual, independentemente dos perfis antigos.
     const ficha: RascunhoFicha = {
       versao: 1,
       editorAberto: true,
@@ -764,7 +754,6 @@ function App() {
       arquetipoImpeto,
       talentoArquetipo,
       nome,
-      classe,
       historia,
       foto,
       ataqueBasico,
@@ -828,7 +817,6 @@ function App() {
       setArquetipoImpeto(ficha.arquetipoImpeto ?? "");
       setTalentoArquetipo(ficha.talentoArquetipo ?? "");
       setNome(ficha.nome);
-      setClasse(ficha.classe);
       setHistoria(ficha.historia);
       setFoto(ficha.foto);
       setAtaqueBasico({ ...ficha.ataqueBasico });
@@ -913,7 +901,6 @@ function App() {
   };
 
   const selecionado = elementos.find((item) => item.id === elemento)!;
-  const atributos = atributosPorClasse[classe];
   const regraPassiva = regrasPassivas[passiva.modelo];
   const habilidadeVinculada = habilidades[passiva.habilidadeVinculada];
   const vinculoPodeAcertar = habilidadeVinculada && [
@@ -976,13 +963,16 @@ function App() {
       await exportarFichaPdf({
         nome: nome.trim(),
         elemento,
-        classe,
+        classe: arquetipoImpeto || "Ímpeto RPG",
         historia,
         foto,
-        ...atributos,
+        hp: recursosCalculados.hp,
+        mana: recursosCalculados.energia,
+        ca: recursosCalculados.ca,
+        regeneracao: `+${recursosCalculados.regeneracao} EN/rodada`,
         ataqueBasico: {
           nome: ataqueBasico.nome,
-          dano: danoBasicoPorClasse[classe],
+          dano: recursosCalculados.ataque,
           descricao: ataqueBasico.descricao,
         },
         habilidades: habilidades.map((h) => {
@@ -992,8 +982,8 @@ function App() {
             categoria: regra.tipo,
             modelo: regra.nome,
             acao: regra.acao,
-            custo: custoDaTecnica(h.modelo, classe),
-            valor: valorDaTecnica(h.modelo, classe),
+            custo: custoDaTecnica(h.modelo),
+            valor: valorDaTecnica(h.modelo, recursosCalculados.ataque),
             rotuloValor: regra.rotuloValor,
             valorAdicional: regra.valorAdicional,
             rotuloAdicional: regra.rotuloAdicional,
@@ -1200,17 +1190,6 @@ function App() {
               onChange={(e) => setNome(e.target.value)}
             />
 
-            <label htmlFor="classe-personagem">Perfil de combate anterior (temporário)</label>
-            <select
-              id="classe-personagem"
-              value={classe}
-              onChange={(e) => setClasse(e.target.value as Classe)}
-            >
-              <option value="Lutador">Lutador</option>
-              <option value="Linha de Frente">Linha de Frente</option>
-              <option value="Conjurador">Conjurador</option>
-            </select>
-
             <label htmlFor="historia-personagem">História</label>
             <textarea
               id="historia-personagem"
@@ -1307,7 +1286,7 @@ function App() {
                   <p className="descricao-atributos-impeto">
                     Referência experimental do livro: valor base 8, teto 14 na criação e 28 PA
                     para distribuir. Custos por aumento: 9–12 = 1 PA; 13–14 = 2 PA.
-                    Estes atributos ainda não substituem os recursos de combate legados abaixo.
+                    Os recursos de combate são calculados pelos PR no painel seguinte.
                   </p>
                   <div className="grade-atributos-impeto">
                     {NOMES_ATRIBUTOS_IMPETO.map((nomeAtributo) => {
@@ -1333,7 +1312,7 @@ function App() {
                   </div>
                   <small className="aviso-impeto">
                     O orçamento de atributos e os recursos avançados da campanha Hexatombe: Avatar
-                    serão consolidados antes de substituir os valores antigos de combate.
+                    serão calibrados para dobradores experientes em uma etapa posterior.
                     A distribuição de PA já é salva automaticamente e incluída no JSON.
                   </small>
                 </section>
@@ -1352,7 +1331,7 @@ function App() {
                   <p className="descricao-recursos-impeto">
                     Referência introdutória do livro: 40 HP, 30 EN, CA Base 8, Ataque Base 2d6+2,
                     regeneração 0 e 20 PR. A escala avançada de Hexatombe: Avatar será calibrada
-                    separadamente; os valores antigos da ficha permanecem intactos abaixo.
+                    separadamente. Os valores mostrados na ficha são calculados pelos PR.
                   </p>
                   <div className="grade-recursos-impeto">
                     {([
@@ -1392,18 +1371,10 @@ function App() {
                     Os investimentos em PR são preservados no salvamento automático e no JSON.
                   </small>
                 </section>
-                <div className="atributos-ficha">
-                  <div className="atributo"><span>HP</span><strong>{atributos.hp}</strong></div>
-                  <div className="atributo"><span>Mana</span><strong>{atributos.mana}</strong></div>
-                  <div className="atributo"><span>CA</span><strong>{atributos.ca}</strong></div>
-                </div>
-                <p className="regeneracao">
-                  Regeneração: <strong>{atributos.regeneracao} por turno</strong>
-                </p>
             <section className="secao-combate">
               <div className="grupo-habilidade">
                 <h3>Ataque Básico</h3>
-                <p className="descricao-editor">Não consome Mana.</p>
+                <p className="descricao-editor">Não consome Energia (EN).</p>
 
                 <label htmlFor="ataque-nome">Nome do ataque</label>
                 <input
@@ -1419,9 +1390,9 @@ function App() {
                 />
 
                 <p>
-                  <strong>Dano básico:</strong> {danoBasicoPorClasse[classe]}
+                  <strong>Dano básico:</strong> {recursosCalculados.ataque}
                 </p>
-                <p>Custo: 0 Mana</p>
+                <p>Custo: 0 EN</p>
 
                 <label htmlFor="ataque-descricao">Descrição</label>
                 <textarea
@@ -1523,10 +1494,10 @@ function App() {
                 <section className="secao-combate">
               <h3 className="titulo-tecnicas">Habilidades Ativas</h3>
               <p className="descricao-editor">
-                Os valores de Mana, dano, cura, escudo e condições são definidos pelo tipo de
-                técnica e pela classe. Criar e encantar armas respeita o dano básico e
-                o limite de um buff por turno. A preparação de iniciativa só pode ser
-                usada antes do combate. A descrição não concede efeitos extras.
+                As técnicas desta seção ainda usam os modelos experimentais antigos
+                e serão atualizadas pelo construtor de habilidades do Ímpeto.
+                Os recursos e o ataque básico já usam PR; as técnicas não concedem
+                ações extras e a descrição narrativa não altera os efeitos.
               </p>
 
               {habilidades.map((habilidade, indice) => {
@@ -1551,8 +1522,8 @@ function App() {
                       </span>
                       <span className="resumo-habilidade-cabecalho">
                         <span className="etiqueta-tipo">{modelo.tipo}</span>
-                        <span className="etiqueta-mana">{custoDaTecnica(habilidade.modelo, classe)} Mana</span>
-                        <span className="etiqueta-valor">{valorDaTecnica(habilidade.modelo, classe)}</span>
+                        <span className="etiqueta-mana">{custoDaTecnica(habilidade.modelo)} EN</span>
+                        <span className="etiqueta-valor">{valorDaTecnica(habilidade.modelo, recursosCalculados.ataque)}</span>
                       </span>
                       <span className="icone-expandir" aria-hidden="true">{habilidadeAberta === indice ? "−" : "+"}</span>
                     </button>
@@ -1607,11 +1578,11 @@ function App() {
                     <p><strong>Momento de uso:</strong> {rotuloMomentoDeUso(modelo.acao)}</p>
                     <div className="linha-campos">
                       <div>
-                        <label htmlFor={`skill-${indice}-mana`}>Custo de Mana</label>
+                        <label htmlFor={`skill-${indice}-mana`}>Custo de EN</label>
                         <input
                           id={`skill-${indice}-mana`}
                           type="number"
-                          value={custoDaTecnica(habilidade.modelo, classe)}
+                          value={custoDaTecnica(habilidade.modelo)}
                           readOnly
                         />
                       </div>
@@ -1621,7 +1592,7 @@ function App() {
                         </label>
                         <input
                           id={`skill-${indice}-valor`}
-                          value={valorDaTecnica(habilidade.modelo, classe)}
+                          value={valorDaTecnica(habilidade.modelo, recursosCalculados.ataque)}
                           readOnly
                         />
                       </div>
@@ -1747,7 +1718,7 @@ function App() {
                   </span>
                   <span className="resumo-habilidade-cabecalho">
                     <span className="etiqueta-tipo">Passiva</span>
-                    <span className="etiqueta-mana">0 Mana</span>
+                    <span className="etiqueta-mana">0 EN</span>
                     <span className="etiqueta-valor">Sem ação</span>
                   </span>
                   <span className="icone-expandir" aria-hidden="true">
@@ -1831,7 +1802,7 @@ function App() {
                       <p><strong>Condição de ativação:</strong> {gatilhoPassiva}</p>
                       <p><strong>Efeito:</strong> {regraPassiva.efeito}</p>
                       <p><strong>Limites:</strong> {regraPassiva.limite}</p>
-                      <p><strong>Custo:</strong> 0 Mana · não consome ação.</p>
+                      <p><strong>Custo:</strong> 0 EN · não consome ação.</p>
                     </div>
 
                     <label htmlFor="passiva-descricao">Descrição narrativa</label>
@@ -1858,11 +1829,11 @@ function App() {
                 <div className="previa-introducao">
                   <span className="previa-sobretitulo">ARQUIVO ESPIRITUAL · REGISTRO DO PERSONAGEM</span>
                   <h2>Prévia do Personagem</h2>
-                  <p>Confira seu registro antes de exportar. Os valores de combate são calculados pelo sistema.</p>
+                  <p>Confira seu registro antes de exportar. Recursos e ataque básico são calculados pelos PR.</p>
                   <button className="botao-gerar-pdf" type="button" onClick={gerarPdf} disabled={exportandoPdf}>
                     {exportandoPdf ? "Gerando PDF..." : "📜 Gerar ficha em PDF"}
                   </button>
-                  <small className="pdf-ajuda">A4 • Pergaminho espiritual • detalhes e história em páginas adicionais</small>
+                  <small className="pdf-ajuda">A4 • Layout antigo do PDF; novos atributos, talentos e perícias entrarão depois</small>
                 </div>
 
                 <section className="previa-identidade" aria-label="Identidade do personagem">
@@ -1881,7 +1852,6 @@ function App() {
                     <h3>{nome.trim() || "Personagem sem nome"}</h3>
                     <div className="previa-chips">
                       <span className="previa-chip-elemento">{selecionado.simbolo} {selecionado.nome}</span>
-                      <span>{classe}</span>
                       {arquetipoImpeto && <span>{arquetipoImpeto}</span>}
                     </div>
                     <div className="previa-historia">
@@ -1927,7 +1897,7 @@ function App() {
                     <p>{NOMES_ATRIBUTOS_IMPETO.map((chave) =>
                       `${chave}: ${atributosImpeto[chave]}`).join(" · ")}</p>
                     <small>PA: {paGastos} usados / {PA_INICIAL_REFERENCIA} disponíveis.
-                      Dados de combate abaixo ainda usam a escala anterior durante a adaptação.</small>
+                      Os recursos de combate são determinados pelos PR.</small>
                   </div>
 
                   <div className="previa-recursos-impeto">
@@ -1938,27 +1908,7 @@ function App() {
                       Regeneração +{recursosCalculados.regeneracao}/rodada
                     </p>
                     <small>{prGastos} PR gastos de {PR_INICIAL_REFERENCIA}.
-                      A escala antiga mostrada abaixo ainda não foi substituída.</small>
-                  </div>
-                  <div className="previa-atributos">
-                    <div className="previa-atributo previa-hp">
-                      <span className="previa-estat-icone" aria-hidden="true">♥</span>
-                      <span>Vida · HP</span>
-                      <strong>{atributos.hp}</strong>
-                    </div>
-                    <div className="previa-atributo previa-mana">
-                      <span className="previa-estat-icone" aria-hidden="true">✧</span>
-                      <span>Mana / Foco</span>
-                      <strong>{atributos.mana}</strong>
-                    </div>
-                    <div className="previa-atributo previa-ca">
-                      <span className="previa-estat-icone" aria-hidden="true">⬡</span>
-                      <span>Defesa · CA</span>
-                      <strong>{atributos.ca}</strong>
-                    </div>
-                  </div>
-                  <div className="previa-regen">
-                    Regeneração por turno <strong>{atributos.regeneracao} de {elemento === "neutro" ? "Foco" : "Mana"}</strong>
+                      Configuração introdutória em teste; escala Avatar avançada ainda será calibrada.</small>
                   </div>
                   <div className="previa-ataque">
                     <div>
@@ -1967,8 +1917,8 @@ function App() {
                       {ataqueBasico.descricao.trim() && <p>{ataqueBasico.descricao}</p>}
                     </div>
                     <div className="previa-ataque-badges">
-                      <span>{danoBasicoPorClasse[classe]} dano</span>
-                      <span>0 Mana</span>
+                      <span>{recursosCalculados.ataque} dano</span>
+                      <span>0 EN</span>
                     </div>
                   </div>
                 </section>
@@ -2016,12 +1966,12 @@ function App() {
                           </div>
                           <div className="previa-chips previa-tecnica-chips">
                             <span>{modelo.tipo}</span>
-                            <span>{custoDaTecnica(habilidade.modelo, classe)} Mana</span>
+                            <span>{custoDaTecnica(habilidade.modelo)} EN</span>
                             <span>{rotuloMomentoDeUso(modelo.acao)}</span>
                           </div>
                           <p className="previa-tecnica-efeito">
                             <span>{modelo.rotuloValor}</span>
-                            <strong>{valorDaTecnica(habilidade.modelo, classe)}</strong>
+                            <strong>{valorDaTecnica(habilidade.modelo, recursosCalculados.ataque)}</strong>
                             {modelo.valorAdicional && <em> + {modelo.valorAdicional}</em>}
                           </p>
                           {modelo.experimental && <span className="previa-experimental">Em playtest</span>}
@@ -2064,7 +2014,7 @@ function App() {
                   <div className="previa-chips">
                     <span>{regraPassiva.nome}</span>
                     <span>{regraPassiva.categoria}</span>
-                    <span>0 Mana</span>
+                    <span>0 EN</span>
                     <span>Sem ação</span>
                   </div>
                   <p><strong>Ativação:</strong> {gatilhoPassiva}</p>
