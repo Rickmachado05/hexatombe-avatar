@@ -1451,7 +1451,7 @@ function App() {
                     </p>
                   </div>
                   <p className="descricao-atributos-impeto">
-                    Referência experimental do livro: valor base 8, teto 14 na criação e 28 PA
+                    Valores provisórios para Hexatombe: Avatar: base 8, teto 14 na criação e 28 PA
                     para distribuir. Custos por aumento: 9–12 = 1 PA; 13–14 = 2 PA.
                     Os recursos de combate são calculados pelos PR no painel seguinte.
                   </p>
@@ -1496,7 +1496,7 @@ function App() {
                     </p>
                   </div>
                   <p className="descricao-recursos-impeto">
-                    Referência introdutória do livro: 40 HP, 30 EN, CA Base 8, Ataque Base 2d6+2,
+                    Base provisória em calibração para Avatar: 40 HP, 30 EN, CA Base 8, Ataque Base 2d6+2,
                     regeneração 0 e 20 PR. A escala avançada de Hexatombe: Avatar será calibrada
                     separadamente. Os valores mostrados na ficha são calculados pelos PR.
                   </p>
@@ -1751,14 +1751,14 @@ function App() {
                   </div>
 
                   <div className="previa-recursos-impeto">
-                    <strong>Ímpeto RPG · Recursos em PR (referência introdutória)</strong>
+                    <strong>Hexatombe: Avatar · Recursos em PR (calibração)</strong>
                     <p>
                       HP {recursosCalculados.hp} · EN {recursosCalculados.energia} ·
                       CA Base {recursosCalculados.ca} · Ataque {recursosCalculados.ataque} ·
                       Regeneração +{recursosCalculados.regeneracao}/rodada
                     </p>
                     <small>{prGastos} PR gastos de {PR_INICIAL_REFERENCIA}.
-                      Configuração introdutória em teste; escala Avatar avançada ainda será calibrada.</small>
+                      Os valores base e os orçamentos PA, PR e PT ainda serão calibrados para a escala avançada de Avatar.</small>
                   </div>
                   <div className="previa-ataque">
                     <div>
