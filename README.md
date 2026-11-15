@@ -15,7 +15,8 @@ Sem instalação: crie seu personagem no navegador, exporte o pergaminho em PDF 
 - **Identidade:** nome, elemento, classe, retrato e história do personagem.
 - **Cinco identidades elementais:** Água, Terra, Fogo, Ar e Não Dobrador, com temas visuais próprios.
 - **Classes:** Lutador, Linha de Frente e Conjurador.
-- **Combate:** atributos por classe, ataque básico, pontos de vida, recurso de técnicas (Mana/Foco), CA e regeneração.
+- **Combate:** atributos por classe, ataque básico, pontos de vida, recurso de técnicas (Mana/Foco), CA e regeneração (estrutura anterior em processo de adaptação).
+- **Ímpeto 1.0 (primeira etapa):** oito atributos universais com base 8, teto 14, orçamento inicial de referência de 28 PA e preços progressivos. Distribuição persistida no navegador e incluída nos arquivos JSON; nesta etapa, não altera os recursos legados nem o PDF.
 - **Técnicas:** cinco habilidades ativas personalizáveis a partir de modelos com custos, efeitos e limitações mecânicas.
 - **Passiva:** personalização narrativa com modelos de ativação e efeito.
 - **Prévia:** consulta da ficha montada antes da exportação.
@@ -62,7 +63,7 @@ npm run lint
 
 1. Escolha o elemento do personagem.
 2. Preencha a identidade, selecione a classe e adicione um retrato, se desejar.
-3. Consulte os atributos na aba **Combate**.
+3. Na aba **Combate**, distribua os **28 PA de referência** entre os oito atributos do Ímpeto. O cálculo de HP/Energia/CA ainda segue o modelo anterior nesta etapa de migração.
 4. Personalize as cinco técnicas e a habilidade passiva.
 5. Revise o resultado em **Prévia**.
 6. Clique em **Gerar ficha em PDF** para exportar o pergaminho ou em **Exportar JSON** para salvar uma cópia editável.
