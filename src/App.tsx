@@ -17,6 +17,7 @@ import "./HexatombeTemasElementais.css";
 import "./HexatombeCombate.css";
 import "./HexatombeHabilidades.css";
 import "./HexatombePrevia.css";
+import "./HexatombeMobile.css";
 
 type Elemento = "agua" | "terra" | "fogo" | "ar" | "neutro";
 type PerfilLegadoTecnica = "Lutador" | "Linha de Frente" | "Conjurador";
@@ -1197,6 +1198,13 @@ function App() {
     }
   };
 
+  const indiceEtapaAtual = abasEditor.findIndex((aba) => aba.id === abaAtiva);
+  const navegarParaAba = (destino: AbaEditor) => {
+    setAbaAtiva(destino);
+    // Em todas as telas, trocar a etapa sempre começa pelo topo.
+    window.requestAnimationFrame(() => window.scrollTo(0, 0));
+  };
+
   return (
     <main className={`app tema-${elemento}`}>
       <input
@@ -1275,6 +1283,31 @@ function App() {
           </div>
         ) : (
           <section className="editor-identidade editor-com-abas">
+            <div className="navegacao-etapas-mobile" aria-label="Navegação por etapas">
+              <div className="navegacao-etapas-mobile-topo">
+                <div>
+                  <span className="mobile-etapa-contador">Etapa {indiceEtapaAtual + 1} de {abasEditor.length}</span>
+                  <strong className="mobile-etapa-titulo">{abasEditor[indiceEtapaAtual].nome}</strong>
+                </div>
+                <span className="mobile-etapa-percentual">{Math.round((indiceEtapaAtual + 1) / abasEditor.length * 100)}%</span>
+              </div>
+              <div className="mobile-etapas-progresso" role="progressbar"
+                aria-label="Progresso nas etapas da ficha"
+                aria-valuemin={0} aria-valuemax={abasEditor.length}
+                aria-valuenow={indiceEtapaAtual + 1}>
+                {abasEditor.map((etapa, indice) => (
+                  <span key={etapa.id} aria-hidden="true"
+                    className={indice <= indiceEtapaAtual ? "concluida" : ""}/>
+                ))}
+              </div>
+              <label htmlFor="selecionar-etapa-mobile">Ir para outra etapa</label>
+              <select id="selecionar-etapa-mobile" value={abaAtiva}
+                onChange={(evento) => navegarParaAba(evento.target.value as AbaEditor)}>
+                {abasEditor.map((aba, indice) => (
+                  <option key={aba.id} value={aba.id}>{indice + 1}. {aba.nome}</option>
+                ))}
+              </select>
+            </div>
             <nav className="abas-editor" aria-label="Etapas da ficha">
               {abasEditor.map((aba) => (
                 <button
@@ -1283,7 +1316,7 @@ function App() {
                   id={`aba-${aba.id}`}
                   className={`aba-editor ${abaAtiva === aba.id ? "selecionada" : ""}`}
                   aria-current={abaAtiva === aba.id ? "step" : undefined}
-                  onClick={() => setAbaAtiva(aba.id)}
+                  onClick={() => navegarParaAba(aba.id)}
                 >
                   {aba.nome}
                 </button>
@@ -1807,7 +1840,7 @@ function App() {
                       <strong>História</strong>
                       <p>{historia.trim() || "A história deste personagem ainda não foi escrita."}</p>
                     </div>
-                    <button className="previa-editar" type="button" onClick={() => setAbaAtiva("identidade")}>
+                    <button className="previa-editar" type="button" onClick={() => navegarParaAba("identidade")}>
                       Editar identidade
                     </button>
                   </div>
@@ -1817,7 +1850,7 @@ function App() {
                 <section className="previa-secao" aria-label="Arquétipo Ímpeto">
                   <div className="previa-secao-topo">
                     <h3>Arquétipo e talento</h3>
-                    <button className="previa-editar" type="button" onClick={() => setAbaAtiva("arquetipo")}>
+                    <button className="previa-editar" type="button" onClick={() => navegarParaAba("arquetipo")}>
                       Editar arquétipo
                     </button>
                   </div>
@@ -1846,7 +1879,7 @@ function App() {
                 <section className="previa-secao" aria-labelledby="previa-titulo-combate">
                   <div className="previa-secao-topo">
                     <h3 id="previa-titulo-combate">Atributos e recursos de combate</h3>
-                    <button className="previa-editar" type="button" onClick={() => setAbaAtiva("atributos")}>
+                    <button className="previa-editar" type="button" onClick={() => navegarParaAba("atributos")}>
                       Editar atributos
                     </button>
                   </div>
@@ -1902,7 +1935,7 @@ function App() {
                 <section className="previa-secao previa-pericias-impeto" aria-label="Perícias do Ímpeto">
                   <div className="previa-secao-topo">
                     <h3>Perícias</h3>
-                    <button className="previa-editar" type="button" onClick={() => setAbaAtiva("pericias")}>
+                    <button className="previa-editar" type="button" onClick={() => navegarParaAba("pericias")}>
                       Editar perícias
                     </button>
                   </div>
@@ -1921,9 +1954,9 @@ function App() {
                   <ResumoHabilidadesImpeto perfil={perfilHabilidades} ativas={ativasImpeto}
                     passiva={passivaImpeto} exploracao={exploracaoImpeto} />
                   <button className="previa-editar" type="button"
-                    onClick={() => setAbaAtiva("habilidades")}>Editar habilidades</button>
+                    onClick={() => navegarParaAba("habilidades")}>Editar habilidades</button>
                   <button className="previa-editar" type="button"
-                    onClick={() => setAbaAtiva("exploracao")}>Editar exploração</button>
+                    onClick={() => navegarParaAba("exploracao")}>Editar exploração</button>
                 </section>
                 <p className="previa-rodape">Este resumo é para consulta no editor. Gere um PDF para impressão ou exporte um JSON para continuar a edição depois.</p>
               </section>
@@ -1933,7 +1966,7 @@ function App() {
               {abaAtiva !== "identidade" && (
                 <button
                   type="button"
-                  onClick={() => setAbaAtiva(abasEditor[abasEditor.findIndex((aba) => aba.id === abaAtiva) - 1].id)}
+                  onClick={() => navegarParaAba(abasEditor[indiceEtapaAtual - 1].id)}
                 >
                   ← Anterior
                 </button>
@@ -1942,14 +1975,7 @@ function App() {
                 <button
                   type="button"
                   className="proxima-aba"
-                  onClick={() => {
-                    const indiceAtual = abasEditor.findIndex((aba) => aba.id === abaAtiva);
-                    const proxima = abasEditor[indiceAtual + 1];
-                    if (!proxima) return;
-                    setAbaAtiva(proxima.id);
-                    // Depois da troca de etapa, voltar ao topo da página.
-                    window.requestAnimationFrame(() => window.scrollTo(0, 0));
-                  }}
+                  onClick={() => navegarParaAba(abasEditor[indiceEtapaAtual + 1].id)}
                 >
                   Próxima etapa →
                 </button>
