@@ -336,3 +336,115 @@
     align-items: flex-start;
   }
 }
+
+
+/* Ímpeto RPG T02 — arquétipo separado do antigo perfil de combate. */
+.app .editor-com-abas .painel-arquetipo-impeto {
+  margin: 4px 0 26px;
+  padding: clamp(14px, 2.2vw, 23px);
+  border: 1px solid rgba(207, 168, 114, .43);
+  border-radius: 15px;
+  background: linear-gradient(140deg, rgba(24, 34, 50, .97), rgba(9, 17, 30, .97));
+}
+.app .editor-com-abas .cabecalho-arquetipo-impeto h3 {
+  margin: 5px 0 9px;
+  font-size: clamp(1.16rem, 2vw, 1.5rem);
+  color: #f0dbb5;
+}
+.app .editor-com-abas .cabecalho-arquetipo-impeto p,
+.app .editor-com-abas .nota-talento-impeto,
+.app .editor-com-abas .alerta-talento-impeto {
+  margin: 9px 0 15px;
+  color: #c0ccda;
+  font: .84rem/1.6 "Segoe UI", sans-serif;
+}
+.app .editor-com-abas .painel-arquetipo-impeto > label {
+  display: block;
+  margin: 14px 0 7px;
+  color: #e9d8b8;
+  font-size: .9rem;
+  font-weight: 600;
+}
+.app .editor-com-abas .painel-arquetipo-impeto > select {
+  display: block;
+  width: 100%;
+  max-width: 650px;
+  min-height: 43px;
+  padding: 9px 12px;
+  border: 1px solid rgba(211, 170, 112, .4);
+  border-radius: 9px;
+  color: #f2e6d0;
+  background: #101b2d;
+}
+.app .editor-com-abas .grupo-talentos-impeto {
+  display: grid;
+  gap: 10px;
+  margin: 20px 0 8px;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.app .editor-com-abas .grupo-talentos-impeto legend {
+  padding: 0 0 12px;
+  color: #e5c99e;
+  font-size: .91rem;
+  font-weight: 700;
+}
+.app .editor-com-abas .cartao-talento-impeto {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(188, 157, 111, .27);
+  border-radius: 10px;
+  background: rgba(8, 15, 27, .8);
+  cursor: pointer;
+}
+.app .editor-com-abas .cartao-talento-impeto.selecionado {
+  border-color: var(--elemento);
+  background: linear-gradient(120deg, var(--brilho), rgba(15, 25, 40, .98));
+}
+.app .editor-com-abas .cartao-talento-impeto input {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  accent-color: var(--elemento);
+}
+.app .editor-com-abas .cartao-talento-impeto strong {
+  display: block;
+  color: #f0dec1;
+  font-size: .91rem;
+  margin-bottom: 4px;
+}
+.app .editor-com-abas .cartao-talento-impeto small {
+  display: block;
+  color: #bdcad5;
+  font-size: .81rem;
+  line-height: 1.55;
+}
+.app .editor-com-abas .alerta-talento-impeto {
+  color: #e9b88d;
+  font-weight: 600;
+}
+.app .editor-com-abas .previa-arquetipo-impeto {
+  margin: 0 0 14px;
+  padding: 13px 15px;
+  border: 1px solid rgba(205, 168, 112, .3);
+  border-radius: 9px;
+  color: #ead7b1;
+  background: rgba(14, 24, 39, .8);
+}
+.app .editor-com-abas .previa-arquetipo-impeto p {
+  color: #d6dee7;
+  margin: 8px 0;
+  line-height: 1.55;
+  font-size: .84rem;
+}
+.app .editor-com-abas .previa-arquetipo-impeto small {
+  display: block;
+  margin-top: 6px;
+  color: #bba883;
+  font-size: .76rem;
+  line-height: 1.5;
+}
