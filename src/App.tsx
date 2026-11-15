@@ -1945,7 +1945,14 @@ function App() {
                 <button
                   type="button"
                   className="proxima-aba"
-                  onClick={() => setAbaAtiva(abasEditor[abasEditor.findIndex((aba) => aba.id === abaAtiva) + 1].id)}
+                  onClick={() => {
+                    const indiceAtual = abasEditor.findIndex((aba) => aba.id === abaAtiva);
+                    const proxima = abasEditor[indiceAtual + 1];
+                    if (!proxima) return;
+                    setAbaAtiva(proxima.id);
+                    // Depois da troca de etapa, voltar ao topo da página.
+                    window.requestAnimationFrame(() => window.scrollTo(0, 0));
+                  }}
                 >
                   Próxima etapa →
                 </button>
