@@ -341,7 +341,16 @@ const NOMES_ATRIBUTOS_IMPETO: NomeAtributoImpeto[] = [
   "Força", "Agilidade", "Destreza", "Vigor",
   "Intelecto", "Percepção", "Vontade", "Presença",
 ];
-const PA_INICIAL_REFERENCIA = 28;
+// Escala única de Hexatombe: Avatar. Candidata A01 para playtest com dobradores experientes.
+const ESCALA_AVATAR = {
+  versao: "piloto-a01" as const,
+  hpBase: 130,
+  energiaBase: 120,
+  pa: 32,
+  pr: 20,
+  pt: 6,
+};
+const PA_INICIAL_REFERENCIA = ESCALA_AVATAR.pa;
 const ATRIBUTO_BASE_REFERENCIA = 8;
 const ATRIBUTO_TETO_REFERENCIA = 14;
 const ATRIBUTOS_PADRAO_IMPETO: AtributosImpeto = {
@@ -495,7 +504,7 @@ type NomePericiaImpeto = (typeof GRUPOS_PERICIAS_IMPETO)[number]["pericias"][num
 type GrauPericiaImpeto = 0 | 1 | 2;
 type PericiasImpeto = Record<NomePericiaImpeto, GrauPericiaImpeto>;
 
-const PT_INICIAL_REFERENCIA = 4;
+const PT_INICIAL_REFERENCIA = ESCALA_AVATAR.pt;
 const PERICIAS_PADRAO_IMPETO: PericiasImpeto = {
   Atletismo: 0, Acrobacia: 0, Furtividade: 0, "Precisão Manual": 0,
   Atenção: 0, Investigação: 0, Sobrevivência: 0, Condução: 0,
@@ -538,7 +547,7 @@ type RecursosImpeto = {
   regeneracao: number; // níveis adquiridos: 0, 1 ou 2
 };
 
-const PR_INICIAL_REFERENCIA = 20;
+const PR_INICIAL_REFERENCIA = ESCALA_AVATAR.pr;
 const CUSTOS_CA_PR = [0, 1, 3, 6, 10, 15] as const;
 const CUSTOS_ATAQUE_PR = [0, 5, 13] as const;
 const CUSTOS_REGENERACAO_PR = [0, 3, 9] as const;
@@ -570,8 +579,8 @@ function validarRecursosImpeto(valor: unknown): valor is RecursosImpeto {
 
 function valorRecursosImpeto(recursos: RecursosImpeto, derivacao: DerivacaoD01Tipo) {
   return {
-    hp: 40 + 3 * recursos.hp + (derivacao === "resistencia" ? 3 : 0),
-    energia: 30 + 5 * recursos.energia + (derivacao === "reserva" ? 5 : 0),
+    hp: ESCALA_AVATAR.hpBase + 3 * recursos.hp + (derivacao === "resistencia" ? 3 : 0),
+    energia: ESCALA_AVATAR.energiaBase + 5 * recursos.energia + (derivacao === "reserva" ? 5 : 0),
     ca: recursos.ca,
     ataque: `${2 + recursos.ataqueDados}d6+${2 + (derivacao === "potencia" ? 1 : 0)}`,
     regeneracao: recursos.regeneracao,
@@ -626,6 +635,7 @@ function validarVantagemV01(valor: unknown): boolean {
 
 type RascunhoFicha = {
   versao: 1;
+  escalaAvatar?: typeof ESCALA_AVATAR.versao; // ausente em JSONs anteriores à A01
   // Etapa visual opcional para manter compatibilidade com rascunhos anteriores.
   editorAberto?: boolean;
   abaAtiva?: AbaEditor | "combate";
@@ -678,6 +688,7 @@ function validarFicha(valor: unknown): valor is RascunhoFicha {
   };
 
   return dados.versao === 1 &&
+    (dados.escalaAvatar === undefined || dados.escalaAvatar === ESCALA_AVATAR.versao) &&
     (dados.editorAberto === undefined || typeof dados.editorAberto === "boolean") &&
     (dados.abaAtiva === undefined || dados.abaAtiva === "combate" || abasEditor.some((aba) => aba.id === dados.abaAtiva)) &&
     elementos.some((item) => item.id === dados.elemento) &&
@@ -831,6 +842,7 @@ function App() {
   useEffect(() => {
     const rascunho: RascunhoFicha = {
       versao: 1,
+      escalaAvatar: ESCALA_AVATAR.versao,
       editorAberto: mostrandoIdentidade,
       abaAtiva,
       elemento,
@@ -865,6 +877,7 @@ function App() {
     // do registro atual, independentemente dos perfis antigos.
     const ficha: RascunhoFicha = {
       versao: 1,
+      escalaAvatar: ESCALA_AVATAR.versao,
       editorAberto: true,
       abaAtiva,
       elemento,
@@ -932,7 +945,11 @@ function App() {
         return;
       }
 
-      if (!window.confirm("Importar esta ficha substituirá o rascunho que está em edição neste navegador. Deseja continuar?")) {
+      const avisoEscala = ficha.escalaAvatar === ESCALA_AVATAR.versao
+        ? ""
+        : "\n\nEste arquivo usa uma escala anterior. HP e EN serão recalculados na escala Avatar A01 (base 130 HP/120 EN).";
+      if (!window.confirm("Importar esta ficha substituirá o rascunho atual." +
+        avisoEscala + "\n\nDeseja continuar?")) {
         return;
       }
 
@@ -1489,6 +1506,14 @@ function App() {
             {abaAtiva === "atributos" && (
               <section className="conteudo-aba" aria-labelledby="aba-atributos">
                 <h2>Atributos</h2>
+                <div className="resumo-escala-avatar" role="note">
+                  <strong>Hexatombe: Avatar · Escala experiente A01</strong>
+                  <p>{ESCALA_AVATAR.hpBase} HP base · {ESCALA_AVATAR.energiaBase} EN base ·
+                    {PA_INICIAL_REFERENCIA} PA · {PR_INICIAL_REFERENCIA} PR ·
+                    {PT_INICIAL_REFERENCIA} PT</p>
+                  <small>Configuração-piloto da campanha, ainda não homologada.
+                    As fichas antigas usam automaticamente estes novos valores base ao serem abertas.</small>
+                </div>
 
                 <section className="painel-atributos-impeto" aria-label="Oito atributos do Ímpeto RPG">
                   <div className="painel-impeto-topo">
@@ -1502,7 +1527,7 @@ function App() {
                     </p>
                   </div>
                   <p className="descricao-atributos-impeto">
-                    Valores provisórios para Hexatombe: Avatar: base 8, teto 14 na criação e 28 PA
+                    Escala Avatar A01 (playtest): atributos base 8, teto 14 na criação e {PA_INICIAL_REFERENCIA} PA
                     para distribuir. Custos por aumento: 9–12 = 1 PA; 13–14 = 2 PA.
                     Os recursos de combate são calculados pelos PR no painel seguinte.
                   </p>
@@ -1529,8 +1554,7 @@ function App() {
                     })}
                   </div>
                   <small className="aviso-impeto">
-                    O orçamento de atributos e os recursos avançados da campanha Hexatombe: Avatar
-                    serão calibrados para dobradores experientes em uma etapa posterior.
+                    A01 é uma proposta de playtest para dobradores experientes, não uma escala homologada.
                     A distribuição de PA já é salva automaticamente e incluída no JSON.
                   </small>
                 </section>
@@ -1608,9 +1632,9 @@ function App() {
                     </p>
                   </div>
                   <p className="descricao-recursos-impeto">
-                    Base provisória em calibração para Avatar: 40 HP, 30 EN, CA Base 8, Ataque Base 2d6+2,
-                    regeneração 0 e 20 PR. A escala avançada de Hexatombe: Avatar será calibrada
-                    separadamente. Os valores mostrados na ficha são calculados pelos PR.
+                    Escala experiente A01 de Avatar (playtest): {ESCALA_AVATAR.hpBase} HP, {ESCALA_AVATAR.energiaBase} EN,
+                    CA Base 8, Ataque Base 2d6+2, regeneração 0 e {PR_INICIAL_REFERENCIA} PR.
+                    Os recursos são calculados com PR e derivação D01; sem perfil de combate fixo.
                   </p>
                   <div className="grade-recursos-impeto">
                     {([
@@ -1754,8 +1778,8 @@ function App() {
                   <p className="nota-pericias-impeto">
                     Testes: 1d20 + atributo adequado + bônus da perícia.
                     A combinação depende da situação, não de uma associação fixa.
-                    Os 4 PT são a referência inicial do livro e poderão ser adaptados
-                    à escala de personagens experientes da campanha.
+                    Os {PT_INICIAL_REFERENCIA} PT são a proposta A01 de Hexatombe: Avatar.
+                    A distribuição será revisada após os playtests da campanha.
                     Esta distribuição já é salva no navegador e no JSON.
                   </p>
                 </div>
@@ -1886,7 +1910,7 @@ function App() {
                       Regeneração +{recursosCalculados.regeneracao}/rodada
                     </p>
                     <small>{prGastos} PR gastos de {PR_INICIAL_REFERENCIA}.
-                      Os valores base e os orçamentos PA, PR e PT ainda serão calibrados para a escala avançada de Avatar.</small>
+                      Escala única Avatar A01 — valores de playtest sujeitos a revisão.</small>
                   </div>
                   <div className="previa-ataque">
                     <div>
