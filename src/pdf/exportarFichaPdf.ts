@@ -596,15 +596,16 @@ export async function exportarFichaPdf(ficha: FichaPDF): Promise<void> {
     text(a.nome, xx + 2, yy + 4.5, 8.1, paleta.escura, true);
     text(String(a.valor), xx + anchoAtributo - 11, yy + 10.8, 12, DARK, true);
   });
+  // Contador abaixo dos oito cartões: nunca sobrepor a segunda linha de atributos.
   text(`PA: ${ficha.orcamentos.pa.usados} / ${ficha.orcamentos.pa.total} usados`,
-    M + 3, 80.3, 8.8, DARK);
+    M + 3, 84.0, 8.8, DARK);
 
-  sectionHeading("Dezesseis perícias", 84);
+  sectionHeading("Dezesseis perícias", 89);
   const periciaLargura = (W - 2 * M - 5) / 2;
   ficha.pericias.slice(0, 16).forEach((pericia, i) => {
     const col = Math.floor(i / 8), linha = i % 8;
     const xx = M + col * (periciaLargura + 5);
-    const yy = 96 + linha * 7.8;
+    const yy = 100 + linha * 7.8;
     pdf.setFillColor(linha % 2 ? 249 : 243, linha % 2 ? 237 : 229, 211);
     pdf.setDrawColor(...paleta.clara);
     pdf.roundedRect(xx, yy, periciaLargura, 7.2, .6, .6, "FD");
@@ -614,7 +615,7 @@ export async function exportarFichaPdf(ficha: FichaPDF): Promise<void> {
     text(clampLines(pdf, status, 36, 1)[0], xx + periciaLargura - 38, yy + 4.65, 7.3, paleta.escura);
   });
 
-  sectionHeading("Orçamentos e investimentos", 163);
+  sectionHeading("Orçamentos e investimentos", 165);
   const pontos = [
     `PA ${ficha.orcamentos.pa.usados}/${ficha.orcamentos.pa.total}`,
     `PR ${ficha.orcamentos.pr.usados}/${ficha.orcamentos.pr.total}`,
@@ -624,13 +625,13 @@ export async function exportarFichaPdf(ficha: FichaPDF): Promise<void> {
   ];
   pdf.setFillColor(251, 240, 215);
   pdf.setDrawColor(...paleta.cor);
-  pdf.roundedRect(M, 174, W - 2 * M, 20, 1.3, 1.3, "FD");
-  text(pontos.join("     ·     "), M + 4, 181.6, 9, DARK, true);
+  pdf.roundedRect(M, 176, W - 2 * M, 20, 1.3, 1.3, "FD");
+  text(pontos.join("     ·     "), M + 4, 183.6, 9, DARK, true);
   const inv = ficha.investimento;
   text(`Investimentos: HP ${inv.hp} PR · EN ${inv.energia} PR · CA ${inv.ca} · Ataque +${inv.ataqueDados}d6 · Regen +${inv.regeneracao}`,
-    M + 4, 189.1, 8.0, paleta.escura);
+    M + 4, 191.1, 8.0, paleta.escura);
 
-  sectionHeading("Escolhas do personagem", 198);
+  sectionHeading("Escolhas do personagem", 200);
   const quadroEscolha = (yy: number, rotulo: string, titulo: string, detalhe: string) => {
     pdf.setFillColor(250, 240, 216);
     pdf.setDrawColor(...paleta.cor);
@@ -641,13 +642,13 @@ export async function exportarFichaPdf(ficha: FichaPDF): Promise<void> {
     text(clampLines(pdf, titulo, W - 2 * M - 9, 1)[0], M + 4, yy + 12.5, 10, DARK, true);
     text(clampLines(pdf, detalhe, W - 2 * M - 9, 1)[0], M + 4, yy + 18.5, 8.5, DARK);
   };
-  quadroEscolha(210, "Talento de arquétipo",
+  quadroEscolha(211, "Talento de arquétipo",
     ficha.talento?.nome || "Nenhum talento escolhido",
     ficha.talento?.efeito || "Uma escolha opcional do arquétipo T02.");
-  quadroEscolha(232.5, "Vantagem universal V01",
+  quadroEscolha(233.5, "Vantagem universal V01",
     ficha.vantagem?.nome || "Nenhuma vantagem escolhida",
     ficha.vantagem?.beneficio || "Sem vantagem V01.");
-  quadroEscolha(255, "Derivação D01",
+  quadroEscolha(256, "Derivação D01",
     ficha.derivacao ? `${ficha.derivacao.nome} · ${ficha.derivacao.atributo}` : "Nenhuma derivação escolhida",
     ficha.derivacao?.beneficio || "Requer um atributo 12+.");
   
@@ -669,7 +670,6 @@ export async function exportarFichaPdf(ficha: FichaPDF): Promise<void> {
     if (hasText(ativa.descricao)) campos.push({ rotulo: "Descrição", valor: ativa.descricao });
     if (hasText(ativa.limites)) campos.push({ rotulo: "Limites", valor: ativa.limites });
     if (ativa.empurraoAdicional) campos.push({ rotulo: "Adicional", valor: "Empurrão adicional comprado." });
-    if (ativa.referenciaAntiga) campos.push({ rotulo: "Referência", valor: ativa.referenciaAntiga });
     cartaoDetalhado(hasText(ativa.nome) || `Habilidade ${i + 1}`,
       `${nomeEfeito(ativa.efeito)} · ${custoEnergia(ativa)} · ${custoPC(ativa)} PC`, campos, i + 1);
   });
@@ -681,7 +681,6 @@ export async function exportarFichaPdf(ficha: FichaPDF): Promise<void> {
   if (hasText(ficha.passiva.gatilho)) passivaCampos.push({ rotulo: "Gatilho", valor: ficha.passiva.gatilho });
   if (hasText(ficha.passiva.descricao)) passivaCampos.push({ rotulo: "Descrição", valor: ficha.passiva.descricao });
   if (hasText(ficha.passiva.limites)) passivaCampos.push({ rotulo: "Limites", valor: ficha.passiva.limites });
-  if (ficha.passiva.referenciaAntiga) passivaCampos.push({ rotulo: "Referência", valor: ficha.passiva.referenciaAntiga });
   cartaoDetalhado(hasText(ficha.passiva.nome) || "Passiva não definida",
     "PASSIVA · Automática · Não ocupa ação principal", passivaCampos);
 
