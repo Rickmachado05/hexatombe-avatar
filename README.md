@@ -16,7 +16,7 @@ Sem instalação: crie seu personagem no navegador, exporte o pergaminho em PDF 
 - **Cinco identidades elementais:** Água, Terra, Fogo, Ar e Não Dobrador, com temas visuais próprios.
 - **Classes:** Lutador, Linha de Frente e Conjurador.
 - **Combate:** atributos por classe, ataque básico, pontos de vida, recurso de técnicas (Mana/Foco), CA e regeneração (estrutura anterior em processo de adaptação).
-- **Ímpeto 1.0 (migração incremental):** editor dividido em Identidade, Arquétipo, Atributos, Perícias, Habilidades e Prévia. Oito atributos universais com base 8, teto 14 e 28 PA de referência. Quatro arquétipos T02 com três talentos cada, separados das habilidades e da passiva. As 16 perícias universais são agrupadas em Físicas, Exploração, Conhecimento e Sociais, com 4 PT de referência (Treinado +2 por 1 PT, Especialista +4 por 2 PT totais). Tudo é salvo no navegador e no JSON. Os valores antigos de combate e o PDF ainda não foram migrados.
+- **Ímpeto 1.0 (migração incremental):** editor dividido em Identidade, Arquétipo, Atributos, Perícias, Habilidades e Prévia. Oito atributos universais com base 8, teto 14 e 28 PA de referência. Quatro arquétipos T02 com três talentos cada, separados das habilidades e da passiva. As 16 perícias universais são agrupadas em Físicas, Exploração, Conhecimento e Sociais, com 4 PT de referência (Treinado +2 por 1 PT, Especialista +4 por 2 PT totais). **Pontos de Recursos (PR):** painel de referência experimental com 20 PR para investir em HP, Energia, CA Base, Ataque Base e regeneração, com custos progressivos e conferência do saldo. Tudo é salvo no navegador e no JSON. Os valores antigos de combate e o PDF ainda não foram migrados.
 - **Técnicas:** cinco habilidades ativas personalizáveis a partir de modelos com custos, efeitos e limitações mecânicas.
 - **Passiva:** personalização narrativa com modelos de ativação e efeito.
 - **Prévia:** consulta da ficha montada antes da exportação.
@@ -64,7 +64,7 @@ npm run lint
 1. Escolha o elemento do personagem.
 2. Preencha a identidade, selecione a classe e adicione um retrato, se desejar.
 3. Na aba **Arquétipo**, escolha um dos quatro arquétipos do Ímpeto e um de seus três talentos T02.
-4. Na aba **Atributos**, distribua os 28 PA de referência entre os oito atributos. O cálculo de HP/Energia/CA ainda segue o modelo anterior durante a migração.
+4. Na aba **Atributos**, distribua os 28 PA de referência entre os oito atributos e os **20 PR de referência** entre HP, Energia, CA Base, Ataque Base e regeneração. Esses recursos novos aparecem em painel próprio; as estatísticas antigas de Avatar permanecem em uso até a configuração avançada ser definida.
 5. Na aba **Perícias**, distribua 4 PT de referência: Não treinado (+0), Treinado (+2) ou Especialista (+4).
 6. Na aba **Habilidades**, personalize as cinco técnicas e a habilidade passiva.
 7. Revise o resultado em **Prévia**.
@@ -73,7 +73,7 @@ npm run lint
 
 **Salvamento de rascunho:** o editor salva automaticamente a ficha em edição no armazenamento local deste navegador, incluindo retrato, técnicas e passiva. Ao reabrir o site no mesmo navegador, é possível continuar a edição. Isso não é backup em nuvem: limpar os dados do navegador pode apagar o rascunho. **Exporte JSON para manter um arquivo editável independente**; o PDF serve para consulta e impressão, não para reimportação.
 
-**Formato do JSON:** arquivo identificado por `formato: "hexatombe-avatar-ficha"`, `versaoFormato: 1` e o objeto `ficha`. O editor valida a estrutura antes de substituir os dados atuais e aceita também o objeto de rascunho v1 sem invólucro. Os campos novos `atributosImpeto`, `arquetipoImpeto`, `talentoArquetipo` e `periciasImpeto` são opcionais para preservar a importação de JSON antigos. O valor legado `abaAtiva: "combate"` é convertido para a aba `atributos`. O limite de importação é 8 MB. A compatibilidade automática com o **Portal do Mestre** depende de integração específica no importador daquela plataforma.
+**Formato do JSON:** arquivo identificado por `formato: "hexatombe-avatar-ficha"`, `versaoFormato: 1` e o objeto `ficha`. O editor valida a estrutura antes de substituir os dados atuais e aceita também o objeto de rascunho v1 sem invólucro. Os campos novos `atributosImpeto`, `recursosImpeto`, `arquetipoImpeto`, `talentoArquetipo` e `periciasImpeto` são opcionais para preservar a importação de JSON antigos. O valor legado `abaAtiva: "combate"` é convertido para a aba `atributos`. O limite de importação é 8 MB. A compatibilidade automática com o **Portal do Mestre** depende de integração específica no importador daquela plataforma.
 
 ## Organização
 

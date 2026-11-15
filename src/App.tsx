@@ -517,6 +517,56 @@ function bonusGrauPericia(grau: GrauPericiaImpeto): number {
   return grau * 2;
 }
 
+
+type RecursoImpeto = "hp" | "energia" | "ca" | "ataqueDados" | "regeneracao";
+type RecursosImpeto = {
+  hp: number; // PR investidos em HP (+3 HP por PR)
+  energia: number; // PR investidos em EN (+5 EN por PR)
+  ca: number; // CA Base adquirida na criação (8 a 13)
+  ataqueDados: number; // dados d6 adicionais: 0, 1 ou 2
+  regeneracao: number; // níveis adquiridos: 0, 1 ou 2
+};
+
+const PR_INICIAL_REFERENCIA = 20;
+const CUSTOS_CA_PR = [0, 1, 3, 6, 10, 15] as const;
+const CUSTOS_ATAQUE_PR = [0, 5, 13] as const;
+const CUSTOS_REGENERACAO_PR = [0, 3, 9] as const;
+const RECURSOS_PADRAO_IMPETO: RecursosImpeto = {
+  hp: 0, energia: 0, ca: 8, ataqueDados: 0, regeneracao: 0,
+};
+
+function custoRecursosImpeto(recursos: RecursosImpeto): number {
+  return recursos.hp + recursos.energia +
+    CUSTOS_CA_PR[recursos.ca - 8] +
+    CUSTOS_ATAQUE_PR[recursos.ataqueDados] +
+    CUSTOS_REGENERACAO_PR[recursos.regeneracao];
+}
+
+function validarRecursosImpeto(valor: unknown): valor is RecursosImpeto {
+  if (!valor || typeof valor !== "object" || Array.isArray(valor)) return false;
+  const dados = valor as Record<string, unknown>;
+  const chaves: RecursoImpeto[] = ["hp", "energia", "ca", "ataqueDados", "regeneracao"];
+  if (Object.keys(dados).length !== chaves.length ||
+    !chaves.every((chave) => Number.isInteger(dados[chave]))) return false;
+  const recursos = valor as RecursosImpeto;
+  return recursos.hp >= 0 && recursos.hp <= PR_INICIAL_REFERENCIA &&
+    recursos.energia >= 0 && recursos.energia <= PR_INICIAL_REFERENCIA &&
+    recursos.ca >= 8 && recursos.ca <= 13 &&
+    recursos.ataqueDados >= 0 && recursos.ataqueDados <= 2 &&
+    recursos.regeneracao >= 0 && recursos.regeneracao <= 2 &&
+    custoRecursosImpeto(recursos) <= PR_INICIAL_REFERENCIA;
+}
+
+function valorRecursosImpeto(recursos: RecursosImpeto) {
+  return {
+    hp: 40 + 3 * recursos.hp,
+    energia: 30 + 5 * recursos.energia,
+    ca: recursos.ca,
+    ataque: `${2 + recursos.ataqueDados}d6+2`,
+    regeneracao: recursos.regeneracao,
+  };
+}
+
 type RascunhoFicha = {
   versao: 1;
   // Etapa visual opcional para manter compatibilidade com rascunhos anteriores.
@@ -525,6 +575,7 @@ type RascunhoFicha = {
   elemento: Elemento;
   // Opcional para importar fichas JSON produzidas antes desta atualização.
   atributosImpeto?: AtributosImpeto;
+  recursosImpeto?: RecursosImpeto;
   periciasImpeto?: PericiasImpeto;
   // Módulo T02: campos opcionais para importar fichas JSON mais antigas.
   arquetipoImpeto?: ArquetipoImpeto | "";
@@ -567,6 +618,7 @@ function validarFicha(valor: unknown): valor is RascunhoFicha {
     (dados.abaAtiva === undefined || dados.abaAtiva === "combate" || abasEditor.some((aba) => aba.id === dados.abaAtiva)) &&
     elementos.some((item) => item.id === dados.elemento) &&
     (dados.atributosImpeto === undefined || validarAtributosImpeto(dados.atributosImpeto)) &&
+    (dados.recursosImpeto === undefined || validarRecursosImpeto(dados.recursosImpeto)) &&
     (dados.periciasImpeto === undefined || validarPericiasImpeto(dados.periciasImpeto)) &&
     validarEscolhaT02(dados.arquetipoImpeto, dados.talentoArquetipo) &&
     Object.prototype.hasOwnProperty.call(atributosPorClasse, dados.classe ?? "") &&
@@ -619,6 +671,9 @@ function App() {
   const [elemento, setElemento] = useState<Elemento>(rascunhoInicial?.elemento ?? "agua");
   const [atributosImpeto, setAtributosImpeto] = useState<AtributosImpeto>(
     rascunhoInicial?.atributosImpeto ?? { ...ATRIBUTOS_PADRAO_IMPETO }
+  );
+  const [recursosImpeto, setRecursosImpeto] = useState<RecursosImpeto>(
+    rascunhoInicial?.recursosImpeto ?? { ...RECURSOS_PADRAO_IMPETO }
   );
   const [periciasImpeto, setPericiasImpeto] = useState<PericiasImpeto>(
     rascunhoInicial?.periciasImpeto ?? { ...PERICIAS_PADRAO_IMPETO }
@@ -675,6 +730,7 @@ function App() {
       abaAtiva,
       elemento,
       atributosImpeto,
+      recursosImpeto,
       periciasImpeto,
       arquetipoImpeto,
       talentoArquetipo,
@@ -691,7 +747,7 @@ function App() {
     } catch (erro) {
       console.warn("Não foi possível salvar o rascunho neste navegador.", erro);
     }
-  }, [mostrandoIdentidade, abaAtiva, elemento, atributosImpeto, periciasImpeto, arquetipoImpeto, talentoArquetipo, nome, classe, historia, foto, ataqueBasico, habilidades, passiva]);
+  }, [mostrandoIdentidade, abaAtiva, elemento, atributosImpeto, recursosImpeto, periciasImpeto, arquetipoImpeto, talentoArquetipo, nome, classe, historia, foto, ataqueBasico, habilidades, passiva]);
 
 
   const exportarJson = () => {
@@ -703,6 +759,7 @@ function App() {
       abaAtiva,
       elemento,
       atributosImpeto,
+      recursosImpeto,
       periciasImpeto,
       arquetipoImpeto,
       talentoArquetipo,
@@ -766,6 +823,7 @@ function App() {
 
       setElemento(ficha.elemento);
       setAtributosImpeto(ficha.atributosImpeto ?? { ...ATRIBUTOS_PADRAO_IMPETO });
+      setRecursosImpeto(ficha.recursosImpeto ?? { ...RECURSOS_PADRAO_IMPETO });
       setPericiasImpeto(ficha.periciasImpeto ?? { ...PERICIAS_PADRAO_IMPETO });
       setArquetipoImpeto(ficha.arquetipoImpeto ?? "");
       setTalentoArquetipo(ficha.talentoArquetipo ?? "");
@@ -802,6 +860,29 @@ function App() {
       return { ...anterior, [pericia]: proximo as GrauPericiaImpeto };
     });
   };
+
+  const prGastos = custoRecursosImpeto(recursosImpeto);
+  const prRestantes = PR_INICIAL_REFERENCIA - prGastos;
+  const recursosCalculados = valorRecursosImpeto(recursosImpeto);
+
+  const alterarRecursoImpeto = (campo: RecursoImpeto, delta: -1 | 1) => {
+    setRecursosImpeto((anterior) => {
+      const seguinte: RecursosImpeto = { ...anterior, [campo]: anterior[campo] + delta };
+      if (!validarRecursosImpeto(seguinte)) return anterior;
+      return seguinte;
+    });
+  };
+
+  const podeAumentarRecursoImpeto = (campo: RecursoImpeto): boolean => {
+    const seguinte = { ...recursosImpeto, [campo]: recursosImpeto[campo] + 1 };
+    return validarRecursosImpeto(seguinte);
+  };
+
+  const podeReduzirRecursoImpeto = (campo: RecursoImpeto): boolean => {
+    const seguinte = { ...recursosImpeto, [campo]: recursosImpeto[campo] - 1 };
+    return validarRecursosImpeto(seguinte);
+  };
+
   const paGastos = pontosGastosAtributos(atributosImpeto);
   const paDisponiveis = PA_INICIAL_REFERENCIA - paGastos;
 
@@ -1254,6 +1335,61 @@ function App() {
                     O orçamento de atributos e os recursos avançados da campanha Hexatombe: Avatar
                     serão consolidados antes de substituir os valores antigos de combate.
                     A distribuição de PA já é salva automaticamente e incluída no JSON.
+                  </small>
+                </section>
+
+                <section className="painel-recursos-impeto" aria-label="Distribuição de Pontos de Recursos">
+                  <div className="painel-recursos-topo">
+                    <div>
+                      <span className="rotulo-impeto">ÍMPETO RPG 1.0 · RECURSOS A04 / CA02</span>
+                      <h3>Distribuição de recursos (PR)</h3>
+                    </div>
+                    <p className="saldo-pr" aria-live="polite">
+                      <strong>{prRestantes}</strong> PR restantes
+                      <small>{prGastos} de {PR_INICIAL_REFERENCIA} usados</small>
+                    </p>
+                  </div>
+                  <p className="descricao-recursos-impeto">
+                    Referência introdutória do livro: 40 HP, 30 EN, CA Base 8, Ataque Base 2d6+2,
+                    regeneração 0 e 20 PR. A escala avançada de Hexatombe: Avatar será calibrada
+                    separadamente; os valores antigos da ficha permanecem intactos abaixo.
+                  </p>
+                  <div className="grade-recursos-impeto">
+                    {([
+                      { id: "hp", nome: "Vida (HP)", valor: `${recursosCalculados.hp} HP`,
+                        custo: "+3 HP por 1 PR", escolhido: recursosImpeto.hp },
+                      { id: "energia", nome: "Energia de referência (EN)", valor: `${recursosCalculados.energia} EN`,
+                        custo: "+5 EN por 1 PR", escolhido: recursosImpeto.energia },
+                      { id: "ca", nome: "Classe de Armadura Base (CA)", valor: `CA ${recursosCalculados.ca}`,
+                        custo: "Degraus progressivos: 1 / 2 / 3 / 4 / 5 PR", escolhido: recursosImpeto.ca - 8 },
+                      { id: "ataqueDados", nome: "Ataque Base", valor: recursosCalculados.ataque,
+                        custo: "Primeiro +1d6: 5 PR; segundo: +8 PR", escolhido: recursosImpeto.ataqueDados },
+                      { id: "regeneracao", nome: "Regeneração de EN", valor: `+${recursosCalculados.regeneracao} por rodada`,
+                        custo: "Primeiro +1: 3 PR; segundo: +6 PR", escolhido: recursosImpeto.regeneracao },
+                    ] as { id: RecursoImpeto; nome: string; valor: string; custo: string; escolhido: number }[]).map((recurso) => (
+                      <div className="linha-recurso-impeto" key={recurso.id}>
+                        <div className="info-recurso-impeto">
+                          <strong>{recurso.nome}</strong>
+                          <span>{recurso.valor}</span>
+                          <small>{recurso.custo}</small>
+                        </div>
+                        <div className="controle-recurso-impeto">
+                          <button type="button" aria-label={`Reduzir ${recurso.nome}`}
+                            onClick={() => alterarRecursoImpeto(recurso.id, -1)}
+                            disabled={!podeReduzirRecursoImpeto(recurso.id)}>−</button>
+                          <span aria-label={`${recurso.nome}: ${recurso.escolhido} melhorias`}>{recurso.escolhido}</span>
+                          <button type="button" aria-label={`Aumentar ${recurso.nome}`}
+                            onClick={() => alterarRecursoImpeto(recurso.id, 1)}
+                            disabled={!podeAumentarRecursoImpeto(recurso.id)}>+</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <small className="aviso-recursos-impeto">
+                    A CA Base é escolhida apenas na criação e permanece fixa durante a campanha.
+                    Energia acumulada pode ultrapassar o valor de referência; regeneração ocorre
+                    uma vez por rodada. Derivações D01 e configuração avançada não estão ativas nesta etapa.
+                    Os investimentos em PR são preservados no salvamento automático e no JSON.
                   </small>
                 </section>
                 <div className="atributos-ficha">
@@ -1792,6 +1928,17 @@ function App() {
                       `${chave}: ${atributosImpeto[chave]}`).join(" · ")}</p>
                     <small>PA: {paGastos} usados / {PA_INICIAL_REFERENCIA} disponíveis.
                       Dados de combate abaixo ainda usam a escala anterior durante a adaptação.</small>
+                  </div>
+
+                  <div className="previa-recursos-impeto">
+                    <strong>Ímpeto RPG · Recursos em PR (referência introdutória)</strong>
+                    <p>
+                      HP {recursosCalculados.hp} · EN {recursosCalculados.energia} ·
+                      CA Base {recursosCalculados.ca} · Ataque {recursosCalculados.ataque} ·
+                      Regeneração +{recursosCalculados.regeneracao}/rodada
+                    </p>
+                    <small>{prGastos} PR gastos de {PR_INICIAL_REFERENCIA}.
+                      A escala antiga mostrada abaixo ainda não foi substituída.</small>
                   </div>
                   <div className="previa-atributos">
                     <div className="previa-atributo previa-hp">
