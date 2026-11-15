@@ -1,0 +1,84 @@
+/* Ímpeto H06/H04.1 — construtor de combate e exploração */
+.app .impeto-construtor { display:grid; gap:15px; color:#dce3e9; }
+.app .impeto-construtor h2 { margin:0 0 4px; color:#efd8aa; font:700 clamp(1.4rem,2.8vw,1.9rem) Georgia,serif; }
+.app .impeto-construtor .impeto-explicacao,.app .impeto-nota {
+  margin:0 0 8px; color:#b7c6d6; font-size:.84rem; line-height:1.6;
+}
+.app .impeto-orcamentos {
+  display:grid; grid-template-columns: minmax(0,1.35fr) minmax(0,1fr);
+  gap:14px; align-items:center; padding:16px;
+  border:1px solid rgba(206,167,113,.38); border-radius:14px;
+  background:linear-gradient(140deg,#1b293a,#0d1524);
+}
+.app .impeto-orcamentos > label { color:#ead5ae; font-weight:600; font-size:.82rem; }
+.app .impeto-orcamentos > label select { margin-top:8px; display:block; width:100%;
+  min-height:42px; padding:9px 12px; color:#f2e8d6; border:1px solid #6c6670;
+  background:#101a29; border-radius:8px; }
+.app .impeto-orcamentos > small { grid-column:1/-1; color:#c5b392; font-size:.76rem; line-height:1.5; }
+.app .impeto-saldos { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+.app .impeto-saldos > div { display:flex; flex-direction:column; align-items:center;
+  padding:10px 8px; border:1px solid rgba(205,166,109,.28); border-radius:10px;
+  background:rgba(5,13,24,.55); text-align:center; }
+.app .impeto-saldos strong { font:700 1.6rem Georgia,serif; color:var(--elemento); }
+.app .impeto-saldos span { font-size:.72rem; color:#e8dabf; }
+.app .impeto-saldos small { margin-top:5px; color:#bbc4d3; font-size:.7rem; }
+.app .impeto-cartao { min-width:0; margin:0; border:1px solid rgba(209,170,116,.4);
+  border-radius:13px; overflow:hidden; background:linear-gradient(140deg,#182338,#0a1625); }
+.app details.impeto-cartao > summary { display:flex; gap:13px; align-items:center;
+  padding:15px; color:#f1e2c8; cursor:pointer; list-style:none; }
+.app details.impeto-cartao > summary::-webkit-details-marker { display:none; }
+.app details.impeto-cartao > summary:focus-visible { outline:2px solid var(--elemento); outline-offset:-2px; }
+.app details.impeto-cartao[open] > summary { border-bottom:1px solid rgba(209,170,116,.25); }
+.app .impeto-numero { flex:0 0 auto; min-width:45px; padding:8px 5px; text-align:center;
+  font-weight:800; font-size:.8rem; border-radius:9px; color:#0c1521;
+  background:var(--elemento); }
+.app .impeto-nome { flex:1; min-width:0; display:block; font-weight:700; font-size:.92rem; }
+.app .impeto-nome small { display:block; margin-top:5px; color:#b9c7d6;
+  font-size:.74rem; font-weight:400; overflow-wrap:anywhere; }
+.app .impeto-preco { flex:0 0 auto; font-size:.96rem; font-weight:750; color:#edc78c; text-align:right; }
+.app .impeto-preco small { display:block; margin-top:5px; font-size:.73rem; color:#bbc4d0; }
+.app .impeto-corpo, .app .impeto-passiva { padding:18px; display:grid; gap:13px; }
+.app .impeto-passiva h3 { color:#f0d6a9; font-size:1.12rem; margin:0; }
+.app .impeto-passiva > p { font-size:.83rem; line-height:1.6; color:#bdcbd8; margin:0; }
+.app .impeto-campo { display:flex; flex-direction:column; gap:6px; min-width:0;
+  color:#ead5ad; font-size:.85rem; font-weight:600; }
+.app .impeto-grade-campos { display:grid; grid-template-columns:repeat(auto-fit,minmax(165px,1fr)); gap:11px; }
+.app .impeto-grade-campos > label { display:flex; flex-direction:column; gap:7px; color:#e7d5b3; font-size:.83rem; }
+.app .impeto-campo input,.app .impeto-campo textarea,.app .impeto-campo select,
+.app .impeto-grade-campos input,.app .impeto-grade-campos select {
+  width:100%; min-width:0; min-height:41px; padding:9px 11px; background:#0b1625;
+  color:#f0e8de; border:1px solid rgba(147,161,179,.48); border-radius:8px;
+  box-sizing:border-box; font:inherit; font-weight:400;
+}
+.app .impeto-campo textarea { min-height:76px; resize:vertical; line-height:1.6; }
+.app .impeto-campo small { color:#b7c6d2; font-size:.73rem; font-weight:400; line-height:1.5; }
+.app .impeto-check { display:flex; align-items:flex-start; gap:9px; font-size:.83rem; line-height:1.5;
+  color:#dfccad; cursor:pointer; }
+.app .impeto-check input { flex:0 0 auto; accent-color:var(--elemento); margin-top:3px; }
+.app .impeto-legado { padding:11px; border-left:3px solid #cc9955;
+  background:rgba(143,99,43,.12); color:#e5c7a0; font-size:.78rem; }
+.app .impeto-resultado { margin:6px 0 0; padding:12px; background:#111f30; border-radius:8px;
+  border:1px solid rgba(205,171,117,.23); color:#dfd3c2; font-size:.82rem; line-height:1.6; }
+.app .impeto-resultado strong { color:#f0cc8c; }
+.app .impeto-adicionar { padding:13px; border-radius:10px; border:1px solid var(--elemento);
+  background:#223246; color:#f8e3bd; cursor:pointer; font-weight:700; }
+.app .impeto-adicionar:disabled { opacity:.4; cursor:not-allowed; }
+.app .impeto-excluir { justify-self:end; border:1px solid #ab6a61; background:#2b1e28;
+  border-radius:8px; padding:9px 14px; color:#ffdbd4; cursor:pointer; }
+.app .impeto-alerta { padding:12px; border:1px solid #d39b55; border-radius:8px;
+  color:#f5d19a; background:rgba(101,60,13,.2); font-size:.82rem; }
+.app .impeto-resumo { padding:15px; border:1px solid rgba(211,169,109,.36);
+  border-radius:10px; color:#d7e0e8; background:rgba(13,23,38,.8); }
+.app .impeto-resumo h3,.app .impeto-resumo h4 { color:#f0d7a7; margin:14px 0 8px; }
+.app .impeto-resumo p { margin:8px 0; line-height:1.55; font-size:.82rem; }
+.app .impeto-resumo p small { display:block; color:#b9c8d5; margin-top:4px; white-space:pre-wrap; }
+@media(max-width:680px){
+  .app .impeto-orcamentos { grid-template-columns:1fr; }
+  .app .impeto-grade-campos { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:450px){
+  .app .impeto-grade-campos { grid-template-columns:1fr; }
+  .app .impeto-corpo,.app .impeto-passiva { padding:12px; }
+  .app details.impeto-cartao > summary { gap:8px; padding:12px; }
+  .app .impeto-preco { font-size:.84rem; }
+}
