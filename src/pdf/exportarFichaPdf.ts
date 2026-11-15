@@ -534,8 +534,7 @@ export async function exportarFichaPdf(ficha: FichaPDF): Promise<void> {
     text(valor, x + 2.5, 128, index === 3 ? 12.2 : 15, index === 1 ? paleta.cor : DARK, true);
   });
   text(`HP atual: __________ / ${ficha.hp}`, M + 4, 137.8, 9, DARK);
-  text(`EN atual: __________ / ${ficha.energia} (pode acumular acima da base)`,
-    M + 89, 137.8, 8.4, DARK);
+  text(`EN atual: __________ / ${ficha.energia}`, M + 93, 137.8, 8.8, DARK);
 
   sectionHeading("Ataque básico", 143);
   pdf.setDrawColor(...paleta.cor);
@@ -628,8 +627,8 @@ export async function exportarFichaPdf(ficha: FichaPDF): Promise<void> {
   pdf.roundedRect(M, 174, W - 2 * M, 20, 1.3, 1.3, "FD");
   text(pontos.join("     ·     "), M + 4, 181.6, 9, DARK, true);
   const inv = ficha.investimento;
-  text(`Investimentos: HP ${inv.hp} PR · EN ${inv.energia} PR · CA ${inv.ca}`,
-    M + 4, 189.1, 8.2, paleta.escura);
+  text(`Investimentos: HP ${inv.hp} PR · EN ${inv.energia} PR · CA ${inv.ca} · Ataque +${inv.ataqueDados}d6 · Regen +${inv.regeneracao}`,
+    M + 4, 189.1, 8.0, paleta.escura);
 
   sectionHeading("Escolhas do personagem", 198);
   const quadroEscolha = (yy: number, rotulo: string, titulo: string, detalhe: string) => {
@@ -662,11 +661,13 @@ export async function exportarFichaPdf(ficha: FichaPDF): Promise<void> {
         ativa.ativacao === "buff" ? "Buff opcional" : "Reação" },
       { rotulo: "Alvos", valor: `${ativa.alvos} · ${ativa.distante ? "À distância" : "Próximo"}` },
       { rotulo: "PC / EN", valor: `${custoPC(ativa)} PC na construção · ${custoEnergia(ativa)} por uso` },
-      { rotulo: "Duração", valor: `${ativa.rodadasExtras} rodada(s) adicional(is)` },
-      { rotulo: "Gatilho", valor: ativa.gatilho },
-      { rotulo: "Descrição", valor: ativa.descricao },
-      { rotulo: "Limites", valor: ativa.limites },
     ];
+    if (ativa.rodadasExtras > 0) campos.push({
+      rotulo: "Duração", valor: `${ativa.rodadasExtras} rodada(s) adicional(is)`
+    });
+    if (hasText(ativa.gatilho)) campos.push({ rotulo: "Gatilho", valor: ativa.gatilho });
+    if (hasText(ativa.descricao)) campos.push({ rotulo: "Descrição", valor: ativa.descricao });
+    if (hasText(ativa.limites)) campos.push({ rotulo: "Limites", valor: ativa.limites });
     if (ativa.empurraoAdicional) campos.push({ rotulo: "Adicional", valor: "Empurrão adicional comprado." });
     if (ativa.referenciaAntiga) campos.push({ rotulo: "Referência", valor: ativa.referenciaAntiga });
     cartaoDetalhado(hasText(ativa.nome) || `Habilidade ${i + 1}`,
@@ -676,10 +677,10 @@ export async function exportarFichaPdf(ficha: FichaPDF): Promise<void> {
     { rotulo: "Efeito", valor: textoPassiva(ficha.passiva) },
     { rotulo: "Usos", valor: `${ficha.passiva.usos} ativação(ões) automática(s) por combate` },
     { rotulo: "Custo", valor: `${custoPassiva(ficha.passiva)} PC na construção · 0 EN` },
-    { rotulo: "Gatilho", valor: ficha.passiva.gatilho },
-    { rotulo: "Descrição", valor: ficha.passiva.descricao },
-    { rotulo: "Limites", valor: ficha.passiva.limites },
   ];
+  if (hasText(ficha.passiva.gatilho)) passivaCampos.push({ rotulo: "Gatilho", valor: ficha.passiva.gatilho });
+  if (hasText(ficha.passiva.descricao)) passivaCampos.push({ rotulo: "Descrição", valor: ficha.passiva.descricao });
+  if (hasText(ficha.passiva.limites)) passivaCampos.push({ rotulo: "Limites", valor: ficha.passiva.limites });
   if (ficha.passiva.referenciaAntiga) passivaCampos.push({ rotulo: "Referência", valor: ficha.passiva.referenciaAntiga });
   cartaoDetalhado(hasText(ficha.passiva.nome) || "Passiva não definida",
     "PASSIVA · Automática · Não ocupa ação principal", passivaCampos);
