@@ -136,3 +136,18 @@
   line-height: 1.5;
   overflow-wrap: break-word;
 }
+
+/* Explicação do alcance fora da caixa de seleção, sem interferir no tamanho do checkbox. */
+.app .impeto-construtor .impeto-opcao-alcance {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.app .impeto-construtor .impeto-opcao-alcance > small {
+  display: block;
+  margin: 0 0 4px 28px;
+  color: #b9c8d5;
+  font-size: .77rem;
+  line-height: 1.55;
+}
