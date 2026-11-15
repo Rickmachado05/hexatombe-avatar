@@ -711,6 +711,14 @@ export async function exportarFichaPdf(ficha: FichaPDF): Promise<void> {
         campos, i + 1);
     });
   }
+  // O resumo do Ataque Básico na primeira página pode ser abreviado.
+  // Sua descrição integral é preservada aqui para não perder texto.
+  cartaoDetalhado("Ataque básico", "AÇÃO PRINCIPAL · 0 EN",
+    [
+      { rotulo: "Nome", valor: ficha.ataqueBasico.nome || "Ataque sem nome" },
+      { rotulo: "Dano", valor: ficha.ataqueBasico.dano },
+      { rotulo: "Descrição", valor: ficha.ataqueBasico.descricao },
+    ]);
   if (ficha.talento) cartaoDetalhado("Talento de arquétipo T02", ficha.arquetipo,
     [{ rotulo: "Talento", valor: ficha.talento.nome }, { rotulo: "Benefício", valor: ficha.talento.efeito }]);
   if (ficha.vantagem) cartaoDetalhado("Vantagem universal V01", "Vantagem independente",
@@ -724,7 +732,10 @@ export async function exportarFichaPdf(ficha: FichaPDF): Promise<void> {
     ]);
   cartaoDetalhado("História do personagem",
     `REGISTRO NARRATIVO · ${hasText(ficha.nome) || "Personagem sem nome"}`,
-    [{ rotulo: "História", valor: ficha.historia || "História não informada." }]);
+    [
+      { rotulo: "Nome", valor: ficha.nome || "Personagem sem nome" },
+      { rotulo: "História", valor: ficha.historia || "História não informada." },
+    ]);
 
   pdf.save(`Hexatombe_Avatar_${safeFileName(ficha.nome)}.pdf`);
 }
