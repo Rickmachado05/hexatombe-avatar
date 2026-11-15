@@ -376,7 +376,7 @@ function validarFicha(valor: unknown): valor is RascunhoFicha {
     if (!item || typeof item !== "object" || Array.isArray(item)) return false;
     const habilidade = item as Partial<Habilidade>;
     return typeof habilidade.nome === "string" &&
-      Object.prototype.hasOwnProperty.call(regrasModelos, habilidade.modelo) &&
+      Object.prototype.hasOwnProperty.call(regrasModelos, habilidade.modelo ?? "") &&
       (habilidade.alvos === 1 || habilidade.alvos === 2) &&
       typeof habilidade.efeito === "string" &&
       typeof habilidade.limitacoes === "string" &&
@@ -388,7 +388,7 @@ function validarFicha(valor: unknown): valor is RascunhoFicha {
     (dados.editorAberto === undefined || typeof dados.editorAberto === "boolean") &&
     (dados.abaAtiva === undefined || abasEditor.some((aba) => aba.id === dados.abaAtiva)) &&
     elementos.some((item) => item.id === dados.elemento) &&
-    Object.prototype.hasOwnProperty.call(atributosPorClasse, dados.classe) &&
+    Object.prototype.hasOwnProperty.call(atributosPorClasse, dados.classe ?? "") &&
     typeof dados.nome === "string" &&
     typeof dados.historia === "string" &&
     typeof dados.foto === "string" &&
