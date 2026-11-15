@@ -55,8 +55,6 @@
 .app .impeto-check { display:flex; align-items:flex-start; gap:9px; font-size:.83rem; line-height:1.5;
   color:#dfccad; cursor:pointer; }
 .app .impeto-check input { flex:0 0 auto; accent-color:var(--elemento); margin-top:3px; }
-.app .impeto-legado { padding:11px; border-left:3px solid #cc9955;
-  background:rgba(143,99,43,.12); color:#e5c7a0; font-size:.78rem; }
 .app .impeto-resultado { margin:6px 0 0; padding:12px; background:#111f30; border-radius:8px;
   border:1px solid rgba(205,171,117,.23); color:#dfd3c2; font-size:.82rem; line-height:1.6; }
 .app .impeto-resultado strong { color:#f0cc8c; }
@@ -99,4 +97,42 @@
 .app .impeto-campanha-fixa span {
   color: #b9c8d5;
   font: 500 .79rem "Segoe UI", system-ui, sans-serif;
+}
+
+/* O estilo global da ficha dá largura de 100% e altura de 45px para todo input.
+   Nas opções booleanas isso esticava o checkbox e expulsava o texto do cartão.
+   Regras específicas valem em Combate e Exploração, inclusive em telas estreitas. */
+.app .editor-identidade.editor-com-abas .impeto-construtor label.impeto-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0;
+  padding: 6px 0;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+  cursor: pointer;
+}
+.app .editor-identidade.editor-com-abas .impeto-construtor label.impeto-check input[type="checkbox"] {
+  display: block;
+  flex: 0 0 18px;
+  width: 18px;
+  max-width: 18px;
+  min-width: 18px;
+  height: 18px;
+  min-height: 18px;
+  max-height: 18px;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  accent-color: var(--elemento);
+  cursor: pointer;
+}
+.app .editor-identidade.editor-com-abas .impeto-construtor label.impeto-check span {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  line-height: 1.5;
+  overflow-wrap: break-word;
 }
