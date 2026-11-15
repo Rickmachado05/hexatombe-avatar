@@ -116,7 +116,7 @@ export function CombateImpeto(props:Props){
           {a.efeito==="dano"&&<label className="impeto-check">
             <input type="checkbox" checked={a.empurraoAdicional}
               onChange={e=>editarAtiva(i,{empurraoAdicional:e.target.checked})}/>
-            Somar empurrão simples ao dano (+4 PC antes dos modificadores)
+            <span>Somar empurrão simples ao dano (+4 PC antes dos modificadores)</span>
           </label>}
           <div className="impeto-grade-campos">
             <label>Ativação
@@ -144,7 +144,7 @@ export function CombateImpeto(props:Props){
           <label className="impeto-check">
             <input type="checkbox" checked={a.distante}
               onChange={e=>editarAtiva(i,{distante:e.target.checked})}/>
-            Alcance narrativo distante (+25% no subtotal, H03 opcional)
+            <span>Alcance narrativo distante (+25% no subtotal, H03 opcional)</span>
           </label>
           {a.ativacao==="reacao"&&<CampoTexto titulo="Gatilho da reação" valor={a.gatilho}
             alterar={v=>editarAtiva(i,{gatilho:v})}
@@ -153,7 +153,6 @@ export function CombateImpeto(props:Props){
             alterar={v=>editarAtiva(i,{descricao:v})}/>
           <CampoTexto titulo="Limitações, defesa e contrajogo" valor={a.limites} linhas={2}
             alterar={v=>editarAtiva(i,{limites:v})}/>
-          {a.referenciaAntiga&&<p className="impeto-legado">{a.referenciaAntiga}</p>}
           <p className="impeto-resultado">Custo de criação: <strong>{pc} PC</strong> ·
             Custo de uso: <strong>{en===null?"pactuar EN com o mestre":en+" EN"}</strong></p>
           {a.efeito==="atordoamento"&&<p className="impeto-nota">C02: uma defesa inicial;
@@ -197,7 +196,6 @@ export function CombateImpeto(props:Props){
         alterar={v=>editarPassiva({descricao:v})}/>
       <CampoTexto titulo="Limites e não acúmulo" valor={passiva.limites} linhas={2}
         alterar={v=>editarPassiva({limites:v})}/>
-      {passiva.referenciaAntiga&&<p className="impeto-legado">{passiva.referenciaAntiga}</p>}
       <p className="impeto-resultado">Custo: <strong>{custoPassiva(passiva)} PC</strong>
         (teto {limite.passiva} PC) · aplicação automática sem ação extra.</p>
     </section>
@@ -277,7 +275,7 @@ export function ExploracaoImpeto(props:Props){
           <label className="impeto-check">
             <input type="checkbox" checked={e.automatica}
               onChange={v=>editarExploracao(i,{automatica:v.target.checked,usos:1})}/>
-            Automática uma vez por cena (×1,5 PX, H06 experimental)
+            <span>Automática uma vez por cena (×1,5 PX, H06 experimental)</span>
           </label>
           <CampoTexto titulo="O que esta técnica permite fazer?" valor={e.descricao} linhas={3}
             alterar={v=>editarExploracao(i,{descricao:v})}/>
@@ -324,7 +322,5 @@ export function ResumoHabilidadesImpeto({perfil,ativas,passiva,exploracao}:Pick<
     {exploracao.map((e,i)=><p key={i}><strong>{e.nome||"Sem nome"}</strong> —
       {e.classe} · {custoPX(e)} PX · {custoENPX(custoPX(e),e.automatica)??"EN especial"} EN
       {e.descricao&&<small>{e.descricao}</small>}</p>)}
-    <p className="impeto-nota">Este resumo é editável no JSON; o PDF ainda não inclui
-      o construtor H06/H04.1/PX e será atualizado separadamente.</p>
   </div>;
 }
