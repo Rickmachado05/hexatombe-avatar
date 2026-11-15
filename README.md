@@ -25,6 +25,7 @@ Sem instalação: crie seu personagem no navegador, exporte o pergaminho em PDF 
 - **Prévia:** consulta da ficha montada antes da exportação.
 - **PDF dinâmico:** geração A4 com no mínimo quatro seções (resumo de combate, atributos e perícias, técnicas H06/passiva, exploração PX/história). Preserva as manchas de sangue, molduras rituais douradas e linhas da cor do elemento. Descrições longas ganham páginas adicionais sem cortes; apenas os resumos de consulta rápida podem ser abreviados.
 - **JSON editável:** exporte a ficha completa (incluindo elemento, retrato, cinco técnicas e passiva) e importe-a novamente no editor, em outro navegador ou dispositivo.
+- **Interface mobile completa:** em celulares, as sete abas viram uma navegação por etapas com progresso e seletor nativo; campos e recursos adaptam-se ao toque, cartões de habilidade não têm rolagem interna, botões Anterior/Próxima ficam acessíveis no rodapé e exportações JSON/PDF continuam disponíveis. A folha `src/HexatombeMobile.css` é carregada por último para preservar o layout desktop. Compatível também com smartphones em paisagem e telas touch compactas.
 
 ## Tecnologias
 

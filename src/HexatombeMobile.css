@@ -1,0 +1,324 @@
+/* Hexatombe: Avatar — experiência mobile única, preservando as regras e o desktop.
+   Importado por último: corrige especificidade de temas/abas antigos no celular. */
+.app .navegacao-etapas-mobile { display: none; }
+
+@media (max-width: 760px), (pointer: coarse) and (max-width: 960px) {
+  .app, .app .conteudo, .app .editor-com-abas, .app .conteudo-aba,
+  .app .impeto-construtor, .app .impeto-cartao, .app .impeto-corpo {
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .app .conteudo {
+    width: calc(100% - 16px);
+    max-width: 100%;
+    margin-inline: auto;
+  }
+  .app .cabecalho-compacto {
+    padding: 8px 0 2px;
+  }
+  .app .cabecalho-compacto .emblema-central { display: none; }
+  .app .cabecalho-compacto h1 {
+    margin: 0;
+    font-size: clamp(1.3rem, 5.8vw, 1.8rem);
+    letter-spacing: .055em;
+  }
+  .app .editor-identidade.editor-com-abas {
+    width: 100%;
+    max-width: 100%;
+    margin: 10px auto 32px;
+    padding: 14px;
+    border-radius: 14px;
+  }
+  .app .editor-com-abas .abas-editor {
+    display: none;
+  }
+  .app .editor-com-abas .navegacao-etapas-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0 0 17px;
+    padding: 13px;
+    border: 1px solid rgba(205, 167, 111, .38);
+    border-radius: 12px;
+    background: linear-gradient(130deg, #202b3e, #0c1728);
+  }
+  .app .navegacao-etapas-mobile-topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-width: 0;
+    gap: 10px;
+  }
+  .app .navegacao-etapas-mobile-topo > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  .app .mobile-etapa-contador {
+    color: #c7b391;
+    text-transform: uppercase;
+    font-size: .74rem;
+    letter-spacing: .08em;
+    font-weight: 700;
+  }
+  .app .mobile-etapa-titulo {
+    color: #f5e4c4;
+    font: 700 1.23rem Georgia, serif;
+    overflow-wrap: anywhere;
+  }
+  .app .mobile-etapa-percentual {
+    flex: 0 0 auto;
+    color: var(--elemento);
+    font-size: .84rem;
+    font-weight: 750;
+  }
+  .app .mobile-etapas-progresso {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px;
+    width: 100%;
+  }
+  .app .mobile-etapas-progresso > span {
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(191, 197, 206, .22);
+  }
+  .app .mobile-etapas-progresso > span.concluida {
+    background: var(--elemento);
+  }
+  .app .navegacao-etapas-mobile > label {
+    display: block;
+    margin: 0;
+    color: #ebd8b6;
+    font-size: .79rem;
+    font-weight: 600;
+  }
+  .app .editor-com-abas .navegacao-etapas-mobile > select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    padding: 10px 12px;
+    box-sizing: border-box;
+    border: 1px solid rgba(190, 161, 116, .6);
+    border-radius: 9px;
+    background: #121f33;
+    color: #f5e9d6;
+    font-size: 16px;
+  }
+  .app .editor-com-abas .navegacao-etapas-mobile > select:focus-visible {
+    outline: 2px solid var(--elemento);
+    outline-offset: 2px;
+  }
+
+  /* Campos legíveis sem zoom forçado do Safari e sem scroll horizontal. */
+  .app .editor-com-abas :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea) {
+    box-sizing: border-box;
+    min-width: 0;
+    max-width: 100%;
+    font-size: 16px;
+  }
+  .app .editor-com-abas textarea {
+    line-height: 1.5;
+    resize: vertical;
+  }
+  .app .editor-com-abas :is(button, select, input[type="file"]) {
+    touch-action: manipulation;
+  }
+  .app .editor-com-abas :is(button, .botao-json, .botao-gerar-pdf) {
+    min-height: 44px;
+  }
+  .app .editor-com-abas :is(.painel-atributos-impeto, .painel-recursos-impeto,
+    .painel-pericias-impeto, .painel-arquetipo-impeto, .painel-vantagens-v01,
+    .painel-derivacao-d01, .grupo-pericias-impeto) {
+    min-width: 0;
+  }
+
+  /* Cada atributo é uma peça de dois andares para acomodar + / - no toque. */
+  .app .editor-com-abas .grade-atributos-impeto {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+  .app .editor-com-abas .atributo-impeto {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 9px;
+    padding: 12px 9px;
+  }
+  .app .editor-com-abas .atributo-impeto > span {
+    font-size: .84rem;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+  .app .editor-com-abas .controle-atributo-impeto {
+    width: 100%;
+    justify-content: space-between;
+    gap: 3px;
+  }
+  .app .editor-com-abas .controle-atributo-impeto button {
+    width: 42px;
+    height: 44px;
+    min-height: 44px;
+    flex: 0 1 42px;
+    font-size: 1.3rem;
+  }
+  .app .editor-com-abas .controle-atributo-impeto strong {
+    min-width: 20px;
+    font-size: 1.13rem;
+  }
+
+  /* Perícias e recursos não podem ter controles menores do que a área de toque. */
+  .app .editor-com-abas .grupos-pericias-impeto,
+  .app .editor-com-abas .grade-recursos-impeto {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .app .editor-com-abas .linha-pericia-impeto,
+  .app .editor-com-abas .linha-recurso-impeto {
+    min-width: 0;
+    gap: 8px;
+  }
+  .app .editor-com-abas .controle-pericia-impeto button,
+  .app .editor-com-abas .controle-recurso-impeto button {
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    flex: 0 0 44px;
+    font-size: 1.2rem;
+  }
+
+  /* H06: abrir um cartão não cria rolagem dentro de outra rolagem. */
+  .app .editor-com-abas .impeto-orcamentos {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 13px;
+  }
+  .app .editor-com-abas .impeto-grade-campos {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .app .editor-com-abas .impeto-corpo {
+    padding: 14px;
+    min-width: 0;
+  }
+  .app .editor-com-abas details.impeto-cartao > summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    min-height: 56px;
+    padding: 12px;
+  }
+  .app .editor-com-abas .impeto-nome {
+    flex: 1 1 120px;
+    min-width: 0;
+  }
+  .app .editor-com-abas .impeto-preco {
+    text-align: right;
+    flex: 0 0 auto;
+  }
+  .app .editor-com-abas .aba-habilidades .corpo-habilidade {
+    max-height: none;
+    overflow: visible;
+    padding: 13px;
+  }
+  .app .editor-com-abas .aba-habilidades .corpo-habilidade .linha-campos {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .app .editor-com-abas .impeto-construtor label.impeto-check {
+    min-height: 44px;
+  }
+
+  /* Prévia e exportações — sem colunas estreitas e sem cortar nomes. */
+  .app .editor-com-abas .aba-previa .previa-identidade {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 14px;
+  }
+  .app .editor-com-abas .aba-previa .previa-retrato {
+    width: min(190px, 90%);
+    margin-inline: auto;
+  }
+  .app .editor-com-abas .aba-previa .previa-atributos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .app .editor-com-abas .aba-previa .previa-grade-tecnicas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .app .editor-com-abas .aba-previa .previa-secao-topo {
+    flex-wrap: wrap;
+    align-items: start;
+    gap: 10px;
+  }
+  .app .editor-com-abas .aba-previa .previa-editar {
+    min-height: 44px;
+  }
+  .app .editor-com-abas .aba-previa .botao-gerar-pdf {
+    width: 100%;
+    white-space: normal;
+  }
+  .app .editor-com-abas .acoes-json {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+  .app .editor-com-abas .acoes-json .botao-json {
+    width: 100%;
+    min-width: 0;
+    min-height: 46px;
+    padding-inline: 8px;
+  }
+  .app .editor-com-abas .acoes-json small {
+    grid-column: 1 / -1;
+    overflow-wrap: anywhere;
+  }
+
+  /* Rodapé de navegação acessível mesmo em etapas muito longas. */
+  .app .editor-com-abas .navegacao-editor {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 25px -14px 10px;
+    padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid rgba(210, 175, 128, .36);
+    border-radius: 0 0 12px 12px;
+    background: rgba(11, 19, 32, .97);
+    box-shadow: 0 -12px 35px rgba(0, 0, 0, .24);
+  }
+  .app .editor-com-abas .navegacao-editor button {
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    margin: 0;
+    padding: 10px 8px;
+    font-size: .9rem;
+    line-height: 1.25;
+  }
+  .app .editor-com-abas .navegacao-editor button:only-child {
+    grid-column: 1 / -1;
+  }
+  .app .editor-com-abas > .botao-voltar {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
+/* Telas muito pequenas: evitar que a barra de controle ultrapasse 320px. */
+@media (max-width: 370px) {
+  .app .editor-identidade.editor-com-abas { padding: 10px; }
+  .app .editor-com-abas .navegacao-editor { margin-inline: -10px; padding-inline: 10px; }
+  .app .editor-com-abas .atributo-impeto { padding: 9px 6px; }
+  .app .editor-com-abas .controle-atributo-impeto button { width: 40px; flex-basis: 40px; }
+  .app .editor-com-abas .linha-pericia-impeto,
+  .app .editor-com-abas .linha-recurso-impeto { flex-wrap: wrap; }
+  .app .editor-com-abas .controle-pericia-impeto,
+  .app .editor-com-abas .controle-recurso-impeto { margin-left: auto; }
+  .app .editor-com-abas .navegacao-editor button { font-size: .83rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app .editor-com-abas .navegacao-etapas-mobile *,
+  .app .editor-com-abas .navegacao-editor * { transition: none; }
+}
