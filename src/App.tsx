@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { ChangeEvent } from "react";
 import { exportarFichaPdf } from "./pdf/exportarFichaPdf";
 import "./HexatombePdf.css";
 import "./App.css";
@@ -361,59 +362,79 @@ type RascunhoFicha = {
 
 const CHAVE_RASCUNHO = "hexatombe-avatar:rascunho:v1";
 
-function carregarRascunho(): RascunhoFicha | null {
-  try {
-    const texto = window.localStorage.getItem(CHAVE_RASCUNHO);
-    if (!texto) return null;
 
-    const dados = JSON.parse(texto) as Partial<RascunhoFicha>;
-    const habilidadeValida = (habilidade: Habilidade) =>
-      habilidade !== null &&
-      typeof habilidade === "object" &&
-      typeof habilidade.nome === "string" &&
+const FORMATO_JSON = "hexatombe-avatar-ficha";
+const LIMITE_JSON_BYTES = 8 * 1024 * 1024;
+
+// Um arquivo de outro projeto ou uma ficha incompleta nunca deve substituir
+// a ficha atual; a mesma verificação vale para o rascunho automático.
+function validarFicha(valor: unknown): valor is RascunhoFicha {
+  if (!valor || typeof valor !== "object" || Array.isArray(valor)) return false;
+  const dados = valor as Partial<RascunhoFicha>;
+
+  const habilidadeValida = (item: unknown) => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return false;
+    const habilidade = item as Partial<Habilidade>;
+    return typeof habilidade.nome === "string" &&
       Object.prototype.hasOwnProperty.call(regrasModelos, habilidade.modelo) &&
       (habilidade.alvos === 1 || habilidade.alvos === 2) &&
       typeof habilidade.efeito === "string" &&
       typeof habilidade.limitacoes === "string" &&
       typeof habilidade.nomeCondicao === "string" &&
       typeof habilidade.nomeArma === "string";
+  };
 
-    if (
-      !dados ||
-      dados.versao !== 1 ||
-      (dados.editorAberto !== undefined && typeof dados.editorAberto !== "boolean") ||
-      (dados.abaAtiva !== undefined && !abasEditor.some((aba) => aba.id === dados.abaAtiva)) ||
-      !elementos.some((item) => item.id === dados.elemento) ||
-      !Object.prototype.hasOwnProperty.call(atributosPorClasse, dados.classe ?? "") ||
-      typeof dados.nome !== "string" ||
-      typeof dados.historia !== "string" ||
-      typeof dados.foto !== "string" ||
-      !dados.ataqueBasico ||
-      typeof dados.ataqueBasico.nome !== "string" ||
-      typeof dados.ataqueBasico.descricao !== "string" ||
-      !Array.isArray(dados.habilidades) ||
-      dados.habilidades.length !== 5 ||
-      !dados.habilidades.every(habilidadeValida) ||
-      !dados.passiva ||
-      typeof dados.passiva.nome !== "string" ||
-      !Object.prototype.hasOwnProperty.call(regrasPassivas, dados.passiva.modelo) ||
-      typeof dados.passiva.descricao !== "string" ||
-      !Number.isInteger(dados.passiva.habilidadeVinculada) ||
-      dados.passiva.habilidadeVinculada < 0 ||
-      dados.passiva.habilidadeVinculada > 4
-    ) {
-      return null;
-    }
+  return dados.versao === 1 &&
+    (dados.editorAberto === undefined || typeof dados.editorAberto === "boolean") &&
+    (dados.abaAtiva === undefined || abasEditor.some((aba) => aba.id === dados.abaAtiva)) &&
+    elementos.some((item) => item.id === dados.elemento) &&
+    Object.prototype.hasOwnProperty.call(atributosPorClasse, dados.classe) &&
+    typeof dados.nome === "string" &&
+    typeof dados.historia === "string" &&
+    typeof dados.foto === "string" &&
+    (dados.foto === "" || /^data:image\/(png|jpeg|webp);base64,/i.test(dados.foto)) &&
+    !!dados.ataqueBasico &&
+    typeof dados.ataqueBasico.nome === "string" &&
+    typeof dados.ataqueBasico.descricao === "string" &&
+    Array.isArray(dados.habilidades) &&
+    dados.habilidades.length === 5 &&
+    dados.habilidades.every(habilidadeValida) &&
+    !!dados.passiva &&
+    typeof dados.passiva.nome === "string" &&
+    Object.prototype.hasOwnProperty.call(regrasPassivas, dados.passiva.modelo) &&
+    typeof dados.passiva.descricao === "string" &&
+    Number.isInteger(dados.passiva.habilidadeVinculada) &&
+    dados.passiva.habilidadeVinculada >= 0 &&
+    dados.passiva.habilidadeVinculada <= 4;
+}
 
-    return dados as RascunhoFicha;
+function carregarRascunho(): RascunhoFicha | null {
+  try {
+    const texto = window.localStorage.getItem(CHAVE_RASCUNHO);
+    if (!texto) return null;
+    const dados: unknown = JSON.parse(texto);
+    return validarFicha(dados) ? dados : null;
   } catch (erro) {
     console.warn("Não foi possível recuperar o rascunho salvo.", erro);
     return null;
   }
 }
 
+// Mantém o mesmo esquema do salvamento local; o invólucro identifica
+// o aplicativo e a versão do formato para futuras integrações.
+function obterFichaDoArquivo(conteudo: unknown): RascunhoFicha | null {
+  if (!conteudo || typeof conteudo !== "object" || Array.isArray(conteudo)) return null;
+  const pacote = conteudo as Record<string, unknown>;
+  if (pacote.formato === FORMATO_JSON && pacote.versaoFormato === 1) {
+    return validarFicha(pacote.ficha) ? pacote.ficha : null;
+  }
+  // Também aceita uma cópia do rascunho local v1, sem invólucro.
+  return validarFicha(conteudo) ? conteudo : null;
+}
+
 function App() {
   const [rascunhoInicial] = useState(() => carregarRascunho());
+  const seletorJsonRef = useRef<HTMLInputElement>(null);
   const [elemento, setElemento] = useState<Elemento>(rascunhoInicial?.elemento ?? "agua");
   // Novos rascunhos retomam a tela em que o jogador estava.
   // Rascunhos da versão anterior, que não guardavam a etapa, retomam o editor
@@ -474,6 +495,91 @@ function App() {
       console.warn("Não foi possível salvar o rascunho neste navegador.", erro);
     }
   }, [mostrandoIdentidade, abaAtiva, elemento, nome, classe, historia, foto, ataqueBasico, habilidades, passiva]);
+
+
+  const exportarJson = () => {
+    // Exporta os campos editáveis, sem depender de PDF ou das tabelas
+    // de atributos calculados a partir da classe.
+    const ficha: RascunhoFicha = {
+      versao: 1,
+      editorAberto: true,
+      abaAtiva,
+      elemento,
+      nome,
+      classe,
+      historia,
+      foto,
+      ataqueBasico,
+      habilidades,
+      passiva,
+    };
+    const pacote = {
+      formato: FORMATO_JSON,
+      versaoFormato: 1,
+      exportadoEm: new Date().toISOString(),
+      ficha,
+    };
+
+    try {
+      const dados = new Blob([JSON.stringify(pacote, null, 2)], {
+        type: "application/json;charset=utf-8",
+      });
+      const url = URL.createObjectURL(dados);
+      const nomeArquivo = nome.trim()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-zA-Z0-9_-]+/g, "-")
+        .replace(/^-+|-+$/g, "").slice(0, 60) || "personagem";
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = nomeArquivo + "-hexatombe-avatar.json";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (erro) {
+      console.error("Falha ao exportar JSON", erro);
+      window.alert("Não foi possível baixar o JSON desta ficha.");
+    }
+  };
+
+  const importarJson = async (evento: ChangeEvent<HTMLInputElement>) => {
+    const arquivo = evento.currentTarget.files?.[0];
+    evento.currentTarget.value = "";
+    if (!arquivo) return;
+    if (arquivo.size > LIMITE_JSON_BYTES) {
+      window.alert("Arquivo muito grande. O limite para importação é 8 MB.");
+      return;
+    }
+
+    try {
+      const conteudo: unknown = JSON.parse(await arquivo.text());
+      const ficha = obterFichaDoArquivo(conteudo);
+      if (!ficha) {
+        window.alert("JSON inválido ou incompatível. Selecione uma ficha exportada pelo criador Hexatombe: Avatar.");
+        return;
+      }
+
+      if (!window.confirm("Importar esta ficha substituirá o rascunho que está em edição neste navegador. Deseja continuar?")) {
+        return;
+      }
+
+      setElemento(ficha.elemento);
+      setNome(ficha.nome);
+      setClasse(ficha.classe);
+      setHistoria(ficha.historia);
+      setFoto(ficha.foto);
+      setAtaqueBasico({ ...ficha.ataqueBasico });
+      setHabilidades(ficha.habilidades.map((habilidade) => ({ ...habilidade })));
+      setPassiva({ ...ficha.passiva });
+      setAbaAtiva(ficha.abaAtiva ?? "identidade");
+      setHabilidadeAberta(0);
+      setMostrandoIdentidade(true);
+      window.alert("Ficha importada! Você pode continuar editando ou gerar o PDF.");
+    } catch (erro) {
+      console.warn("Erro ao ler o arquivo JSON", erro);
+      window.alert("Não foi possível ler este JSON. Confira se o arquivo é válido.");
+    }
+  };
 
   const atualizarHabilidade = (
     indice: number,
@@ -608,6 +714,14 @@ function App() {
 
   return (
     <main className={`app tema-${elemento}`}>
+      <input
+        ref={seletorJsonRef}
+        type="file"
+        accept=".json,application/json"
+        aria-label="Escolher arquivo JSON de personagem"
+        className="arquivo-json-oculto"
+        onChange={importarJson}
+      />
       <div className="aura" />
       <div className="conteudo">
         <header className={`cabecalho ${mostrandoIdentidade ? "cabecalho-compacto" : ""}`}>
@@ -670,6 +784,9 @@ function App() {
             >
               Criar personagem
             </button>
+            <button className="botao-json" type="button" onClick={() => seletorJsonRef.current?.click()}>
+              Importar ficha JSON
+            </button>
           </div>
         ) : (
           <section className="editor-identidade editor-com-abas">
@@ -687,6 +804,15 @@ function App() {
                 </button>
               ))}
             </nav>
+            <div className="acoes-json" aria-label="Arquivo editável da ficha">
+              <button className="botao-json" type="button" onClick={exportarJson}>
+                Exportar JSON
+              </button>
+              <button className="botao-json" type="button" onClick={() => seletorJsonRef.current?.click()}>
+                Importar JSON
+              </button>
+              <small>Salve um arquivo editável e abra-o depois, neste ou em outro navegador.</small>
+            </div>
 
             {abaAtiva === "identidade" && (
               <section className="conteudo-aba" aria-labelledby="aba-identidade">
@@ -1341,7 +1467,7 @@ function App() {
                     <p className="previa-alerta">Passiva experimental: requer aprovação do mestre.</p>
                   )}
                 </section>
-                <p className="previa-rodape">Este resumo é para consulta no editor. Use “Gerar ficha em PDF” para exportar o pergaminho com todos os detalhes.</p>
+                <p className="previa-rodape">Este resumo é para consulta no editor. Gere um PDF para impressão ou exporte um JSON para continuar a edição depois.</p>
               </section>
             )}
 
