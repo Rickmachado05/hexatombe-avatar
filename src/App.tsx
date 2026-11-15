@@ -13,7 +13,7 @@ import "./HexatombeHabilidades.css";
 import "./HexatombePrevia.css";
 
 type Elemento = "agua" | "terra" | "fogo" | "ar" | "neutro";
-type Classe = "Lutador" | "Linha de Frente" | "Conjurador";
+type PerfilLegadoTecnica = "Lutador" | "Linha de Frente" | "Conjurador";
 type TipoHabilidade =
   | "Ofensiva"
   | "Ofensiva em área"
@@ -57,8 +57,8 @@ type RegraModelo = {
   nome: string;
   tipo: TipoHabilidade;
   acao: TipoAcao;
-  custo: number | Record<Classe, number>;
-  valor: string | Record<Classe, string>;
+  custo: number | Record<PerfilLegadoTecnica, number>;
+  valor: string | Record<PerfilLegadoTecnica, string>;
   rotuloValor: string;
   valorAdicional?: string;
   rotuloAdicional?: string;
@@ -74,21 +74,6 @@ const elementos = [
   { id: "ar", nome: "Ar", simbolo: "气", descricao: "Liberdade, movimento e espiritualidade." },
   { id: "neutro", nome: "Não Dobrador", simbolo: "✦", descricao: "Disciplina, técnica e perseverança." },
 ] as const;
-
-const atributosPorClasse: Record<
-  Classe,
-  { hp: number; mana: number; ca: number; regeneracao: string }
-> = {
-  Lutador: { hp: 135, mana: 130, ca: 10, regeneracao: "1d4" },
-  "Linha de Frente": { hp: 145, mana: 120, ca: 11, regeneracao: "1d6" },
-  Conjurador: { hp: 130, mana: 180, ca: 10, regeneracao: "1d10" },
-};
-
-const danoBasicoPorClasse: Record<Classe, string> = {
-  Lutador: "2d6+6",
-  "Linha de Frente": "1d10+6",
-  Conjurador: "2d6+6",
-};
 
 // Modelos de combate baseados nas fichas-piloto v1.0 e no guia v0.8.
 // Escudo ATIVO é uma proposta de playtest, ainda não validada em mesa.
@@ -205,14 +190,19 @@ const modelosPorTipo: Record<TipoHabilidade, ModeloId[]> = {
   Utilidade: ["movimento", "criarArma", "encantarArma"],
 };
 
-const custoDaTecnica = (modelo: ModeloId, classe: Classe) => {
+// Os modelos antigos de habilidades permanecem provisórios até a atualização H06.
+// Não há perfil de combate selecionável nem recursos derivados de classe.
+const MODELO_TECNICA_LEGADO: PerfilLegadoTecnica = "Lutador";
+
+const custoDaTecnica = (modelo: ModeloId) => {
   const custo = regrasModelos[modelo].custo;
-  return typeof custo === "number" ? custo : custo[classe];
+  return typeof custo === "number" ? custo : custo[MODELO_TECNICA_LEGADO];
 };
 
-const valorDaTecnica = (modelo: ModeloId, classe: Classe) => {
+const valorDaTecnica = (modelo: ModeloId, danoBasicoAtual?: string) => {
+  if (modelo === "criarArma" && danoBasicoAtual) return danoBasicoAtual;
   const valor = regrasModelos[modelo].valor;
-  return typeof valor === "string" ? valor : valor[classe];
+  return typeof valor === "string" ? valor : valor[MODELO_TECNICA_LEGADO];
 };
 
 const rotuloMomentoDeUso = (acao: TipoAcao) =>
@@ -581,7 +571,7 @@ type RascunhoFicha = {
   arquetipoImpeto?: ArquetipoImpeto | "";
   talentoArquetipo?: TalentoArquetipoId | "";
   nome: string;
-  classe: Classe;
+  classe?: PerfilLegadoTecnica; // campo de JSON anterior, ignorado em novas fichas
   historia: string;
   foto: string;
   ataqueBasico: { nome: string; descricao: string };
@@ -621,7 +611,9 @@ function validarFicha(valor: unknown): valor is RascunhoFicha {
     (dados.recursosImpeto === undefined || validarRecursosImpeto(dados.recursosImpeto)) &&
     (dados.periciasImpeto === undefined || validarPericiasImpeto(dados.periciasImpeto)) &&
     validarEscolhaT02(dados.arquetipoImpeto, dados.talentoArquetipo) &&
-    Object.prototype.hasOwnProperty.call(atributosPorClasse, dados.classe ?? "") &&
+    (dados.classe === undefined ||
+      (typeof dados.classe === "string" &&
+        ["Lutador", "Linha de Frente", "Conjurador"].includes(dados.classe))) &&
     typeof dados.nome === "string" &&
     typeof dados.historia === "string" &&
     typeof dados.foto === "string" &&
@@ -692,7 +684,6 @@ function App() {
       Boolean(rascunhoInicial?.nome.trim() || rascunhoInicial?.historia.trim())
   );
   const [nome, setNome] = useState(rascunhoInicial?.nome ?? "");
-  const [classe, setClasse] = useState<Classe>(rascunhoInicial?.classe ?? "Lutador");
   const [historia, setHistoria] = useState(rascunhoInicial?.historia ?? "");
   const [foto, setFoto] = useState(rascunhoInicial?.foto ?? "");
   const [abaAtiva, setAbaAtiva] = useState<AbaEditor>(normalizarAbaEditor(rascunhoInicial?.abaAtiva));
@@ -735,7 +726,6 @@ function App() {
       arquetipoImpeto,
       talentoArquetipo,
       nome,
-      classe,
       historia,
       foto,
       ataqueBasico,
@@ -747,7 +737,7 @@ function App() {
     } catch (erro) {
       console.warn("Não foi possível salvar o rascunho neste navegador.", erro);
     }
-  }, [mostrandoIdentidade, abaAtiva, elemento, atributosImpeto, recursosImpeto, periciasImpeto, arquetipoImpeto, talentoArquetipo, nome, classe, historia, foto, ataqueBasico, habilidades, passiva]);
+  }, [mostrandoIdentidade, abaAtiva, elemento, atributosImpeto, recursosImpeto, periciasImpeto, arquetipoImpeto, talentoArquetipo, nome, historia, foto, ataqueBasico, habilidades, passiva]);
 
 
   const exportarJson = () => {
@@ -764,7 +754,6 @@ function App() {
       arquetipoImpeto,
       talentoArquetipo,
       nome,
-      classe,
       historia,
       foto,
       ataqueBasico,
@@ -828,7 +817,6 @@ function App() {
       setArquetipoImpeto(ficha.arquetipoImpeto ?? "");
       setTalentoArquetipo(ficha.talentoArquetipo ?? "");
       setNome(ficha.nome);
-      setClasse(ficha.classe);
       setHistoria(ficha.historia);
       setFoto(ficha.foto);
       setAtaqueBasico({ ...ficha.ataqueBasico });
@@ -913,7 +901,6 @@ function App() {
   };
 
   const selecionado = elementos.find((item) => item.id === elemento)!;
-  const atributos = atributosPorClasse[classe];
   const regraPassiva = regrasPassivas[passiva.modelo];
   const habilidadeVinculada = habilidades[passiva.habilidadeVinculada];
   const vinculoPodeAcertar = habilidadeVinculada && [
@@ -976,13 +963,16 @@ function App() {
       await exportarFichaPdf({
         nome: nome.trim(),
         elemento,
-        classe,
+        classe: arquetipoImpeto || "Ímpeto RPG",
         historia,
         foto,
-        ...atributos,
+        hp: recursosCalculados.hp,
+        mana: recursosCalculados.energia,
+        ca: recursosCalculados.ca,
+        regeneracao: `+${recursosCalculados.regeneracao} EN/rodada`,
         ataqueBasico: {
           nome: ataqueBasico.nome,
-          dano: danoBasicoPorClasse[classe],
+          dano: recursosCalculados.ataque,
           descricao: ataqueBasico.descricao,
         },
         habilidades: habilidades.map((h) => {
@@ -992,8 +982,8 @@ function App() {
             categoria: regra.tipo,
             modelo: regra.nome,
             acao: regra.acao,
-            custo: custoDaTecnica(h.modelo, classe),
-            valor: valorDaTecnica(h.modelo, classe),
+            custo: custoDaTecnica(h.modelo),
+            valor: valorDaTecnica(h.modelo, recursosCalculados.ataque),
             rotuloValor: regra.rotuloValor,
             valorAdicional: regra.valorAdicional,
             rotuloAdicional: regra.rotuloAdicional,
@@ -1199,17 +1189,6 @@ function App() {
               value={nome}
               onChange={(e) => setNome(e.target.value)}
             />
-
-            <label htmlFor="classe-personagem">Perfil de combate anterior (temporário)</label>
-            <select
-              id="classe-personagem"
-              value={classe}
-              onChange={(e) => setClasse(e.target.value as Classe)}
-            >
-              <option value="Lutador">Lutador</option>
-              <option value="Linha de Frente">Linha de Frente</option>
-              <option value="Conjurador">Conjurador</option>
-            </select>
 
             <label htmlFor="historia-personagem">História</label>
             <textarea
@@ -1551,8 +1530,8 @@ function App() {
                       </span>
                       <span className="resumo-habilidade-cabecalho">
                         <span className="etiqueta-tipo">{modelo.tipo}</span>
-                        <span className="etiqueta-mana">{custoDaTecnica(habilidade.modelo, classe)} Mana</span>
-                        <span className="etiqueta-valor">{valorDaTecnica(habilidade.modelo, classe)}</span>
+                        <span className="etiqueta-mana">{custoDaTecnica(habilidade.modelo)} Mana</span>
+                        <span className="etiqueta-valor">{valorDaTecnica(habilidade.modelo, recursosCalculados.ataque)}</span>
                       </span>
                       <span className="icone-expandir" aria-hidden="true">{habilidadeAberta === indice ? "−" : "+"}</span>
                     </button>
@@ -1611,7 +1590,7 @@ function App() {
                         <input
                           id={`skill-${indice}-mana`}
                           type="number"
-                          value={custoDaTecnica(habilidade.modelo, classe)}
+                          value={custoDaTecnica(habilidade.modelo)}
                           readOnly
                         />
                       </div>
@@ -1621,7 +1600,7 @@ function App() {
                         </label>
                         <input
                           id={`skill-${indice}-valor`}
-                          value={valorDaTecnica(habilidade.modelo, classe)}
+                          value={valorDaTecnica(habilidade.modelo, recursosCalculados.ataque)}
                           readOnly
                         />
                       </div>
@@ -2016,12 +1995,12 @@ function App() {
                           </div>
                           <div className="previa-chips previa-tecnica-chips">
                             <span>{modelo.tipo}</span>
-                            <span>{custoDaTecnica(habilidade.modelo, classe)} Mana</span>
+                            <span>{custoDaTecnica(habilidade.modelo)} Mana</span>
                             <span>{rotuloMomentoDeUso(modelo.acao)}</span>
                           </div>
                           <p className="previa-tecnica-efeito">
                             <span>{modelo.rotuloValor}</span>
-                            <strong>{valorDaTecnica(habilidade.modelo, classe)}</strong>
+                            <strong>{valorDaTecnica(habilidade.modelo, recursosCalculados.ataque)}</strong>
                             {modelo.valorAdicional && <em> + {modelo.valorAdicional}</em>}
                           </p>
                           {modelo.experimental && <span className="previa-experimental">Em playtest</span>}
