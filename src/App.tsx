@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import { exportarFichaPdf } from "./pdf/exportarFichaPdf";
+import { SimboloElemento } from "./SimboloElemento";
 import {
   novaExploracao, migrarAtivas, migrarPassiva, validaConstrucao,
   custoPC, custoPassiva, custoPX, PERFIS
@@ -75,11 +76,11 @@ type RegraModelo = {
 };
 
 const elementos = [
-  { id: "agua", nome: "Água", simbolo: "水", descricao: "Adaptação, equilíbrio e fluidez." },
-  { id: "terra", nome: "Terra", simbolo: "土", descricao: "Resistência, firmeza e determinação." },
-  { id: "fogo", nome: "Fogo", simbolo: "火", descricao: "Energia, transformação e vontade." },
-  { id: "ar", nome: "Ar", simbolo: "气", descricao: "Liberdade, movimento e espiritualidade." },
-  { id: "neutro", nome: "Não Dobrador", simbolo: "✦", descricao: "Disciplina, técnica e perseverança." },
+  { id: "agua", nome: "Água", descricao: "Adaptação, equilíbrio e fluidez." },
+  { id: "terra", nome: "Terra", descricao: "Resistência, firmeza e determinação." },
+  { id: "fogo", nome: "Fogo", descricao: "Energia, transformação e vontade." },
+  { id: "ar", nome: "Ar", descricao: "Liberdade, movimento e espiritualidade." },
+  { id: "neutro", nome: "Não Dobrador", descricao: "Disciplina, técnica e perseverança." },
 ] as const;
 
 // Modelos de combate baseados nas fichas-piloto v1.0 e no guia v0.8.
@@ -1249,7 +1250,7 @@ function App() {
                 onClick={() => setElemento(item.id)}
                 aria-pressed={elemento === item.id}
               >
-                <span className="simbolo">{item.simbolo}</span>
+                <span className="simbolo" translate="no"><SimboloElemento elemento={item.id}/></span>
                 <span className="nome">{item.nome}</span>
               </button>
             ))}
@@ -1258,7 +1259,7 @@ function App() {
 
         <section className="detalhes">
           <div className="circulo-espiritual">
-            <span>{selecionado.simbolo}</span>
+            <SimboloElemento elemento={elemento}/>
           </div>
           <h2>{selecionado.nome}</h2>
           <p>{selecionado.descricao}</p>
@@ -1346,7 +1347,7 @@ function App() {
                         onClick={() => setElemento(item.id)}
                         aria-pressed={elemento === item.id}
                       >
-                        <span className="simbolo">{item.simbolo}</span>
+                        <span className="simbolo" translate="no"><SimboloElemento elemento={item.id}/></span>
                         <span className="nome">{item.nome}</span>
                       </button>
                     ))}
@@ -1824,7 +1825,7 @@ function App() {
                       <img src={foto} alt={`Retrato de ${nome.trim() || "personagem sem nome"}`} />
                     ) : (
                       <div className="previa-retrato-vazio">
-                        <span className="previa-simbolo">{selecionado.simbolo}</span>
+                        <span className="previa-simbolo" translate="no"><SimboloElemento elemento={elemento}/></span>
                         <small>Sem retrato</small>
                       </div>
                     )}
@@ -1833,7 +1834,7 @@ function App() {
                     <span className="previa-rotulo">VÍNCULO ELEMENTAL</span>
                     <h3>{nome.trim() || "Personagem sem nome"}</h3>
                     <div className="previa-chips">
-                      <span className="previa-chip-elemento">{selecionado.simbolo} {selecionado.nome}</span>
+                      <span className="previa-chip-elemento"><SimboloElemento elemento={elemento}/>{selecionado.nome}</span>
                       {arquetipoImpeto && <span>{arquetipoImpeto}</span>}
                     </div>
                     <div className="previa-historia">
