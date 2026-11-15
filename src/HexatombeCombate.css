@@ -775,3 +775,93 @@
   .app .editor-com-abas .painel-recursos-topo { flex-wrap: wrap; }
   .app .editor-com-abas .saldo-pr { text-align: left; }
 }
+
+/* V01: vantagem universal separada dos talentos T02 (Avatar). */
+.app .editor-com-abas .painel-vantagens-v01 {
+  margin: 22px 0 26px;
+  padding: clamp(14px, 2.3vw, 24px);
+  background: linear-gradient(145deg, rgba(26, 36, 52, .98), rgba(9, 17, 29, .97));
+  border: 1px solid rgba(205, 166, 111, .43);
+  border-radius: 15px;
+}
+.app .editor-com-abas .cabecalho-vantagem-v01 h3 {
+  margin: 7px 0;
+  color: #f1dcb6;
+  font-size: clamp(1.12rem, 2vw, 1.5rem);
+}
+.app .editor-com-abas .cabecalho-vantagem-v01 p {
+  color: #c6d0da;
+  font-size: .84rem;
+  line-height: 1.58;
+  margin: 7px 0 16px;
+}
+.app .editor-com-abas .grade-vantagens-v01 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.app .editor-com-abas .cartao-vantagem-v01 {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 14px;
+  border: 1px solid rgba(191, 165, 121, .28);
+  border-radius: 10px;
+  background: rgba(7, 16, 28, .85);
+  cursor: pointer;
+}
+.app .editor-com-abas .cartao-vantagem-v01.selecionada {
+  border-color: var(--elemento);
+  background: linear-gradient(120deg, var(--brilho), rgba(15, 26, 43, .97));
+}
+.app .editor-com-abas .cartao-vantagem-v01 input {
+  margin: 3px 0 0;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  accent-color: var(--elemento);
+}
+.app .editor-com-abas .cartao-vantagem-v01 strong {
+  display: block;
+  color: #f2e0c0;
+  margin-bottom: 6px;
+  font-size: .88rem;
+}
+.app .editor-com-abas .cartao-vantagem-v01 small {
+  display: block;
+  color: #bfcedb;
+  line-height: 1.5;
+  font-size: .79rem;
+}
+.app .editor-com-abas .limpar-vantagem-v01 {
+  margin-top: 14px;
+  padding: 9px 14px;
+  border: 1px solid rgba(214, 175, 118, .5);
+  border-radius: 8px;
+  background: rgba(15, 26, 41, .8);
+  color: #f2ddb9;
+  font-weight: 600;
+  cursor: pointer;
+}
+.app .editor-com-abas .previa-vantagem-v01 {
+  margin-top: 13px;
+  padding: 13px 15px;
+  border: 1px solid rgba(206, 170, 118, .28);
+  border-radius: 9px;
+  color: #f0dcbb;
+  background: rgba(13, 24, 39, .82);
+}
+.app .editor-com-abas .previa-vantagem-v01 p {
+  margin: 8px 0;
+  color: #e4d3b4;
+  font-weight: 600;
+}
+.app .editor-com-abas .previa-vantagem-v01 small {
+  display: block;
+  color: #b9c8d4;
+  font-size: .79rem;
+  line-height: 1.5;
+}
+@media (max-width: 740px) {
+  .app .editor-com-abas .grade-vantagens-v01 { grid-template-columns: 1fr; }
+}
