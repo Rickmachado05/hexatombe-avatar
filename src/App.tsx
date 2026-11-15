@@ -345,12 +345,61 @@ type PassivaEditavel = {
   habilidadeVinculada: number;
 };
 
+
+type NomeAtributoImpeto =
+  | "Força" | "Agilidade" | "Destreza" | "Vigor"
+  | "Intelecto" | "Percepção" | "Vontade" | "Presença";
+type AtributosImpeto = Record<NomeAtributoImpeto, number>;
+
+const NOMES_ATRIBUTOS_IMPETO: NomeAtributoImpeto[] = [
+  "Força", "Agilidade", "Destreza", "Vigor",
+  "Intelecto", "Percepção", "Vontade", "Presença",
+];
+const PA_INICIAL_REFERENCIA = 28;
+const ATRIBUTO_BASE_REFERENCIA = 8;
+const ATRIBUTO_TETO_REFERENCIA = 14;
+const ATRIBUTOS_PADRAO_IMPETO: AtributosImpeto = {
+  Força: 8, Agilidade: 8, Destreza: 8, Vigor: 8,
+  Intelecto: 8, Percepção: 8, Vontade: 8, Presença: 8,
+};
+
+function custoPassoAtributo(valorDeChegada: number): number {
+  if (valorDeChegada <= 12) return 1;
+  if (valorDeChegada <= 14) return 2;
+  if (valorDeChegada <= 16) return 3;
+  if (valorDeChegada <= 18) return 4;
+  return 5;
+}
+
+function pontosGastosAtributos(atributos: AtributosImpeto): number {
+  return NOMES_ATRIBUTOS_IMPETO.reduce((total, atributo) => {
+    let gasto = 0;
+    for (let n = ATRIBUTO_BASE_REFERENCIA + 1; n <= atributos[atributo]; n += 1) {
+      gasto += custoPassoAtributo(n);
+    }
+    return total + gasto;
+  }, 0);
+}
+
+function validarAtributosImpeto(valor: unknown): valor is AtributosImpeto {
+  if (!valor || typeof valor !== "object" || Array.isArray(valor)) return false;
+  const dados = valor as Record<string, unknown>;
+  const valido = NOMES_ATRIBUTOS_IMPETO.every((nome) => {
+    const n = dados[nome];
+    return typeof n === "number" && Number.isInteger(n) &&
+      n >= ATRIBUTO_BASE_REFERENCIA && n <= ATRIBUTO_TETO_REFERENCIA;
+  });
+  return valido && pontosGastosAtributos(valor as AtributosImpeto) <= PA_INICIAL_REFERENCIA;
+}
+
 type RascunhoFicha = {
   versao: 1;
   // Etapa visual opcional para manter compatibilidade com rascunhos anteriores.
   editorAberto?: boolean;
   abaAtiva?: AbaEditor;
   elemento: Elemento;
+  // Opcional para importar fichas JSON produzidas antes desta atualização.
+  atributosImpeto?: AtributosImpeto;
   nome: string;
   classe: Classe;
   historia: string;
@@ -388,6 +437,7 @@ function validarFicha(valor: unknown): valor is RascunhoFicha {
     (dados.editorAberto === undefined || typeof dados.editorAberto === "boolean") &&
     (dados.abaAtiva === undefined || abasEditor.some((aba) => aba.id === dados.abaAtiva)) &&
     elementos.some((item) => item.id === dados.elemento) &&
+    (dados.atributosImpeto === undefined || validarAtributosImpeto(dados.atributosImpeto)) &&
     Object.prototype.hasOwnProperty.call(atributosPorClasse, dados.classe ?? "") &&
     typeof dados.nome === "string" &&
     typeof dados.historia === "string" &&
@@ -436,6 +486,9 @@ function App() {
   const [rascunhoInicial] = useState(() => carregarRascunho());
   const seletorJsonRef = useRef<HTMLInputElement>(null);
   const [elemento, setElemento] = useState<Elemento>(rascunhoInicial?.elemento ?? "agua");
+  const [atributosImpeto, setAtributosImpeto] = useState<AtributosImpeto>(
+    rascunhoInicial?.atributosImpeto ?? { ...ATRIBUTOS_PADRAO_IMPETO }
+  );
   // Novos rascunhos retomam a tela em que o jogador estava.
   // Rascunhos da versão anterior, que não guardavam a etapa, retomam o editor
   // caso já exista nome ou história preenchidos.
@@ -481,6 +534,7 @@ function App() {
       editorAberto: mostrandoIdentidade,
       abaAtiva,
       elemento,
+      atributosImpeto,
       nome,
       classe,
       historia,
@@ -494,7 +548,7 @@ function App() {
     } catch (erro) {
       console.warn("Não foi possível salvar o rascunho neste navegador.", erro);
     }
-  }, [mostrandoIdentidade, abaAtiva, elemento, nome, classe, historia, foto, ataqueBasico, habilidades, passiva]);
+  }, [mostrandoIdentidade, abaAtiva, elemento, atributosImpeto, nome, classe, historia, foto, ataqueBasico, habilidades, passiva]);
 
 
   const exportarJson = () => {
@@ -505,6 +559,7 @@ function App() {
       editorAberto: true,
       abaAtiva,
       elemento,
+      atributosImpeto,
       nome,
       classe,
       historia,
@@ -564,6 +619,7 @@ function App() {
       }
 
       setElemento(ficha.elemento);
+      setAtributosImpeto(ficha.atributosImpeto ?? { ...ATRIBUTOS_PADRAO_IMPETO });
       setNome(ficha.nome);
       setClasse(ficha.classe);
       setHistoria(ficha.historia);
@@ -579,6 +635,25 @@ function App() {
       console.warn("Erro ao ler o arquivo JSON", erro);
       window.alert("Não foi possível ler este JSON. Confira se o arquivo é válido.");
     }
+  };
+
+
+  const paGastos = pontosGastosAtributos(atributosImpeto);
+  const paDisponiveis = PA_INICIAL_REFERENCIA - paGastos;
+
+  const alterarAtributoImpeto = (nomeAtributo: NomeAtributoImpeto, delta: -1 | 1) => {
+    setAtributosImpeto((anterior) => {
+      const valorAtual = anterior[nomeAtributo];
+      const proximoValor = valorAtual + delta;
+      if (proximoValor < ATRIBUTO_BASE_REFERENCIA || proximoValor > ATRIBUTO_TETO_REFERENCIA) {
+        return anterior;
+      }
+      if (delta === 1 && pontosGastosAtributos(anterior) +
+        custoPassoAtributo(proximoValor) > PA_INICIAL_REFERENCIA) {
+        return anterior;
+      }
+      return { ...anterior, [nomeAtributo]: proximoValor };
+    });
   };
 
   const atualizarHabilidade = (
@@ -905,6 +980,51 @@ function App() {
             {abaAtiva === "combate" && (
               <section className="conteudo-aba" aria-labelledby="aba-combate">
                 <h2>Combate</h2>
+
+                <section className="painel-atributos-impeto" aria-label="Oito atributos do Ímpeto RPG">
+                  <div className="painel-impeto-topo">
+                    <div>
+                      <span className="rotulo-impeto">ÍMPETO RPG 1.0 · ETAPA DE ADAPTAÇÃO</span>
+                      <h3>Oito atributos do personagem</h3>
+                    </div>
+                    <p className="saldo-pa">
+                      <strong>{paDisponiveis}</strong> PA restantes
+                      <small>{paGastos} de {PA_INICIAL_REFERENCIA} usados</small>
+                    </p>
+                  </div>
+                  <p className="descricao-atributos-impeto">
+                    Referência experimental do livro: valor base 8, teto 14 na criação e 28 PA
+                    para distribuir. Custos por aumento: 9–12 = 1 PA; 13–14 = 2 PA.
+                    Estes atributos ainda não substituem os recursos de combate legados abaixo.
+                  </p>
+                  <div className="grade-atributos-impeto">
+                    {NOMES_ATRIBUTOS_IMPETO.map((nomeAtributo) => {
+                      const valor = atributosImpeto[nomeAtributo];
+                      const custoProximo = custoPassoAtributo(valor + 1);
+                      return (
+                        <div className="atributo-impeto" key={nomeAtributo}>
+                          <span>{nomeAtributo}</span>
+                          <div className="controle-atributo-impeto">
+                            <button type="button"
+                              aria-label={`Diminuir ${nomeAtributo}`}
+                              disabled={valor <= ATRIBUTO_BASE_REFERENCIA}
+                              onClick={() => alterarAtributoImpeto(nomeAtributo, -1)}>−</button>
+                            <strong aria-label={`${nomeAtributo}: ${valor}`}>{valor}</strong>
+                            <button type="button"
+                              aria-label={`Aumentar ${nomeAtributo}`}
+                              disabled={valor >= ATRIBUTO_TETO_REFERENCIA || custoProximo > paDisponiveis}
+                              onClick={() => alterarAtributoImpeto(nomeAtributo, 1)}>+</button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <small className="aviso-impeto">
+                    O orçamento de atributos e os recursos avançados da campanha Hexatombe: Avatar
+                    serão consolidados antes de substituir os valores antigos de combate.
+                    A distribuição de PA já é salva automaticamente e incluída no JSON.
+                  </small>
+                </section>
                 <div className="atributos-ficha">
                   <div className="atributo"><span>HP</span><strong>{atributos.hp}</strong></div>
                   <div className="atributo"><span>Mana</span><strong>{atributos.mana}</strong></div>
@@ -1341,6 +1461,13 @@ function App() {
                     <button className="previa-editar" type="button" onClick={() => setAbaAtiva("combate")}>
                       Editar combate
                     </button>
+                  </div>
+                  <div className="previa-impeto-atributos">
+                    <strong>Ímpeto RPG · Atributos universais</strong>
+                    <p>{NOMES_ATRIBUTOS_IMPETO.map((chave) =>
+                      `${chave}: ${atributosImpeto[chave]}`).join(" · ")}</p>
+                    <small>PA: {paGastos} usados / {PA_INICIAL_REFERENCIA} disponíveis.
+                      Dados de combate abaixo ainda usam a escala anterior durante a adaptação.</small>
                   </div>
                   <div className="previa-atributos">
                     <div className="previa-atributo previa-hp">
