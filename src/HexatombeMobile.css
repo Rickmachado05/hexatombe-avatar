@@ -322,3 +322,122 @@
   .app .editor-com-abas .navegacao-etapas-mobile *,
   .app .editor-com-abas .navegacao-editor * { transition: none; }
 }
+
+
+/* Seleção elemental mobile: a regra antiga em index.css forçava largura de
+   50% da célula do grid. Cada card deve ocupar toda a própria coluna. */
+@media (max-width: 760px), (pointer: coarse) and (max-width: 960px) {
+  .app:has(.acoes) .selecao .elementos,
+  .app .editor-com-abas .selecao-identidade .elementos {
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    justify-items: stretch;
+    align-items: stretch;
+    gap: 10px;
+    box-sizing: border-box;
+  }
+
+  .app:has(.acoes) .selecao .elementos > .elemento,
+  .app .editor-com-abas .selecao-identidade .elementos > .elemento {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: auto;
+    min-height: 108px;
+    margin: 0;
+    padding: 12px 8px;
+    gap: 7px;
+    box-sizing: border-box;
+    overflow: hidden;
+    white-space: normal;
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+
+  .app:has(.acoes) .selecao .elemento .simbolo,
+  .app .editor-com-abas .selecao-identidade .elemento .simbolo {
+    display: block;
+    max-width: 100%;
+    margin: 0;
+    font-size: clamp(1.22rem, 4.4vw, 1.75rem);
+    font-weight: 500;
+    line-height: 1.16;
+    letter-spacing: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .app:has(.acoes) .selecao .elemento .nome,
+  .app .editor-com-abas .selecao-identidade .elemento .nome {
+    display: block;
+    max-width: 100%;
+    margin: 0;
+    font-size: clamp(.78rem, 2.9vw, .94rem);
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+    hyphens: auto;
+  }
+
+  /* O selo usa o nome/símbolo textual do elemento, não uma imagem.
+     Redimensionar o span também (a fonte global era 52px). */
+  .app:has(.acoes) .detalhes .circulo-espiritual {
+    min-width: 0;
+    flex-shrink: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  .app:has(.acoes) .detalhes .circulo-espiritual > span {
+    display: block;
+    max-width: 100%;
+    padding: 0 2px;
+    box-sizing: border-box;
+    text-align: center;
+    font-size: clamp(.78rem, 2.7vw, 1rem);
+    line-height: 1.1;
+    letter-spacing: 0;
+    overflow-wrap: anywhere;
+  }
+  .app:has(.acoes) .detalhes {
+    box-sizing: border-box;
+    max-width: 100%;
+    min-width: 0;
+  }
+  .app:has(.acoes) .detalhes > :is(h2, p, .mensagem) {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 600px) {
+  .app:has(.acoes) .selecao .elementos,
+  .app .editor-com-abas .selecao-identidade .elementos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .app:has(.acoes) .selecao .elementos > .elemento,
+  .app .editor-com-abas .selecao-identidade .elementos > .elemento {
+    min-height: 116px;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 760px) {
+  .app:has(.acoes) .selecao .elementos,
+  .app .editor-com-abas .selecao-identidade .elementos {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 360px) {
+  .app:has(.acoes) .selecao .elementos,
+  .app .editor-com-abas .selecao-identidade .elementos {
+    gap: 8px;
+  }
+  .app:has(.acoes) .selecao .elementos > .elemento,
+  .app .editor-com-abas .selecao-identidade .elementos > .elemento {
+    padding-inline: 5px;
+  }
+}
