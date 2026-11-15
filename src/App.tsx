@@ -346,6 +346,9 @@ type PassivaEditavel = {
 
 type RascunhoFicha = {
   versao: 1;
+  // Etapa visual opcional para manter compatibilidade com rascunhos anteriores.
+  editorAberto?: boolean;
+  abaAtiva?: AbaEditor;
   elemento: Elemento;
   nome: string;
   classe: Classe;
@@ -378,6 +381,8 @@ function carregarRascunho(): RascunhoFicha | null {
     if (
       !dados ||
       dados.versao !== 1 ||
+      (dados.editorAberto !== undefined && typeof dados.editorAberto !== "boolean") ||
+      (dados.abaAtiva !== undefined && !abasEditor.some((aba) => aba.id === dados.abaAtiva)) ||
       !elementos.some((item) => item.id === dados.elemento) ||
       !Object.prototype.hasOwnProperty.call(atributosPorClasse, dados.classe ?? "") ||
       typeof dados.nome !== "string" ||
@@ -410,12 +415,18 @@ function carregarRascunho(): RascunhoFicha | null {
 function App() {
   const [rascunhoInicial] = useState(() => carregarRascunho());
   const [elemento, setElemento] = useState<Elemento>(rascunhoInicial?.elemento ?? "agua");
-  const [mostrandoIdentidade, setMostrandoIdentidade] = useState(false);
+  // Novos rascunhos retomam a tela em que o jogador estava.
+  // Rascunhos da versão anterior, que não guardavam a etapa, retomam o editor
+  // caso já exista nome ou história preenchidos.
+  const [mostrandoIdentidade, setMostrandoIdentidade] = useState(
+    rascunhoInicial?.editorAberto ??
+      Boolean(rascunhoInicial?.nome.trim() || rascunhoInicial?.historia.trim())
+  );
   const [nome, setNome] = useState(rascunhoInicial?.nome ?? "");
   const [classe, setClasse] = useState<Classe>(rascunhoInicial?.classe ?? "Lutador");
   const [historia, setHistoria] = useState(rascunhoInicial?.historia ?? "");
   const [foto, setFoto] = useState(rascunhoInicial?.foto ?? "");
-  const [abaAtiva, setAbaAtiva] = useState<AbaEditor>("identidade");
+  const [abaAtiva, setAbaAtiva] = useState<AbaEditor>(rascunhoInicial?.abaAtiva ?? "identidade");
   const [exportandoPdf, setExportandoPdf] = useState(false);
   const [habilidadeAberta, setHabilidadeAberta] = useState<number | "passiva" | null>(0);
 
@@ -446,6 +457,8 @@ function App() {
   useEffect(() => {
     const rascunho: RascunhoFicha = {
       versao: 1,
+      editorAberto: mostrandoIdentidade,
+      abaAtiva,
       elemento,
       nome,
       classe,
@@ -460,7 +473,7 @@ function App() {
     } catch (erro) {
       console.warn("Não foi possível salvar o rascunho neste navegador.", erro);
     }
-  }, [elemento, nome, classe, historia, foto, ataqueBasico, habilidades, passiva]);
+  }, [mostrandoIdentidade, abaAtiva, elemento, nome, classe, historia, foto, ataqueBasico, habilidades, passiva]);
 
   const atualizarHabilidade = (
     indice: number,
