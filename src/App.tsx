@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { exportarFichaPdf } from "./pdf/exportarFichaPdf";
 import "./HexatombePdf.css";
 import "./App.css";
@@ -336,42 +336,131 @@ const abasEditor: { id: AbaEditor; nome: string }[] = [
   { id: "previa", nome: "Prévia" },
 ];
 
+
+type PassivaEditavel = {
+  nome: string;
+  modelo: ModeloPassivaId;
+  descricao: string;
+  habilidadeVinculada: number;
+};
+
+type RascunhoFicha = {
+  versao: 1;
+  elemento: Elemento;
+  nome: string;
+  classe: Classe;
+  historia: string;
+  foto: string;
+  ataqueBasico: { nome: string; descricao: string };
+  habilidades: Habilidade[];
+  passiva: PassivaEditavel;
+};
+
+const CHAVE_RASCUNHO = "hexatombe-avatar:rascunho:v1";
+
+function carregarRascunho(): RascunhoFicha | null {
+  try {
+    const texto = window.localStorage.getItem(CHAVE_RASCUNHO);
+    if (!texto) return null;
+
+    const dados = JSON.parse(texto) as Partial<RascunhoFicha>;
+    const habilidadeValida = (habilidade: Habilidade) =>
+      habilidade !== null &&
+      typeof habilidade === "object" &&
+      typeof habilidade.nome === "string" &&
+      Object.prototype.hasOwnProperty.call(regrasModelos, habilidade.modelo) &&
+      (habilidade.alvos === 1 || habilidade.alvos === 2) &&
+      typeof habilidade.efeito === "string" &&
+      typeof habilidade.limitacoes === "string" &&
+      typeof habilidade.nomeCondicao === "string" &&
+      typeof habilidade.nomeArma === "string";
+
+    if (
+      !dados ||
+      dados.versao !== 1 ||
+      !elementos.some((item) => item.id === dados.elemento) ||
+      !Object.prototype.hasOwnProperty.call(atributosPorClasse, dados.classe ?? "") ||
+      typeof dados.nome !== "string" ||
+      typeof dados.historia !== "string" ||
+      typeof dados.foto !== "string" ||
+      !dados.ataqueBasico ||
+      typeof dados.ataqueBasico.nome !== "string" ||
+      typeof dados.ataqueBasico.descricao !== "string" ||
+      !Array.isArray(dados.habilidades) ||
+      dados.habilidades.length !== 5 ||
+      !dados.habilidades.every(habilidadeValida) ||
+      !dados.passiva ||
+      typeof dados.passiva.nome !== "string" ||
+      !Object.prototype.hasOwnProperty.call(regrasPassivas, dados.passiva.modelo) ||
+      typeof dados.passiva.descricao !== "string" ||
+      !Number.isInteger(dados.passiva.habilidadeVinculada) ||
+      dados.passiva.habilidadeVinculada < 0 ||
+      dados.passiva.habilidadeVinculada > 4
+    ) {
+      return null;
+    }
+
+    return dados as RascunhoFicha;
+  } catch (erro) {
+    console.warn("Não foi possível recuperar o rascunho salvo.", erro);
+    return null;
+  }
+}
+
 function App() {
-  const [elemento, setElemento] = useState<Elemento>("agua");
+  const [rascunhoInicial] = useState(() => carregarRascunho());
+  const [elemento, setElemento] = useState<Elemento>(rascunhoInicial?.elemento ?? "agua");
   const [mostrandoIdentidade, setMostrandoIdentidade] = useState(false);
-  const [nome, setNome] = useState("");
-  const [classe, setClasse] = useState<Classe>("Lutador");
-  const [historia, setHistoria] = useState("");
-  const [foto, setFoto] = useState("");
+  const [nome, setNome] = useState(rascunhoInicial?.nome ?? "");
+  const [classe, setClasse] = useState<Classe>(rascunhoInicial?.classe ?? "Lutador");
+  const [historia, setHistoria] = useState(rascunhoInicial?.historia ?? "");
+  const [foto, setFoto] = useState(rascunhoInicial?.foto ?? "");
   const [abaAtiva, setAbaAtiva] = useState<AbaEditor>("identidade");
   const [exportandoPdf, setExportandoPdf] = useState(false);
   const [habilidadeAberta, setHabilidadeAberta] = useState<number | "passiva" | null>(0);
 
   // Os hooks devem ficar dentro do componente App.
-  const [ataqueBasico, setAtaqueBasico] = useState({
-    nome: "",
-    descricao: "",
-  });
+  const [ataqueBasico, setAtaqueBasico] = useState(
+    rascunhoInicial?.ataqueBasico ?? { nome: "", descricao: "" }
+  );
 
-  const [habilidades, setHabilidades] = useState<Habilidade[]>(() => [
-    criarHabilidade("golpe"),
-    criarHabilidade("area"),
-    criarHabilidade("imobilizar"),
-    criarHabilidade("ca"),
-    criarHabilidade("buffDano"),
-  ]);
+  const [habilidades, setHabilidades] = useState<Habilidade[]>(() =>
+    rascunhoInicial?.habilidades ?? [
+      criarHabilidade("golpe"),
+      criarHabilidade("area"),
+      criarHabilidade("imobilizar"),
+      criarHabilidade("ca"),
+      criarHabilidade("buffDano"),
+    ]
+  );
 
-  const [passiva, setPassiva] = useState<{
-    nome: string;
-    modelo: ModeloPassivaId;
-    descricao: string;
-    habilidadeVinculada: number;
-  }>({
-    nome: "",
-    modelo: "protecao",
-    descricao: "",
-    habilidadeVinculada: 0,
-  });
+  const [passiva, setPassiva] = useState<PassivaEditavel>(
+    rascunhoInicial?.passiva ?? {
+      nome: "",
+      modelo: "protecao",
+      descricao: "",
+      habilidadeVinculada: 0,
+    }
+  );
+
+  useEffect(() => {
+    const rascunho: RascunhoFicha = {
+      versao: 1,
+      elemento,
+      nome,
+      classe,
+      historia,
+      foto,
+      ataqueBasico,
+      habilidades,
+      passiva,
+    };
+    try {
+      window.localStorage.setItem(CHAVE_RASCUNHO, JSON.stringify(rascunho));
+    } catch (erro) {
+      console.warn("Não foi possível salvar o rascunho neste navegador.", erro);
+    }
+  }, [elemento, nome, classe, historia, foto, ataqueBasico, habilidades, passiva]);
 
   const atualizarHabilidade = (
     indice: number,
