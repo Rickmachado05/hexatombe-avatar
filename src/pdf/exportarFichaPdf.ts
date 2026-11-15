@@ -660,7 +660,7 @@ export async function exportarFichaPdf(ficha: FichaPDF): Promise<void> {
       { rotulo: "Efeito", valor: `${nomeEfeito(ativa.efeito)} — ${resumoAtiva(ativa)}` },
       { rotulo: "Ação", valor: ativa.ativacao === "principal" ? "Ação principal" :
         ativa.ativacao === "buff" ? "Buff opcional" : "Reação" },
-      { rotulo: "Alvos", valor: `${ativa.alvos} · ${ativa.distante ? "À distância" : "Próximo"}` },
+      { rotulo: "Alvos", valor: `${ativa.alvos} · ${ativa.distante ? "Alcance ampliado (a critério do mestre)" : "Alcance narrativo normal"}` },
       { rotulo: "PC / EN", valor: `${custoPC(ativa)} PC na construção · ${custoEnergia(ativa)} por uso` },
     ];
     if (ativa.rodadasExtras > 0) campos.push({
