@@ -624,3 +624,154 @@
   .app .editor-com-abas .saldo-pt { align-items: flex-start; }
   .app .editor-com-abas .linha-pericia-impeto { padding: 8px; }
 }
+
+
+/* Ímpeto 1.0: compra de recursos A04/CA02, separada da escala Avatar em transição. */
+.app .editor-com-abas .painel-recursos-impeto {
+  margin: 0 0 28px;
+  padding: clamp(14px, 2.3vw, 24px);
+  border: 1px solid rgba(206, 172, 112, .43);
+  border-radius: 15px;
+  background: linear-gradient(145deg, rgba(25, 35, 53, .97), rgba(10, 17, 30, .97));
+}
+.app .editor-com-abas .painel-recursos-topo {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.app .editor-com-abas .painel-recursos-topo h3 {
+  margin: 6px 0 8px;
+  color: #f1dfbd;
+  font-size: clamp(1.12rem, 2vw, 1.5rem);
+}
+.app .editor-com-abas .saldo-pr {
+  flex: 0 0 auto;
+  margin: 0;
+  text-align: right;
+  color: #dfc8a7;
+  font: 600 .83rem "Segoe UI", system-ui, sans-serif;
+}
+.app .editor-com-abas .saldo-pr strong {
+  color: var(--elemento);
+  font: 700 1.75rem Georgia, serif;
+}
+.app .editor-com-abas .saldo-pr small {
+  display: block;
+  margin-top: 5px;
+  font-size: .75rem;
+  color: #b3c0ce;
+}
+.app .editor-com-abas .descricao-recursos-impeto,
+.app .editor-com-abas .aviso-recursos-impeto {
+  display: block;
+  margin: 8px 0 17px;
+  color: #bdc8d6;
+  font: .83rem/1.6 "Segoe UI", system-ui, sans-serif;
+}
+.app .editor-com-abas .aviso-recursos-impeto {
+  color: #cab890;
+  margin: 16px 0 0;
+}
+.app .editor-com-abas .grade-recursos-impeto {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.app .editor-com-abas .linha-recurso-impeto {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-width: 0;
+  gap: 10px;
+  padding: 13px;
+  background: rgba(9, 18, 31, .82);
+  border: 1px solid rgba(192, 164, 121, .25);
+  border-radius: 10px;
+}
+.app .editor-com-abas .info-recurso-impeto { min-width: 0; }
+.app .editor-com-abas .info-recurso-impeto strong {
+  display: block;
+  color: #ecd9b8;
+  font-size: .86rem;
+}
+.app .editor-com-abas .info-recurso-impeto span {
+  display: block;
+  margin: 6px 0 4px;
+  color: #f3e6d1;
+  font-size: 1rem;
+  font-weight: 700;
+}
+.app .editor-com-abas .info-recurso-impeto small {
+  display: block;
+  max-width: 230px;
+  color: #b4c4d2;
+  font-size: .73rem;
+  line-height: 1.5;
+}
+.app .editor-com-abas .controle-recurso-impeto {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+.app .editor-com-abas .controle-recurso-impeto button {
+  width: 30px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid rgba(204, 174, 123, .5);
+  border-radius: 7px;
+  background: #25364b;
+  color: #ffe5b9;
+  cursor: pointer;
+  font-size: 1rem;
+}
+.app .editor-com-abas .controle-recurso-impeto button:hover:not(:disabled) {
+  background: #3b4c63;
+  border-color: var(--elemento);
+}
+.app .editor-com-abas .controle-recurso-impeto button:disabled {
+  opacity: .32;
+  cursor: not-allowed;
+}
+.app .editor-com-abas .controle-recurso-impeto button:focus-visible {
+  outline: 2px solid var(--elemento);
+  outline-offset: 2px;
+}
+.app .editor-com-abas .controle-recurso-impeto span {
+  min-width: 24px;
+  text-align: center;
+  color: #f2dfbc;
+  font: 700 .9rem "Segoe UI", system-ui, sans-serif;
+}
+.app .editor-com-abas .previa-recursos-impeto {
+  margin: 0 0 16px;
+  padding: 13px 15px;
+  border: 1px solid rgba(204, 170, 114, .34);
+  border-radius: 10px;
+  background: rgba(14, 25, 39, .85);
+}
+.app .editor-com-abas .previa-recursos-impeto strong {
+  color: #ecd4ab;
+  font-size: .9rem;
+}
+.app .editor-com-abas .previa-recursos-impeto p {
+  color: #d9e1e8;
+  font-size: .86rem;
+  line-height: 1.6;
+  margin: 9px 0;
+}
+.app .editor-com-abas .previa-recursos-impeto small {
+  color: #b5a988;
+  font-size: .75rem;
+  line-height: 1.5;
+}
+@media (max-width: 780px) {
+  .app .editor-com-abas .grade-recursos-impeto {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 460px) {
+  .app .editor-com-abas .painel-recursos-topo { flex-wrap: wrap; }
+  .app .editor-com-abas .saldo-pr { text-align: left; }
+}
