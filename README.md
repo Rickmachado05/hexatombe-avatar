@@ -66,7 +66,7 @@ npm run lint
 5. Revise o resultado em **Prévia**.
 6. Clique em **Gerar ficha em PDF** para exportar o pergaminho.
 
-**Atenção:** nesta versão, o editor ainda não salva automaticamente os personagens. Exporte o PDF antes de fechar ou atualizar a página. O PDF serve para consulta e impressão; ainda não é um arquivo de importação de volta para o editor.
+**Salvamento de rascunho:** o editor salva automaticamente a ficha em edição no armazenamento local deste navegador, incluindo retrato, técnicas e passiva. Ao reabrir o site no mesmo navegador, é possível continuar a edição. Isso não é backup em nuvem: limpar os dados do navegador pode apagar o rascunho. Exporte o PDF para consulta ou impressão; ele ainda não permite importar a ficha para o editor.
 
 ## Organização
 
@@ -77,7 +77,7 @@ npm run lint
 
 ## Próximas melhorias
 
-- [ ] Salvamento local e recuperação da ficha em edição.
+- [x] Salvamento local automático e recuperação da ficha em edição (primeiro rascunho; aguardando teste).
 - [ ] Exportação/importação de dados da ficha em JSON.
 - [ ] Refinamentos de acessibilidade e experiência em telas menores.
 - [ ] Testes adicionais de compatibilidade e impressão dos PDFs.
