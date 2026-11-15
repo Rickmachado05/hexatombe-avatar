@@ -134,7 +134,7 @@ const regrasModelos: Record<ModeloId, RegraModelo> = {
   buffIniciativa: {
     nome: "Preparação de iniciativa (+2)", tipo: "Buff", acao: "Pré-combate",
     custo: 15, valor: "+2 na iniciativa", rotuloValor: "Bônus de iniciativa", maxAlvos: 1,
-    regra: "Use e pague a Mana somente antes de rolar a iniciativa de um combate iminente; escolha você ou um aliado presente. O alvo soma +2 ao d20 de iniciativa desse combate. Não acumula com outra Preparação de iniciativa para o mesmo alvo, não altera uma iniciativa já rolada e não pode ser usada durante o combate. Se não houver combate até o fim da cena, o efeito expira.",
+    regra: "Use e pague a EN somente antes de rolar a iniciativa de um combate iminente; escolha você ou um aliado presente. O alvo soma +2 ao d20 de iniciativa desse combate. Não acumula com outra Preparação de iniciativa para o mesmo alvo, não altera uma iniciativa já rolada e não pode ser usada durante o combate. Se não houver combate até o fim da cena, o efeito expira.",
     experimental: true,
   },
   cura: {
@@ -145,7 +145,7 @@ const regrasModelos: Record<ModeloId, RegraModelo> = {
   curaArea: {
     nome: "Cura em área (até 2 aliados)", tipo: "Cura", acao: "Principal",
     custo: 45, valor: "1d6+3 HP", rotuloValor: "Cura por aliado", maxAlvos: 2,
-    regra: "Escolha até 2 aliados próximos, podendo incluir você. Role a cura separadamente para cada alvo selecionado. Pague o custo de Mana uma única vez e use sua ação principal. Não ultrapassa o HP máximo, não cura inimigos e não é buff.",
+    regra: "Escolha até 2 aliados próximos, podendo incluir você. Role a cura separadamente para cada alvo selecionado. Pague o custo de EN uma única vez e use sua ação principal. Não ultrapassa o HP máximo, não cura inimigos e não é buff.",
     experimental: true,
   },
   movimento: {
@@ -289,7 +289,7 @@ const regrasPassivas: Record<ModeloPassivaId, RegraPassiva> = {
     categoria: "Suporte",
     gatilho: "Curar um aliado que estava com metade ou menos de seu HP máximo antes da cura.",
     efeito: "Um aliado curado recebe +1d6 HP de cura adicional.",
-    limite: "Uma vez por combate. Em cura em área, escolha somente um aliado para o bônus. Não funciona sobre você mesmo, não ultrapassa HP máximo e não custa Mana ou ação extra.",
+    limite: "Uma vez por combate. Em cura em área, escolha somente um aliado para o bônus. Não funciona sobre você mesmo, não ultrapassa HP máximo e não custa EN ou ação extra.",
     experimental: true,
   },
   amparoSolidario: {
@@ -313,7 +313,7 @@ const regrasPassivas: Record<ModeloPassivaId, RegraPassiva> = {
     categoria: "Suporte",
     gatilho: "Antes da rolagem de iniciativa do combate, escolher um aliado presente.",
     efeito: "Esse aliado recebe +1 no d20 de iniciativa para o combate.",
-    limite: "Uma vez por combate, apenas um aliado diferente de você. Não se aplica depois da iniciativa rolada e não acumula com outros bônus de iniciativa; mantenha o maior. Sem custo de Mana ou ação.",
+    limite: "Uma vez por combate, apenas um aliado diferente de você. Não se aplica depois da iniciativa rolada e não acumula com outros bônus de iniciativa; mantenha o maior. Sem custo de EN ou ação.",
     experimental: true,
   },
 };
@@ -742,7 +742,7 @@ function App() {
 
   const exportarJson = () => {
     // Exporta os campos editáveis, sem depender de PDF ou das tabelas
-    // do registro atual, independentemente do perfil antigo de classe.
+    // do registro atual, independentemente dos perfis antigos.
     const ficha: RascunhoFicha = {
       versao: 1,
       editorAberto: true,
@@ -1522,7 +1522,7 @@ function App() {
                       </span>
                       <span className="resumo-habilidade-cabecalho">
                         <span className="etiqueta-tipo">{modelo.tipo}</span>
-                        <span className="etiqueta-mana">{custoDaTecnica(habilidade.modelo)} Mana</span>
+                        <span className="etiqueta-mana">{custoDaTecnica(habilidade.modelo)} EN</span>
                         <span className="etiqueta-valor">{valorDaTecnica(habilidade.modelo, recursosCalculados.ataque)}</span>
                       </span>
                       <span className="icone-expandir" aria-hidden="true">{habilidadeAberta === indice ? "−" : "+"}</span>
@@ -1578,7 +1578,7 @@ function App() {
                     <p><strong>Momento de uso:</strong> {rotuloMomentoDeUso(modelo.acao)}</p>
                     <div className="linha-campos">
                       <div>
-                        <label htmlFor={`skill-${indice}-mana`}>Custo de Mana</label>
+                        <label htmlFor={`skill-${indice}-mana`}>Custo de EN</label>
                         <input
                           id={`skill-${indice}-mana`}
                           type="number"
@@ -1718,7 +1718,7 @@ function App() {
                   </span>
                   <span className="resumo-habilidade-cabecalho">
                     <span className="etiqueta-tipo">Passiva</span>
-                    <span className="etiqueta-mana">0 Mana</span>
+                    <span className="etiqueta-mana">0 EN</span>
                     <span className="etiqueta-valor">Sem ação</span>
                   </span>
                   <span className="icone-expandir" aria-hidden="true">
@@ -1802,7 +1802,7 @@ function App() {
                       <p><strong>Condição de ativação:</strong> {gatilhoPassiva}</p>
                       <p><strong>Efeito:</strong> {regraPassiva.efeito}</p>
                       <p><strong>Limites:</strong> {regraPassiva.limite}</p>
-                      <p><strong>Custo:</strong> 0 Mana · não consome ação.</p>
+                      <p><strong>Custo:</strong> 0 EN · não consome ação.</p>
                     </div>
 
                     <label htmlFor="passiva-descricao">Descrição narrativa</label>
@@ -1833,7 +1833,7 @@ function App() {
                   <button className="botao-gerar-pdf" type="button" onClick={gerarPdf} disabled={exportandoPdf}>
                     {exportandoPdf ? "Gerando PDF..." : "📜 Gerar ficha em PDF"}
                   </button>
-                  <small className="pdf-ajuda">A4 • Layout anterior: atributos, talentos e perícias entrarão no PDF depois</small>
+                  <small className="pdf-ajuda">A4 • Layout antigo do PDF; novos atributos, talentos e perícias entrarão depois</small>
                 </div>
 
                 <section className="previa-identidade" aria-label="Identidade do personagem">
@@ -1966,7 +1966,7 @@ function App() {
                           </div>
                           <div className="previa-chips previa-tecnica-chips">
                             <span>{modelo.tipo}</span>
-                            <span>{custoDaTecnica(habilidade.modelo)} Mana</span>
+                            <span>{custoDaTecnica(habilidade.modelo)} EN</span>
                             <span>{rotuloMomentoDeUso(modelo.acao)}</span>
                           </div>
                           <p className="previa-tecnica-efeito">
