@@ -441,3 +441,54 @@
     padding-inline: 5px;
   }
 }
+
+
+/* Símbolos em vetor — imunes a tradução automática e fontes CJK ausentes.
+   Esta regra vale também no desktop, mantendo a cor de cada elemento. */
+.app .icone-elemento {
+  display: block;
+  width: 1em;
+  height: 1em;
+  flex: 0 0 auto;
+  fill: currentColor;
+  overflow: visible;
+}
+.app .elemento .simbolo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.app .elemento .simbolo .icone-elemento {
+  width: 1.15em;
+  height: 1.15em;
+}
+.app .detalhes .circulo-espiritual > .icone-elemento {
+  width: 63%;
+  height: 63%;
+  color: var(--elemento);
+}
+.app .editor-com-abas .aba-previa .previa-simbolo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.app .editor-com-abas .aba-previa .previa-simbolo .icone-elemento {
+  width: 1em;
+  height: 1em;
+}
+.app .editor-com-abas .aba-previa .previa-chip-elemento .icone-elemento {
+  width: 1.25em;
+  height: 1.25em;
+}
+
+@media (max-width: 760px), (pointer: coarse) and (max-width: 960px) {
+  .app:has(.acoes) .selecao .elemento .simbolo .icone-elemento,
+  .app .editor-com-abas .selecao-identidade .elemento .simbolo .icone-elemento {
+    width: clamp(34px, 8vw, 44px);
+    height: clamp(34px, 8vw, 44px);
+  }
+  .app:has(.acoes) .detalhes .circulo-espiritual > .icone-elemento {
+    width: 64%;
+    height: 64%;
+  }
+}
