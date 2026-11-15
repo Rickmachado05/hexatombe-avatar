@@ -379,6 +379,37 @@ function validarAtributosImpeto(valor: unknown): valor is AtributosImpeto {
 }
 
 
+
+type DerivacaoD01Tipo = "" | "resistencia" | "reserva" | "potencia";
+type DerivacaoD01 = {
+  tipo: DerivacaoD01Tipo;
+  atributo: NomeAtributoImpeto | "";
+  justificativa: string;
+};
+const DERIVACAO_D01_PADRAO: DerivacaoD01 = {
+  tipo: "", atributo: "", justificativa: "",
+};
+const DERIVACOES_D01: { id: Exclude<DerivacaoD01Tipo, "">; nome: string; beneficio: string }[] = [
+  { id: "resistencia", nome: "Resistência", beneficio: "+3 HP máximo" },
+  { id: "reserva", nome: "Reserva", beneficio: "+5 Energia de referência" },
+  { id: "potencia", nome: "Potência", beneficio: "+1 dano fixo no Ataque Básico" },
+];
+function atributosElegiveisD01(atributos: AtributosImpeto): NomeAtributoImpeto[] {
+  return NOMES_ATRIBUTOS_IMPETO.filter((atributo) => atributos[atributo] >= 12);
+}
+function validarDerivacaoD01(valor: unknown, atributos: AtributosImpeto): boolean {
+  if (valor === undefined) return true; // Compatibilidade com JSONs anteriores à D01.
+  if (!valor || typeof valor !== "object" || Array.isArray(valor)) return false;
+  const dados = valor as Partial<DerivacaoD01>;
+  if (typeof dados.justificativa !== "string" || dados.justificativa.length > 500) return false;
+  if (dados.tipo === "") return dados.atributo === "";
+  return DERIVACOES_D01.some((item) => item.id === dados.tipo) &&
+    !!dados.atributo &&
+    NOMES_ATRIBUTOS_IMPETO.some((atributo) =>
+      atributo === dados.atributo && atributos[atributo] >= 12
+    );
+}
+
 type ArquetipoImpeto = "Ofensivo" | "Defensor" | "Controlador" | "Suporte";
 type TalentoArquetipoId =
   | "aberturaTatica" | "correcaoGolpe" | "dominioCorporal"
@@ -537,12 +568,12 @@ function validarRecursosImpeto(valor: unknown): valor is RecursosImpeto {
     custoRecursosImpeto(recursos) <= PR_INICIAL_REFERENCIA;
 }
 
-function valorRecursosImpeto(recursos: RecursosImpeto) {
+function valorRecursosImpeto(recursos: RecursosImpeto, derivacao: DerivacaoD01Tipo) {
   return {
-    hp: 40 + 3 * recursos.hp,
-    energia: 30 + 5 * recursos.energia,
+    hp: 40 + 3 * recursos.hp + (derivacao === "resistencia" ? 3 : 0),
+    energia: 30 + 5 * recursos.energia + (derivacao === "reserva" ? 5 : 0),
     ca: recursos.ca,
-    ataque: `${2 + recursos.ataqueDados}d6+2`,
+    ataque: `${2 + recursos.ataqueDados}d6+${2 + (derivacao === "potencia" ? 1 : 0)}`,
     regeneracao: recursos.regeneracao,
   };
 }
@@ -601,6 +632,7 @@ type RascunhoFicha = {
   elemento: Elemento;
   // Opcional para importar fichas JSON produzidas antes desta atualização.
   atributosImpeto?: AtributosImpeto;
+  derivacaoD01?: DerivacaoD01;
   recursosImpeto?: RecursosImpeto;
   periciasImpeto?: PericiasImpeto;
   // Módulo T02: campos opcionais para importar fichas JSON mais antigas.
@@ -650,6 +682,7 @@ function validarFicha(valor: unknown): valor is RascunhoFicha {
     (dados.abaAtiva === undefined || dados.abaAtiva === "combate" || abasEditor.some((aba) => aba.id === dados.abaAtiva)) &&
     elementos.some((item) => item.id === dados.elemento) &&
     (dados.atributosImpeto === undefined || validarAtributosImpeto(dados.atributosImpeto)) &&
+    validarDerivacaoD01(dados.derivacaoD01, dados.atributosImpeto ?? ATRIBUTOS_PADRAO_IMPETO) &&
     (dados.recursosImpeto === undefined || validarRecursosImpeto(dados.recursosImpeto)) &&
     (dados.periciasImpeto === undefined || validarPericiasImpeto(dados.periciasImpeto)) &&
     validarEscolhaT02(dados.arquetipoImpeto, dados.talentoArquetipo) &&
@@ -716,6 +749,9 @@ function App() {
   const [elemento, setElemento] = useState<Elemento>(rascunhoInicial?.elemento ?? "agua");
   const [atributosImpeto, setAtributosImpeto] = useState<AtributosImpeto>(
     rascunhoInicial?.atributosImpeto ?? { ...ATRIBUTOS_PADRAO_IMPETO }
+  );
+  const [derivacaoD01, setDerivacaoD01] = useState<DerivacaoD01>(
+    rascunhoInicial?.derivacaoD01 ?? { ...DERIVACAO_D01_PADRAO }
   );
   const [recursosImpeto, setRecursosImpeto] = useState<RecursosImpeto>(
     rascunhoInicial?.recursosImpeto ?? { ...RECURSOS_PADRAO_IMPETO }
@@ -799,6 +835,7 @@ function App() {
       abaAtiva,
       elemento,
       atributosImpeto,
+      derivacaoD01,
       recursosImpeto,
       periciasImpeto,
       arquetipoImpeto,
@@ -820,7 +857,7 @@ function App() {
     } catch (erro) {
       console.warn("Não foi possível salvar o rascunho neste navegador.", erro);
     }
-  }, [mostrandoIdentidade, abaAtiva, elemento, atributosImpeto, recursosImpeto, periciasImpeto, arquetipoImpeto, talentoArquetipo, vantagemUniversal, nome, historia, foto, ataqueBasico, habilidades, passiva, perfilHabilidades, ativasImpeto, passivaImpeto, exploracaoImpeto]);
+  }, [mostrandoIdentidade, abaAtiva, elemento, atributosImpeto, derivacaoD01, recursosImpeto, periciasImpeto, arquetipoImpeto, talentoArquetipo, vantagemUniversal, nome, historia, foto, ataqueBasico, habilidades, passiva, perfilHabilidades, ativasImpeto, passivaImpeto, exploracaoImpeto]);
 
 
   const exportarJson = () => {
@@ -832,6 +869,7 @@ function App() {
       abaAtiva,
       elemento,
       atributosImpeto,
+      derivacaoD01,
       recursosImpeto,
       periciasImpeto,
       arquetipoImpeto,
@@ -900,6 +938,7 @@ function App() {
 
       setElemento(ficha.elemento);
       setAtributosImpeto(ficha.atributosImpeto ?? { ...ATRIBUTOS_PADRAO_IMPETO });
+      setDerivacaoD01(ficha.derivacaoD01 ?? { ...DERIVACAO_D01_PADRAO });
       setRecursosImpeto(ficha.recursosImpeto ?? { ...RECURSOS_PADRAO_IMPETO });
       setPericiasImpeto(ficha.periciasImpeto ?? { ...PERICIAS_PADRAO_IMPETO });
       setArquetipoImpeto(ficha.arquetipoImpeto ?? "");
@@ -945,7 +984,7 @@ function App() {
 
   const prGastos = custoRecursosImpeto(recursosImpeto);
   const prRestantes = PR_INICIAL_REFERENCIA - prGastos;
-  const recursosCalculados = valorRecursosImpeto(recursosImpeto);
+  const recursosCalculados = valorRecursosImpeto(recursosImpeto, derivacaoD01.tipo);
 
   const alterarRecursoImpeto = (campo: RecursoImpeto, delta: -1 | 1) => {
     setRecursosImpeto((anterior) => {
@@ -968,19 +1007,31 @@ function App() {
   const paGastos = pontosGastosAtributos(atributosImpeto);
   const paDisponiveis = PA_INICIAL_REFERENCIA - paGastos;
 
+  const atributosDisponiveisD01 = atributosElegiveisD01(atributosImpeto);
   const alterarAtributoImpeto = (nomeAtributo: NomeAtributoImpeto, delta: -1 | 1) => {
-    setAtributosImpeto((anterior) => {
-      const valorAtual = anterior[nomeAtributo];
-      const proximoValor = valorAtual + delta;
-      if (proximoValor < ATRIBUTO_BASE_REFERENCIA || proximoValor > ATRIBUTO_TETO_REFERENCIA) {
-        return anterior;
-      }
-      if (delta === 1 && pontosGastosAtributos(anterior) +
-        custoPassoAtributo(proximoValor) > PA_INICIAL_REFERENCIA) {
-        return anterior;
-      }
-      return { ...anterior, [nomeAtributo]: proximoValor };
-    });
+    const proximoValor = atributosImpeto[nomeAtributo] + delta;
+    if (proximoValor < ATRIBUTO_BASE_REFERENCIA || proximoValor > ATRIBUTO_TETO_REFERENCIA) {
+      return;
+    }
+    if (delta === 1 && pontosGastosAtributos(atributosImpeto) +
+      custoPassoAtributo(proximoValor) > PA_INICIAL_REFERENCIA) {
+      return;
+    }
+    setAtributosImpeto({ ...atributosImpeto, [nomeAtributo]: proximoValor });
+    // Não manter um bônus D01 caso o atributo escolhido deixe de cumprir 12+.
+    if (derivacaoD01.atributo === nomeAtributo && proximoValor < 12) {
+      setDerivacaoD01({ ...DERIVACAO_D01_PADRAO });
+    }
+  };
+  const selecionarDerivacaoD01 = (tipo: DerivacaoD01Tipo) => {
+    if (tipo === "" || atributosDisponiveisD01.length === 0) {
+      setDerivacaoD01({ ...DERIVACAO_D01_PADRAO });
+      return;
+    }
+    const atributo = derivacaoD01.atributo &&
+      atributosDisponiveisD01.includes(derivacaoD01.atributo)
+      ? derivacaoD01.atributo : atributosDisponiveisD01[0];
+    setDerivacaoD01({ ...derivacaoD01, tipo, atributo });
   };
 
   const informarLimite = () => setAlertaConstrutor(
@@ -1484,6 +1535,67 @@ function App() {
                   </small>
                 </section>
 
+
+                <section className="painel-derivacao-d01" aria-label="Derivação opcional D01">
+                  <div className="cabecalho-derivacao-d01">
+                    <span className="rotulo-impeto">HEXATOMBE: AVATAR · DERIVAÇÃO D01</span>
+                    <h3>Derivação do personagem</h3>
+                    <p>Com um atributo em 12 ou mais, escolha uma das três derivações
+                      experimentais. Não consome PA ou PR, não aumenta CA e não modifica o acerto.</p>
+                  </div>
+                  {atributosDisponiveisD01.length === 0 ? (
+                    <p className="aviso-derivacao-d01" role="status">
+                      Nenhum atributo chegou a 12. Distribua seus PA para liberar uma derivação.
+                    </p>
+                  ) : (
+                    <>
+                      <fieldset className="grupo-derivacoes-d01">
+                        <legend>Escolha uma opção (ou nenhuma)</legend>
+                        <label className="opcao-derivacao-d01">
+                          <input type="radio" name="derivacao-d01" checked={!derivacaoD01.tipo}
+                            onChange={() => selecionarDerivacaoD01("")}/>
+                          <span><strong>Sem derivação</strong><small>Não aplicar bônus D01.</small></span>
+                        </label>
+                        {DERIVACOES_D01.map((opcao) => (
+                          <label className={`opcao-derivacao-d01 ${derivacaoD01.tipo === opcao.id ? "selecionada" : ""}`}
+                            key={opcao.id}>
+                            <input type="radio" name="derivacao-d01"
+                              checked={derivacaoD01.tipo === opcao.id}
+                              onChange={() => selecionarDerivacaoD01(opcao.id)}/>
+                            <span><strong>{opcao.nome}</strong><small>{opcao.beneficio}</small></span>
+                          </label>
+                        ))}
+                      </fieldset>
+                      {derivacaoD01.tipo !== "" && (
+                        <div className="detalhes-derivacao-d01">
+                          <label htmlFor="d01-atributo">Atributo que sustenta a derivação
+                            <select id="d01-atributo" value={derivacaoD01.atributo}
+                              onChange={(evento) => setDerivacaoD01({
+                                ...derivacaoD01,
+                                atributo: evento.target.value as NomeAtributoImpeto,
+                              })}>
+                              {atributosDisponiveisD01.map((atributo) =>
+                                <option key={atributo} value={atributo}>
+                                  {atributo} ({atributosImpeto[atributo]})
+                                </option>)}
+                            </select>
+                          </label>
+                          <label htmlFor="d01-justificativa">Justificativa narrativa
+                            <textarea id="d01-justificativa" rows={2} maxLength={500}
+                              placeholder="Como este atributo se manifesta nessa derivação?"
+                              value={derivacaoD01.justificativa}
+                              onChange={(evento) => setDerivacaoD01({
+                                ...derivacaoD01, justificativa: evento.target.value,
+                              })}/>
+                          </label>
+                          <small>O mestre avalia se a derivação combina com a história.
+                            Se o atributo escolhido cair abaixo de 12, a escolha será removida.</small>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </section>
+
                 <section className="painel-recursos-impeto" aria-label="Distribuição de Pontos de Recursos">
                   <div className="painel-recursos-topo">
                     <div>
@@ -1534,8 +1646,8 @@ function App() {
                   <small className="aviso-recursos-impeto">
                     A CA Base é escolhida apenas na criação e permanece fixa durante a campanha.
                     Energia acumulada pode ultrapassar o valor de referência; regeneração ocorre
-                    uma vez por rodada. Derivações D01 e configuração avançada não estão ativas nesta etapa.
-                    Os investimentos em PR são preservados no salvamento automático e no JSON.
+                    uma vez por rodada. A derivação D01 escolhida acima já altera HP, EN ou dano básico;
+                    os investimentos em PR são preservados no salvamento automático e no JSON.
                   </small>
                 </section>
             <section className="secao-combate">
@@ -1750,6 +1862,22 @@ function App() {
                       Os recursos de combate são determinados pelos PR.</small>
                   </div>
 
+
+                  <div className="previa-derivacao-d01">
+                    <strong>Derivação D01</strong>
+                    {derivacaoD01.tipo ? (
+                      <>
+                        <p>
+                          {DERIVACOES_D01.find((item) => item.id === derivacaoD01.tipo)?.nome}
+                          {" · "}
+                          {DERIVACOES_D01.find((item) => item.id === derivacaoD01.tipo)?.beneficio}
+                          {" · "}
+                          {derivacaoD01.atributo} {atributosImpeto[derivacaoD01.atributo as NomeAtributoImpeto]}
+                        </p>
+                        {derivacaoD01.justificativa && <small>{derivacaoD01.justificativa}</small>}
+                      </>
+                    ) : <small>Nenhuma derivação escolhida.</small>}
+                  </div>
                   <div className="previa-recursos-impeto">
                     <strong>Hexatombe: Avatar · Recursos em PR (calibração)</strong>
                     <p>
