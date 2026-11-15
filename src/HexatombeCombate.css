@@ -199,3 +199,140 @@
   .app .editor-com-abas .conteudo-aba:has(#ataque-nome) .secao-combate > .grupo-habilidade { padding: 16px; }
   .app .editor-com-abas .conteudo-aba:has(#ataque-nome) .secao-combate .grupo-habilidade > p:not(.descricao-editor) { display: block; width: fit-content; margin-top: 8px; }
 }
+
+
+/* Ímpeto 1.0 — primeiro bloco de criação por Pontos de Atributo (PA). */
+.app .editor-com-abas .painel-atributos-impeto {
+  margin: 4px 0 28px;
+  padding: clamp(14px, 2.2vw, 23px);
+  border: 1px solid rgba(208, 174, 122, .42);
+  border-radius: 15px;
+  background: linear-gradient(135deg, rgba(26, 34, 50, .97), rgba(10, 17, 29, .95));
+}
+.app .editor-com-abas .painel-impeto-topo {
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+  align-items: center;
+}
+.app .editor-com-abas .painel-impeto-topo h3 {
+  margin: 5px 0;
+  font-size: clamp(1.12rem, 2vw, 1.45rem);
+  color: #f0dbb5;
+}
+.app .editor-com-abas .rotulo-impeto {
+  font: 700 .7rem "Segoe UI", sans-serif;
+  color: #d8b98a;
+  letter-spacing: .08em;
+}
+.app .editor-com-abas .saldo-pa {
+  margin: 0;
+  min-width: 120px;
+  color: #f3e0c2;
+  font: 600 .87rem "Segoe UI", sans-serif;
+  text-align: right;
+}
+.app .editor-com-abas .saldo-pa strong {
+  display: inline-block;
+  font-size: 1.55rem;
+  color: var(--elemento);
+}
+.app .editor-com-abas .saldo-pa small {
+  display: block;
+  font-size: .73rem;
+  color: #c0c6ce;
+}
+.app .editor-com-abas .descricao-atributos-impeto,
+.app .editor-com-abas .aviso-impeto {
+  display: block;
+  margin: 8px 0 15px;
+  color: #bfcbd7;
+  font: .82rem/1.6 "Segoe UI", sans-serif;
+}
+.app .editor-com-abas .aviso-impeto {
+  margin: 14px 0 0;
+  color: #c9b78e;
+}
+.app .editor-com-abas .grade-atributos-impeto {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.app .editor-com-abas .atributo-impeto {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-width: 0;
+  gap: 8px;
+  padding: 11px 12px;
+  border: 1px solid rgba(194, 171, 135, .22);
+  border-radius: 9px;
+  background: rgba(8, 15, 28, .75);
+}
+.app .editor-com-abas .atributo-impeto > span {
+  color: #ebdcbd;
+  font-size: .87rem;
+}
+.app .editor-com-abas .controle-atributo-impeto {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.app .editor-com-abas .controle-atributo-impeto button {
+  width: 33px;
+  height: 33px;
+  padding: 0;
+  border-radius: 7px;
+  border: 1px solid rgba(204, 173, 125, .5);
+  background: #202c3e;
+  color: #f4ddb5;
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.app .editor-com-abas .controle-atributo-impeto button:hover:not(:disabled) {
+  border-color: var(--elemento);
+  background: #34445b;
+}
+.app .editor-com-abas .controle-atributo-impeto button:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+.app .editor-com-abas .controle-atributo-impeto button:focus-visible {
+  outline: 2px solid var(--elemento);
+  outline-offset: 2px;
+}
+.app .editor-com-abas .controle-atributo-impeto strong {
+  min-width: 24px;
+  font-size: 1.2rem;
+  color: #f8ecd3;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.app .editor-com-abas .previa-impeto-atributos {
+  padding: 13px 15px;
+  margin: 0 0 17px;
+  border: 1px solid rgba(205, 168, 112, .28);
+  border-radius: 9px;
+  color: #e9d8b8;
+  background: rgba(14, 24, 39, .8);
+}
+.app .editor-com-abas .previa-impeto-atributos p {
+  margin: 8px 0;
+  font-size: .83rem;
+  color: #d6dce2;
+  line-height: 1.8;
+}
+.app .editor-com-abas .previa-impeto-atributos small {
+  font-size: .75rem;
+  color: #bda77e;
+  line-height: 1.5;
+}
+@media (max-width: 600px) {
+  .app .editor-com-abas .grade-atributos-impeto {
+    grid-template-columns: 1fr;
+  }
+  .app .editor-com-abas .painel-impeto-topo {
+    align-items: flex-start;
+  }
+}
