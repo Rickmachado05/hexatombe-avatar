@@ -8,7 +8,6 @@ import "./HabilidadesEditor.css";
 
 type Props = {
   perfil:Perfil; ativas:Ativa[]; passiva:Passiva; exploracao:Exploracao[];
-  alterarPerfil:(p:Perfil)=>void;
   editarAtiva:(i:number,campos:Partial<Ativa>)=>void;
   editarPassiva:(campos:Partial<Passiva>)=>void;
   editarExploracao:(i:number,campos:Partial<Exploracao>)=>void;
@@ -37,18 +36,16 @@ function CampoTexto({titulo,valor,alterar,linhas=0,ajuda}:{
     {ajuda && <small>{ajuda}</small>}
   </label>;
 }
-function Orcamentos({perfil,ativas,passiva,exploracao,alterarPerfil}:Pick<Props,
-  "perfil"|"ativas"|"passiva"|"exploracao"|"alterarPerfil">) {
+function Orcamentos({perfil,ativas,passiva,exploracao}:Pick<Props,
+  "perfil"|"ativas"|"passiva"|"exploracao">) {
   const l=PERFIS[perfil];
   const totalPC=ativas.reduce((a,b)=>a+custoPC(b),0)+custoPassiva(passiva);
   const totalPX=exploracao.reduce((a,b)=>a+custoPX(b),0);
   return <div className="impeto-orcamentos">
-    <label>Configuração de campanha
-      <select value={perfil} onChange={e=>alterarPerfil(e.target.value as Perfil)}>
-        {(Object.keys(PERFIS) as Perfil[]).map(p=>
-          <option key={p} value={p}>{PERFIS[p].nome}</option>)}
-      </select>
-    </label>
+    <div className="impeto-campanha-fixa">
+      <strong>HEXATOMBE: AVATAR</strong>
+      <span>Orçamento exclusivo da campanha</span>
+    </div>
     <div className="impeto-saldos">
       <div><strong>{l.pc-totalPC}</strong><span>PC restantes</span>
         <small>{totalPC}/{l.pc} usados</small></div>
@@ -56,8 +53,8 @@ function Orcamentos({perfil,ativas,passiva,exploracao,alterarPerfil}:Pick<Props,
         <small>{totalPX}/{l.px} usados</small></div>
     </div>
     <small>PC das cinco ativas + uma passiva; PX exclusivos das até três técnicas de exploração.
-      Não é permitido trocar PC por PX. Avatar usa 100 PC/35 PX do piloto anterior, ainda em
-      playtest. Teto PX individual mantido provisoriamente em 16.</small>
+      Não é permitido trocar PC por PX. A campanha utiliza 100 PC e 35 PX do
+      piloto experimental Avatar, com teto individual PX provisório de 16.</small>
   </div>;
 }
 function Dados({dado,quantidade,fixo,onChange}:{
@@ -81,11 +78,11 @@ function Dados({dado,quantidade,fixo,onChange}:{
   </div>;
 }
 export function CombateImpeto(props:Props){
-  const {perfil,ativas,passiva,exploracao,alterarPerfil,editarAtiva,editarPassiva}=props;
+  const {perfil,ativas,passiva,exploracao,editarAtiva,editarPassiva}=props;
   const limite=PERFIS[perfil];
   return <div className="impeto-construtor">
     <h2>Construtor de Habilidades de Combate</h2>
-    <Orcamentos {...{perfil,ativas,passiva,exploracao,alterarPerfil}}/>
+    <Orcamentos {...{perfil,ativas,passiva,exploracao}}/>
     <p className="impeto-explicacao">H06: cinco técnicas ativas e uma passiva dividem o mesmo orçamento
       PC. Cada ativa tem teto de {limite.ativa} PC; a passiva, {limite.passiva} PC.
       Dano, cura e proteção não são somados automaticamente ao Ataque Básico.
@@ -207,11 +204,11 @@ export function CombateImpeto(props:Props){
   </div>;
 }
 export function ExploracaoImpeto(props:Props){
-  const {perfil,ativas,passiva,exploracao,alterarPerfil,editarExploracao,adicionarExploracao,removerExploracao}=props;
+  const {perfil,ativas,passiva,exploracao,editarExploracao,adicionarExploracao,removerExploracao}=props;
   const limite=PERFIS[perfil];
   return <div className="impeto-construtor">
     <h2>Técnicas de Exploração</h2>
-    <Orcamentos {...{perfil,ativas,passiva,exploracao,alterarPerfil}}/>
+    <Orcamentos {...{perfil,ativas,passiva,exploracao}}/>
     <p className="impeto-explicacao">Até três técnicas adicionais, compradas com PX independentes
       das cinco ativas e da passiva. Cada técnica tem teto de {limite.exploracao} PX.
       Não ganha ataque, buff, reação ou ação principal extra. Os usos cotidianos do elemento

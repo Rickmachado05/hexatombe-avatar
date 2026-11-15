@@ -82,3 +82,21 @@
   .app details.impeto-cartao > summary { gap:8px; padding:12px; }
   .app .impeto-preco { font-size:.84rem; }
 }
+
+/* Uma única configuração de habilidades: Hexatombe: Avatar. */
+.app .impeto-orcamentos > .impeto-campanha-fixa {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  min-height: 65px;
+}
+.app .impeto-campanha-fixa strong {
+  color: #edd2a0;
+  font: 700 1.12rem Georgia, serif;
+  letter-spacing: .07em;
+}
+.app .impeto-campanha-fixa span {
+  color: #b9c8d5;
+  font: 500 .79rem "Segoe UI", system-ui, sans-serif;
+}

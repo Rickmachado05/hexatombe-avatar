@@ -547,6 +547,52 @@ function valorRecursosImpeto(recursos: RecursosImpeto) {
   };
 }
 
+
+type VantagemUniversalId =
+  | "preparadoImprevistos" | "memoriaTreinada" | "sangueFrio"
+  | "raciocinioAplicado" | "articulacaoSocial" | "engenhosidade"
+  | "conhecimentoCruzado" | "exploradorPreparado";
+
+const VANTAGENS_V01: { id: VantagemUniversalId; nome: string; beneficio: string }[] = [
+  {
+    id: "preparadoImprevistos", nome: "Preparado para Imprevistos",
+    beneficio: "Uma vez por cena, revelar ferramenta mundana simples e plausível.",
+  },
+  {
+    id: "memoriaTreinada", nome: "Memória Treinada",
+    beneficio: "Uma vez por cena, recordar fielmente informação testemunhada.",
+  },
+  {
+    id: "sangueFrio", nome: "Sangue-Frio",
+    beneficio: "Uma vez por cena, atenuar pequena penalidade situacional de medo ou pressão.",
+  },
+  {
+    id: "raciocinioAplicado", nome: "Raciocínio Aplicado",
+    beneficio: "Numa falha próxima fora de combate, obter proposta de avanço com complicação, a critério do mestre.",
+  },
+  {
+    id: "articulacaoSocial", nome: "Articulação Social",
+    beneficio: "Identificar uma objeção importante numa negociação, sem controlar o NPC.",
+  },
+  {
+    id: "engenhosidade", nome: "Engenhosidade",
+    beneficio: "Improvisar solução de pequeno obstáculo material em tarefa técnica plausível.",
+  },
+  {
+    id: "conhecimentoCruzado", nome: "Conhecimento Cruzado",
+    beneficio: "Utilizar um treinamento relacionado em um teste, sem somar duas perícias.",
+  },
+  {
+    id: "exploradorPreparado", nome: "Explorador Preparado",
+    beneficio: "Preparar uma precaução prática perante perigo previsível.",
+  },
+];
+
+function validarVantagemV01(valor: unknown): boolean {
+  return valor === undefined || valor === "" ||
+    (typeof valor === "string" && VANTAGENS_V01.some((item) => item.id === valor));
+}
+
 type RascunhoFicha = {
   versao: 1;
   // Etapa visual opcional para manter compatibilidade com rascunhos anteriores.
@@ -560,6 +606,7 @@ type RascunhoFicha = {
   // Módulo T02: campos opcionais para importar fichas JSON mais antigas.
   arquetipoImpeto?: ArquetipoImpeto | "";
   talentoArquetipo?: TalentoArquetipoId | "";
+  vantagemUniversal?: VantagemUniversalId | "";
   nome: string;
   classe?: PerfilLegadoTecnica; // campo de JSON anterior, ignorado em novas fichas
   historia: string;
@@ -606,6 +653,7 @@ function validarFicha(valor: unknown): valor is RascunhoFicha {
     (dados.recursosImpeto === undefined || validarRecursosImpeto(dados.recursosImpeto)) &&
     (dados.periciasImpeto === undefined || validarPericiasImpeto(dados.periciasImpeto)) &&
     validarEscolhaT02(dados.arquetipoImpeto, dados.talentoArquetipo) &&
+    validarVantagemV01(dados.vantagemUniversal) &&
     (dados.classe === undefined ||
       (typeof dados.classe === "string" &&
         ["Lutador", "Linha de Frente", "Conjurador"].includes(dados.classe))) &&
@@ -681,6 +729,9 @@ function App() {
   const [talentoArquetipo, setTalentoArquetipo] = useState<TalentoArquetipoId | "">(
     rascunhoInicial?.talentoArquetipo ?? ""
   );
+  const [vantagemUniversal, setVantagemUniversal] = useState<VantagemUniversalId | "">(
+    rascunhoInicial?.vantagemUniversal ?? ""
+  );
   // Novos rascunhos retomam a tela em que o jogador estava.
   // Rascunhos da versão anterior, que não guardavam a etapa, retomam o editor
   // caso já exista nome ou história preenchidos.
@@ -720,9 +771,9 @@ function App() {
 
   // O modelo H06 é independente dos registros antigos preservados para
   // importação e exportação PDF até a diagramação definitiva.
-  const [perfilHabilidades, setPerfilHabilidades] = useState<Perfil>(
-    rascunhoInicial?.perfilHabilidades ?? "avatar"
-  );
+  // Este criador é exclusivo de Hexatombe: Avatar.
+  // JSONs antigos com o perfil introdutório são importados no orçamento de Avatar.
+  const perfilHabilidades: Perfil = "avatar";
   const [ativasImpeto, setAtivasImpeto] = useState<Ativa[]>(() =>
     rascunhoInicial?.ativasImpeto ?? migrarAtivas(
       rascunhoInicial?.habilidades ?? [
@@ -752,6 +803,7 @@ function App() {
       periciasImpeto,
       arquetipoImpeto,
       talentoArquetipo,
+      vantagemUniversal,
       nome,
       historia,
       foto,
@@ -768,7 +820,7 @@ function App() {
     } catch (erro) {
       console.warn("Não foi possível salvar o rascunho neste navegador.", erro);
     }
-  }, [mostrandoIdentidade, abaAtiva, elemento, atributosImpeto, recursosImpeto, periciasImpeto, arquetipoImpeto, talentoArquetipo, nome, historia, foto, ataqueBasico, habilidades, passiva, perfilHabilidades, ativasImpeto, passivaImpeto, exploracaoImpeto]);
+  }, [mostrandoIdentidade, abaAtiva, elemento, atributosImpeto, recursosImpeto, periciasImpeto, arquetipoImpeto, talentoArquetipo, vantagemUniversal, nome, historia, foto, ataqueBasico, habilidades, passiva, perfilHabilidades, ativasImpeto, passivaImpeto, exploracaoImpeto]);
 
 
   const exportarJson = () => {
@@ -784,6 +836,7 @@ function App() {
       periciasImpeto,
       arquetipoImpeto,
       talentoArquetipo,
+      vantagemUniversal,
       nome,
       historia,
       foto,
@@ -851,13 +904,13 @@ function App() {
       setPericiasImpeto(ficha.periciasImpeto ?? { ...PERICIAS_PADRAO_IMPETO });
       setArquetipoImpeto(ficha.arquetipoImpeto ?? "");
       setTalentoArquetipo(ficha.talentoArquetipo ?? "");
+      setVantagemUniversal(ficha.vantagemUniversal ?? "");
       setNome(ficha.nome);
       setHistoria(ficha.historia);
       setFoto(ficha.foto);
       setAtaqueBasico({ ...ficha.ataqueBasico });
       setHabilidades(ficha.habilidades.map((habilidade) => ({ ...habilidade })));
       setPassiva({ ...ficha.passiva });
-      setPerfilHabilidades(ficha.perfilHabilidades ?? "avatar");
       setAtivasImpeto(ficha.ativasImpeto ??
         migrarAtivas(ficha.habilidades));
       setPassivaImpeto(ficha.passivaImpeto ??
@@ -932,17 +985,9 @@ function App() {
 
   const informarLimite = () => setAlertaConstrutor(
     "A alteração ultrapassaria o orçamento ou o limite individual da configuração atual. " +
-    "Reduza outro componente ou use uma configuração experimental autorizada pelo mestre."
+    "Reduza outro componente ou ajuste a construção junto ao mestre."
   );
 
-  const alterarPerfilHabilidades = (novo: Perfil) => {
-    if (!validaConstrucao(novo, ativasImpeto, passivaImpeto, exploracaoImpeto)) {
-      informarLimite();
-      return;
-    }
-    setPerfilHabilidades(novo);
-    setAlertaConstrutor("");
-  };
   const editarAtivaImpeto = (indice:number, campos:Partial<Ativa>) => {
     const novas = ativasImpeto.map((a,i)=>i===indice?{...a,...campos}:a);
     if (!validaConstrucao(perfilHabilidades, novas, passivaImpeto, exploracaoImpeto)) {
@@ -981,7 +1026,7 @@ function App() {
   };
   const propsConstrutor = {
     perfil:perfilHabilidades, ativas:ativasImpeto, passiva:passivaImpeto,
-    exploracao:exploracaoImpeto, alterarPerfil:alterarPerfilHabilidades,
+    exploracao:exploracaoImpeto,
     editarAtiva:editarAtivaImpeto, editarPassiva:editarPassivaImpeto,
     editarExploracao:editarExploracaoImpeto,
     adicionarExploracao:adicionarExploracaoImpeto,
@@ -1354,6 +1399,39 @@ function App() {
                   )}
                 </section>
 
+                <section className="painel-vantagens-v01" aria-label="Vantagem universal V01">
+                  <div className="cabecalho-vantagem-v01">
+                    <span className="rotulo-impeto">HEXATOMBE: AVATAR · VANTAGENS V01</span>
+                    <h3>Vantagem universal</h3>
+                    <p>Escolha uma vantagem inicial entre as oito opções do playtest.
+                      Ela é independente do talento de arquétipo, das cinco habilidades,
+                      da passiva e das técnicas de exploração.</p>
+                  </div>
+                  <div className="grade-vantagens-v01" role="radiogroup" aria-label="Escolha uma vantagem universal">
+                    {VANTAGENS_V01.map((vantagem) => (
+                      <label key={vantagem.id}
+                        className={`cartao-vantagem-v01 ${vantagemUniversal === vantagem.id ? "selecionada" : ""}`}>
+                        <input type="radio" name="vantagem-universal"
+                          value={vantagem.id}
+                          checked={vantagemUniversal === vantagem.id}
+                          onChange={() => setVantagemUniversal(vantagem.id)}/>
+                        <span>
+                          <strong>{vantagem.nome}</strong>
+                          <small>{vantagem.beneficio}</small>
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                  {vantagemUniversal && <button type="button" className="limpar-vantagem-v01"
+                    onClick={() => setVantagemUniversal("")}>
+                    Limpar escolha
+                  </button>}
+                  <p className="nota-talento-impeto">
+                    Biblioteca V01 candidata: limites e equivalência dependem de testes.
+                    Desvantagens narrativas não concedem vantagens ou pontos extras.
+                  </p>
+                </section>
+
               </section>
             )}
 
@@ -1373,7 +1451,7 @@ function App() {
                     </p>
                   </div>
                   <p className="descricao-atributos-impeto">
-                    Referência experimental do livro: valor base 8, teto 14 na criação e 28 PA
+                    Valores provisórios para Hexatombe: Avatar: base 8, teto 14 na criação e 28 PA
                     para distribuir. Custos por aumento: 9–12 = 1 PA; 13–14 = 2 PA.
                     Os recursos de combate são calculados pelos PR no painel seguinte.
                   </p>
@@ -1418,7 +1496,7 @@ function App() {
                     </p>
                   </div>
                   <p className="descricao-recursos-impeto">
-                    Referência introdutória do livro: 40 HP, 30 EN, CA Base 8, Ataque Base 2d6+2,
+                    Base provisória em calibração para Avatar: 40 HP, 30 EN, CA Base 8, Ataque Base 2d6+2,
                     regeneração 0 e 20 PR. A escala avançada de Hexatombe: Avatar será calibrada
                     separadamente. Os valores mostrados na ficha são calculados pelos PR.
                   </p>
@@ -1644,6 +1722,16 @@ function App() {
                     )}
                     <small>Talento independente das cinco ativas e da passiva. Não incluído no PDF legado nesta etapa.</small>
                   </div>
+
+                  <div className="previa-vantagem-v01">
+                    <strong>Vantagem universal · V01</strong>
+                    {vantagemUniversal ? (
+                      <>
+                        <p>{VANTAGENS_V01.find((item) => item.id === vantagemUniversal)?.nome}</p>
+                        <small>{VANTAGENS_V01.find((item) => item.id === vantagemUniversal)?.beneficio}</small>
+                      </>
+                    ) : <small>Nenhuma vantagem universal escolhida ainda.</small>}
+                  </div>
                 </section>
 
                 <section className="previa-secao" aria-labelledby="previa-titulo-combate">
@@ -1663,14 +1751,14 @@ function App() {
                   </div>
 
                   <div className="previa-recursos-impeto">
-                    <strong>Ímpeto RPG · Recursos em PR (referência introdutória)</strong>
+                    <strong>Hexatombe: Avatar · Recursos em PR (calibração)</strong>
                     <p>
                       HP {recursosCalculados.hp} · EN {recursosCalculados.energia} ·
                       CA Base {recursosCalculados.ca} · Ataque {recursosCalculados.ataque} ·
                       Regeneração +{recursosCalculados.regeneracao}/rodada
                     </p>
                     <small>{prGastos} PR gastos de {PR_INICIAL_REFERENCIA}.
-                      Configuração introdutória em teste; escala Avatar avançada ainda será calibrada.</small>
+                      Os valores base e os orçamentos PA, PR e PT ainda serão calibrados para a escala avançada de Avatar.</small>
                   </div>
                   <div className="previa-ataque">
                     <div>
