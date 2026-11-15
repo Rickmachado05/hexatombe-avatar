@@ -1058,10 +1058,6 @@ function App() {
               <option value="Linha de Frente">Linha de Frente</option>
               <option value="Conjurador">Conjurador</option>
             </select>
-            <p className="descricao-editor">
-              Este perfil mantém os valores antigos de HP, Mana e ataque enquanto
-              adaptamos a campanha. O novo arquétipo do Ímpeto é escolhido na aba Combate.
-            </p>
 
             <label htmlFor="historia-personagem">História</label>
             <textarea
