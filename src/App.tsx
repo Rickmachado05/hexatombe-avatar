@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import { exportarFichaPdf } from "./pdf/exportarFichaPdf";
 import {
-  novaExploracao, migrarAtivas, migrarPassiva, validaConstrucao
+  novaExploracao, migrarAtivas, migrarPassiva, validaConstrucao,
+  custoPC, custoPassiva, custoPX, PERFIS
 } from "./impeto/habilidades";
 import type { Perfil, Ativa, Passiva, Exploracao } from "./impeto/habilidades";
 import { CombateImpeto, ExploracaoImpeto, ResumoHabilidadesImpeto } from "./impeto/HabilidadesEditor";
@@ -184,20 +185,7 @@ const regrasModelos: Record<ModeloId, RegraModelo> = {
   },
 };
 
-// O catálogo anterior permanece apenas para a compatibilidade dos JSONs e do PDF.
-const MODELO_TECNICA_LEGADO: PerfilLegadoTecnica = "Lutador";
-
-const custoDaTecnica = (modelo: ModeloId) => {
-  const custo = regrasModelos[modelo].custo;
-  return typeof custo === "number" ? custo : custo[MODELO_TECNICA_LEGADO];
-};
-
-const valorDaTecnica = (modelo: ModeloId, danoBasicoAtual?: string) => {
-  if (modelo === "criarArma" && danoBasicoAtual) return danoBasicoAtual;
-  const valor = regrasModelos[modelo].valor;
-  return typeof valor === "string" ? valor : valor[MODELO_TECNICA_LEGADO];
-};
-
+// Campos do formato antigo continuam aceitos para importar JSONs históricos.
 const criarHabilidade = (modelo: ModeloId): Habilidade => ({
   nome: "",
   modelo,
@@ -207,14 +195,6 @@ const criarHabilidade = (modelo: ModeloId): Habilidade => ({
   nomeCondicao: "",
   nomeArma: "",
 });
-
-const condicaoSugeridaPorElemento: Record<Elemento, string> = {
-  agua: "Geada dolorosa",
-  terra: "Fragmentos de rocha",
-  fogo: "Queimadura",
-  ar: "Cortes de vento",
-  neutro: "Sangramento",
-};
 
 // Modelos de passiva: referências de playtest, ainda sujeitos à revisão do mestre.
 type ModeloPassivaId =
@@ -1102,21 +1082,6 @@ function App() {
   };
 
   const selecionado = elementos.find((item) => item.id === elemento)!;
-  const regraPassiva = regrasPassivas[passiva.modelo];
-  const habilidadeVinculada = habilidades[passiva.habilidadeVinculada];
-  const vinculoPodeAcertar = habilidadeVinculada && [
-    "Ofensiva", "Ofensiva em área", "Controle", "Condição",
-  ].includes(regrasModelos[habilidadeVinculada.modelo].tipo);
-  const nomeVinculada = habilidadeVinculada?.nome.trim() ||
-    `Habilidade ${passiva.habilidadeVinculada + 1}`;
-  const gatilhoPassiva = passiva.modelo === "fluxo"
-    ? `Acertar ${nomeVinculada} (técnica ativa vinculada).`
-    : regraPassiva.gatilho;
-  const semControle = passiva.modelo === "preparacao" &&
-    !habilidades.some((habilidade) => regrasModelos[habilidade.modelo].tipo === "Controle");
-  const semCura = (passiva.modelo === "votoMare" || passiva.modelo === "amparoSolidario") &&
-    !habilidades.some((habilidade) => regrasModelos[habilidade.modelo].tipo === "Cura");
-
   const carregarRetrato = (arquivo?: File) => {
     if (!arquivo) return;
 
@@ -1159,62 +1124,70 @@ function App() {
 
   const gerarPdf = async () => {
     if (exportandoPdf) return;
-    if (!window.confirm("O PDF ainda utiliza o modelo anterior de habilidades e não inclui as técnicas H06/PX nem os novos atributos. Para preservar a ficha editável atual, exporte JSON. Deseja gerar o PDF antigo mesmo assim?")) return;
     setExportandoPdf(true);
     try {
+      const pcUtilizados = ativasImpeto.reduce((total, tecnica) => total + custoPC(tecnica), 0)
+        + custoPassiva(passivaImpeto);
+      const pxUtilizados = exploracaoImpeto.reduce(
+        (total, tecnica) => total + custoPX(tecnica), 0);
+      const derivacaoSelecionada = DERIVACOES_D01.find(
+        (item) => item.id === derivacaoD01.tipo);
+      const vantagemSelecionada = VANTAGENS_V01.find(
+        (item) => item.id === vantagemUniversal);
       await exportarFichaPdf({
         nome: nome.trim(),
         elemento,
-        classe: arquetipoImpeto || "Ímpeto RPG",
+        arquetipo: arquetipoImpeto,
         historia,
         foto,
+        atributos: NOMES_ATRIBUTOS_IMPETO.map((atributo) => ({
+          nome: atributo, valor: atributosImpeto[atributo],
+        })),
+        pericias: NOMES_PERICIAS_IMPETO.map((pericia) => ({
+          nome: pericia,
+          grau: nomeGrauPericia(periciasImpeto[pericia]),
+          bonus: bonusGrauPericia(periciasImpeto[pericia]),
+        })),
+        talento: talentoT02Escolhido ? {
+          nome: talentoT02Escolhido.nome,
+          efeito: talentoT02Escolhido.efeito,
+        } : undefined,
+        vantagem: vantagemSelecionada ? {
+          nome: vantagemSelecionada.nome,
+          beneficio: vantagemSelecionada.beneficio,
+        } : undefined,
+        derivacao: derivacaoSelecionada ? {
+          nome: derivacaoSelecionada.nome,
+          atributo: derivacaoD01.atributo,
+          beneficio: derivacaoSelecionada.beneficio,
+          justificativa: derivacaoD01.justificativa,
+        } : undefined,
+        orcamentos: {
+          pa: { usados: paGastos, total: PA_INICIAL_REFERENCIA },
+          pr: { usados: prGastos, total: PR_INICIAL_REFERENCIA },
+          pt: { usados: ptGastos, total: PT_INICIAL_REFERENCIA },
+          pc: { usados: pcUtilizados, total: PERFIS.avatar.pc },
+          px: { usados: pxUtilizados, total: PERFIS.avatar.px },
+        },
+        investimento: {
+          hp: recursosImpeto.hp,
+          energia: recursosImpeto.energia,
+          ca: recursosImpeto.ca,
+          ataqueDados: recursosImpeto.ataqueDados,
+          regeneracao: recursosImpeto.regeneracao,
+        },
         hp: recursosCalculados.hp,
-        mana: recursosCalculados.energia,
+        energia: recursosCalculados.energia,
         ca: recursosCalculados.ca,
-        regeneracao: `+${recursosCalculados.regeneracao} EN/rodada`,
+        regeneracao: recursosCalculados.regeneracao,
         ataqueBasico: {
           nome: ataqueBasico.nome,
           dano: recursosCalculados.ataque,
           descricao: ataqueBasico.descricao,
         },
-        habilidades: habilidades.map((h) => {
-          const regra = regrasModelos[h.modelo];
-          return {
-            nome: h.nome,
-            categoria: regra.tipo,
-            modelo: regra.nome,
-            acao: regra.acao,
-            custo: custoDaTecnica(h.modelo),
-            valor: valorDaTecnica(h.modelo, recursosCalculados.ataque),
-            rotuloValor: regra.rotuloValor,
-            valorAdicional: regra.valorAdicional,
-            rotuloAdicional: regra.rotuloAdicional,
-            alvos: regra.maxAlvos === 2 ? h.alvos : 1,
-            regra: regra.regra,
-            efeitoNarrativo: h.efeito,
-            observacoes: h.limitacoes,
-            condicao: h.modelo === "danoContinuo"
-              ? h.nomeCondicao.trim() || condicaoSugeridaPorElemento[elemento]
-              : undefined,
-            arma: (h.modelo === "criarArma" || h.modelo === "encantarArma")
-              ? h.nomeArma.trim() || "Arma não definida"
-              : undefined,
-            experimental: Boolean(regra.experimental),
-          };
-        }),
-        passiva: {
-          nome: passiva.nome,
-          modelo: `${regraPassiva.categoria} - ${regraPassiva.nome}`,
-          ativacao: gatilhoPassiva,
-          efeito: regraPassiva.efeito,
-          limites: regraPassiva.limite,
-          descricao: passiva.descricao,
-          aviso: passiva.modelo === "fluxo" && !vinculoPodeAcertar
-            ? "A técnica vinculada precisa poder acertar um alvo."
-            : semControle ? "Esta passiva exige uma técnica de Controle."
-            : semCura ? "Esta passiva exige uma técnica de Cura."
-            : regraPassiva.experimental ? "Passiva experimental: requer avaliação do mestre." : undefined,
-        },
+        ativas: ativasImpeto,
+        passiva: passivaImpeto,
+        exploracao: exploracaoImpeto,
       });
     } catch (erro) {
       console.error("Erro ao gerar PDF", erro);
@@ -1809,7 +1782,7 @@ function App() {
                   <button className="botao-gerar-pdf" type="button" onClick={gerarPdf} disabled={exportandoPdf}>
                     {exportandoPdf ? "Gerando PDF..." : "📜 Gerar ficha em PDF"}
                   </button>
-                  <small className="pdf-ajuda">A4 • Layout antigo do PDF; novos atributos, talentos e perícias entrarão depois</small>
+                  <small className="pdf-ajuda">Pergaminho A4 · Ímpeto A01 · 4 páginas iniciais, com expansão automática para textos longos.</small>
                 </div>
 
                 <section className="previa-identidade" aria-label="Identidade do personagem">
