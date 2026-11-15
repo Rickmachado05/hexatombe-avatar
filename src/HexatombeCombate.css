@@ -448,3 +448,179 @@
   font-size: .76rem;
   line-height: 1.5;
 }
+
+/* Ímpeto 1.0 — aba exclusiva de Perícias e Pontos de Treinamento (PT). */
+.app .editor-com-abas .painel-pericias-impeto {
+  margin: 6px 0 24px;
+  padding: clamp(14px, 2.5vw, 24px);
+  border: 1px solid rgba(209, 172, 114, .38);
+  border-radius: 15px;
+  background: linear-gradient(150deg, rgba(25, 34, 49, .97), rgba(9, 16, 28, .97));
+}
+.app .editor-com-abas .painel-pericias-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+.app .editor-com-abas .painel-pericias-topo h3 {
+  margin: 5px 0;
+  color: #f1dfbb;
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+}
+.app .editor-com-abas .painel-pericias-topo p,
+.app .editor-com-abas .nota-pericias-impeto {
+  max-width: 600px;
+  margin: 8px 0 15px;
+  color: #bfc9d5;
+  font: .84rem/1.55 "Segoe UI", system-ui, sans-serif;
+}
+.app .editor-com-abas .saldo-pt {
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  flex: 0 0 auto;
+  color: #ddcbac;
+  font: 600 .82rem "Segoe UI", system-ui, sans-serif;
+}
+.app .editor-com-abas .saldo-pt strong {
+  color: var(--elemento);
+  font: 700 1.8rem/1.1 Georgia, serif;
+}
+.app .editor-com-abas .saldo-pt small {
+  color: #b3bdc9;
+  margin-top: 5px;
+}
+.app .editor-com-abas .referencia-treinamento {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 22px;
+}
+.app .editor-com-abas .referencia-treinamento span {
+  padding: 8px 10px;
+  border-radius: 7px;
+  border: 1px solid rgba(206, 175, 131, .22);
+  background: rgba(9, 18, 31, .72);
+  color: #c9d2dc;
+  font-size: .77rem;
+}
+.app .editor-com-abas .referencia-treinamento strong {
+  color: #f3dba6;
+}
+.app .editor-com-abas .grupos-pericias-impeto {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+.app .editor-com-abas .grupo-pericias-impeto {
+  min-width: 0;
+  padding: 15px;
+  border: 1px solid rgba(206, 169, 113, .27);
+  border-radius: 12px;
+  background: rgba(9, 17, 29, .8);
+}
+.app .editor-com-abas .grupo-pericias-impeto h3 {
+  margin: 0 0 12px;
+  color: #e9d0a5;
+  font-size: 1rem;
+}
+.app .editor-com-abas .lista-pericias-impeto {
+  display: grid;
+  gap: 9px;
+}
+.app .editor-com-abas .linha-pericia-impeto {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-width: 0;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid rgba(180, 164, 142, .14);
+  border-radius: 8px;
+  background: rgba(17, 28, 45, .85);
+}
+.app .editor-com-abas .info-pericia-impeto { min-width: 0; }
+.app .editor-com-abas .info-pericia-impeto strong {
+  display: block;
+  color: #eee3d0;
+  font-size: .85rem;
+}
+.app .editor-com-abas .info-pericia-impeto small {
+  display: block;
+  margin-top: 4px;
+  color: #b3c3d0;
+  font-size: .73rem;
+}
+.app .editor-com-abas .controle-pericia-impeto {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 auto;
+}
+.app .editor-com-abas .controle-pericia-impeto button {
+  width: 29px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid rgba(205, 176, 132, .49);
+  border-radius: 7px;
+  background: #243348;
+  color: #f5ddaf;
+  font-size: 1.05rem;
+  cursor: pointer;
+}
+.app .editor-com-abas .controle-pericia-impeto button:hover:not(:disabled) {
+  border-color: var(--elemento);
+  background: #3a4a60;
+}
+.app .editor-com-abas .controle-pericia-impeto button:disabled {
+  opacity: .32;
+  cursor: not-allowed;
+}
+.app .editor-com-abas .controle-pericia-impeto button:focus-visible {
+  outline: 2px solid var(--elemento);
+  outline-offset: 2px;
+}
+.app .editor-com-abas .controle-pericia-impeto span {
+  min-width: 29px;
+  color: #e8d5b5;
+  text-align: center;
+  font: 600 .84rem "Segoe UI", system-ui, sans-serif;
+}
+.app .editor-com-abas .nota-pericias-impeto {
+  max-width: none;
+  margin: 18px 0 0;
+  color: #c8b68f;
+}
+.app .editor-com-abas .previa-pericias-impeto > p {
+  color: #bbc6d3;
+  font-size: .84rem;
+}
+.app .editor-com-abas .previa-lista-pericias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 7px 0;
+}
+.app .editor-com-abas .previa-lista-pericias span {
+  border: 1px solid rgba(196, 163, 115, .35);
+  border-radius: 7px;
+  padding: 7px 10px;
+  color: #e8d5b4;
+  background: rgba(14, 25, 41, .8);
+  font-size: .78rem;
+}
+.app .editor-com-abas .previa-lista-pericias small {
+  color: #b3bfcb;
+}
+@media (max-width: 750px) {
+  .app .editor-com-abas .grupos-pericias-impeto {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 460px) {
+  .app .editor-com-abas .painel-pericias-topo { flex-wrap: wrap; }
+  .app .editor-com-abas .saldo-pt { align-items: flex-start; }
+  .app .editor-com-abas .linha-pericia-impeto { padding: 8px; }
+}
