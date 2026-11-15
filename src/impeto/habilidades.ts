@@ -172,11 +172,9 @@ export function migrarAtivas(
 ):Ativa[]{
   return Array.from({length:5},(_,i)=>({
     ...novaAtiva(),nome:antigas[i]?.nome??"",descricao:antigas[i]?.efeito??"",
-    limites:antigas[i]?.limitacoes??"",
-    referenciaAntiga:antigas[i]?.modelo?"Modelo legado: "+antigas[i].modelo+". Recrie o custo e o efeito H06.":""
+    limites:antigas[i]?.limitacoes??""
   }));
 }
 export function migrarPassiva(antiga:{nome:string;descricao:string;modelo:string}):Passiva{
-  return {...novaPassiva(),nome:antiga.nome,descricao:antiga.descricao,
-    referenciaAntiga:antiga.modelo?"Modelo legado: "+antiga.modelo+". Recrie H04.1.":""};
+  return {...novaPassiva(),nome:antiga.nome,descricao:antiga.descricao};
 }
