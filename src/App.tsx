@@ -947,9 +947,9 @@ function App() {
 
       const avisoEscala = ficha.escalaAvatar === ESCALA_AVATAR.versao
         ? ""
-        : "\\n\\nEste arquivo usa uma escala anterior. HP e EN serão recalculados na escala Avatar A01 (base 130 HP/120 EN).";
+        : "\n\nEste arquivo usa uma escala anterior. HP e EN serão recalculados na escala Avatar A01 (base 130 HP/120 EN).";
       if (!window.confirm("Importar esta ficha substituirá o rascunho atual." +
-        avisoEscala + "\\n\\nDeseja continuar?")) {
+        avisoEscala + "\n\nDeseja continuar?")) {
         return;
       }
 
