@@ -359,3 +359,59 @@
   outline: 2px solid var(--elemento);
   outline-offset: 3px;
 }
+
+
+/* Exportação/importação JSON: mantém a identidade do grimório. */
+.app .arquivo-json-oculto {
+  display: none;
+}
+.app:has(.acoes) .acoes {
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.app .botao-json {
+  min-height: 43px;
+  padding: 10px 17px;
+  background: rgba(24, 32, 49, .92);
+  color: #edddc1;
+  border: 1px solid rgba(215, 178, 120, .55);
+  border-radius: 9px;
+  font: 600 .85rem "Segoe UI", system-ui, sans-serif;
+  cursor: pointer;
+  transition: border-color .18s ease, background .18s ease;
+}
+.app .botao-json:hover {
+  border-color: var(--elemento);
+  background: rgba(41, 51, 74, .95);
+}
+.app .botao-json:focus-visible {
+  outline: 2px solid var(--elemento);
+  outline-offset: 3px;
+}
+.app .editor-com-abas .acoes-json {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin: -11px 0 27px;
+  padding: 12px 14px;
+  border: 1px solid rgba(205, 168, 112, .23);
+  border-radius: 11px;
+  background: rgba(7, 13, 24, .48);
+}
+.app .editor-com-abas .acoes-json small {
+  flex: 1 1 215px;
+  color: #b6c5d1;
+  font-size: .77rem;
+  line-height: 1.45;
+}
+@media (max-width: 520px) {
+  .app .editor-com-abas .acoes-json .botao-json {
+    flex: 1 1 120px;
+  }
+  .app:has(.acoes) .acoes .botao-json,
+  .app:has(.acoes) .acoes .botao-principal {
+    width: min(100%, 300px);
+  }
+}
