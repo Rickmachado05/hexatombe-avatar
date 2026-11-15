@@ -1,47 +1,38 @@
 import { jsPDF } from "jspdf";
+import { custoPC, custoPassiva, custoPX, custoEN, custoENPX, resumoAtiva, EFEITOS } from "../impeto/habilidades";
+import type { Ativa, Passiva, Exploracao } from "../impeto/habilidades";
 
 export type ElementoFicha = "agua" | "terra" | "fogo" | "ar" | "neutro";
-
-export type TecnicaPDF = {
-  nome: string;
-  categoria: string;
-  modelo: string;
-  acao: string;
-  custo: number;
-  valor: string;
-  rotuloValor: string;
-  valorAdicional?: string;
-  rotuloAdicional?: string;
-  alvos: number;
-  regra: string;
-  efeitoNarrativo: string;
-  observacoes: string;
-  condicao?: string;
-  arma?: string;
-  experimental: boolean;
-};
 
 export type FichaPDF = {
   nome: string;
   elemento: ElementoFicha;
-  classe: string;
+  arquetipo: string;
   historia: string;
   foto: string;
-  hp: number;
-  mana: number;
-  ca: number;
-  regeneracao: string;
-  ataqueBasico: { nome: string; dano: string; descricao: string };
-  habilidades: TecnicaPDF[];
-  passiva: {
-    nome: string;
-    modelo: string;
-    ativacao: string;
-    efeito: string;
-    limites: string;
-    descricao: string;
-    aviso?: string;
+  atributos: { nome: string; valor: number }[];
+  pericias: { nome: string; grau: string; bonus: number }[];
+  talento?: { nome: string; efeito: string };
+  vantagem?: { nome: string; beneficio: string };
+  derivacao?: { nome: string; atributo: string; beneficio: string; justificativa: string };
+  orcamentos: {
+    pa: { usados: number; total: number };
+    pr: { usados: number; total: number };
+    pt: { usados: number; total: number };
+    pc: { usados: number; total: number };
+    px: { usados: number; total: number };
   };
+  investimento: {
+    hp: number; energia: number; ca: number; ataqueDados: number; regeneracao: number;
+  };
+  hp: number;
+  energia: number;
+  ca: number;
+  regeneracao: number;
+  ataqueBasico: { nome: string; dano: string; descricao: string };
+  ativas: Ativa[];
+  passiva: Passiva;
+  exploracao: Exploracao[];
 };
 
 type RGB = [number, number, number];
@@ -371,9 +362,10 @@ export async function exportarFichaPdf(ficha: FichaPDF): Promise<void> {
     return linhas;
   };
 
+  let secaoDetalhada = "Livro de técnicas";
   const novaPaginaTecnicas = (continuacao = true) => {
-    newPage(continuacao ? "Livro de técnicas • Continuação" : "Livro de técnicas • Detalhes");
-    sectionHeading(continuacao ? "Registros continuados" : "Livro de técnicas", 39);
+    newPage(continuacao ? `${secaoDetalhada} • Continuação` : `${secaoDetalhada} • Detalhes`);
+    sectionHeading(continuacao ? "Registros continuados" : secaoDetalhada, 39);
     // Duas marcas caligráficas nas bordas internas do capítulo.
     inkFlourish(M + 8, 50, 1);
     inkFlourish(W - M - 8, 50, -1);
@@ -471,11 +463,28 @@ export async function exportarFichaPdf(ficha: FichaPDF): Promise<void> {
     }
   };
 
-  // PRIMEIRA PÁGINA: consulta rápida durante a sessão.
+
+  // Ímpeto RPG · Hexatombe: Avatar — quatro seções iniciais, com páginas extras dinâmicas.
+  // Elementos gráficos do PDF original (sangue, linhas elementais, ouro e selos)
+  // são mantidos em todas as páginas por pageBase/newPage.
+  const nomeEfeito = (id: Ativa["efeito"]) =>
+    EFEITOS.find((item) => item.id === id)?.nome ?? "Sem efeito definido";
+  const custoEnergia = (a: Ativa) => {
+    const custo = custoEN(custoPC(a), a);
+    return custo === null ? "EN a definir" : `${custo} EN`;
+  };
+  const custoEnergiaExploracao = (e: Exploracao) => {
+    const custo = custoENPX(custoPX(e), e.automatica);
+    return custo === null ? "EN a definir" : `${custo} EN`;
+  };
+  const textoPassiva = (p: Passiva) =>
+    p.efeito === "nenhum" ? "Sem efeito definido"
+      : `${p.efeito} · ${p.quantidade}d${p.dado}${p.fixo ? "+" + p.fixo : ""}`;
+
+  // PÁGINA 1 — Registro espiritual e consulta de combate.
   pageBase("Registro Espiritual • Visão geral");
   footer();
   sectionHeading("O escolhido", 39);
-  // Bloco do retrato, nome, classe, elemento e resumo da história.
   pdf.setFillColor(250, 241, 218);
   pdf.setDrawColor(...paleta.cor);
   pdf.setLineWidth(0.5);
@@ -487,7 +496,7 @@ export async function exportarFichaPdf(ficha: FichaPDF): Promise<void> {
   diamond(W - M - 3.5, 53, 1, GOLD);
   if (retrato) {
     try { pdf.addImage(retrato, "JPEG", M + 3, 52, 30, 38, undefined, "FAST"); }
-    catch { /* foto opcional */ }
+    catch { /* retrato opcional */ }
   } else {
     pdf.setFillColor(...paleta.cor);
     pdf.roundedRect(M + 3, 52, 30, 38, 2, 2, "F");
@@ -495,24 +504,24 @@ export async function exportarFichaPdf(ficha: FichaPDF): Promise<void> {
   }
   text("NOME", M + 38, 56.5, 7.3, paleta.escura, true);
   pdf.setFont("times", "bold"); pdf.setFontSize(14);
-  const nm = clampLines(pdf, hasText(ficha.nome) || "Personagem sem nome", 130, 1);
-  text(nm[0], M + 38, 65.5, 14, DARK, true);
+  text(clampLines(pdf, hasText(ficha.nome) || "Personagem sem nome", 130, 1)[0],
+    M + 38, 65.5, 14, DARK, true);
   text(`Elemento: ${paleta.nome}`, M + 38, 72.7, 9.5, paleta.cor, true);
-  text(`Classe: ${ficha.classe}`, M + 38, 78.8, 9.5, DARK);
+  text(`Arquétipo: ${ficha.arquetipo || "Não escolhido"}`, M + 38, 78.8, 9.5, DARK);
   text("HISTÓRIA — RESUMO", M + 38, 85, 7, paleta.escura, true);
   pdf.setFont("times", "normal"); pdf.setFontSize(8.1);
-  const histResumo = clampLines(pdf, hasText(ficha.historia) || "Não definida.", 136, 2);
-  histResumo.forEach((line, i) => text(line, M + 38, 90 + i * 3.7, 8, DARK));
+  clampLines(pdf, hasText(ficha.historia) || "Não definida.", 136, 2)
+    .forEach((linha, i) => text(linha, M + 38, 90 + i * 3.7, 8, DARK));
 
-  sectionHeading("Atributos de combate", 101);
+  sectionHeading("Recursos de combate", 101);
   const colWidth = (W - 2 * M - 9) / 4;
-  const statData = [
-    ["HP", String(ficha.hp)],
-    [ficha.elemento === "neutro" ? "FOCO" : "MANA", String(ficha.mana)],
-    ["CA", String(ficha.ca)],
-    ["REGENERAÇÃO", ficha.regeneracao],
+  const stats = [
+    ["HP MÁX.", String(ficha.hp)],
+    ["ENERGIA", String(ficha.energia)],
+    ["CA BASE", String(ficha.ca)],
+    ["REGENERAÇÃO", `+${ficha.regeneracao}/rod.`],
   ];
-  statData.forEach(([label, value], index) => {
+  stats.forEach(([rotulo, valor], index) => {
     const x = M + index * (colWidth + 3);
     pdf.setFillColor(250, 238, 210);
     pdf.setDrawColor(...paleta.cor);
@@ -521,11 +530,12 @@ export async function exportarFichaPdf(ficha: FichaPDF): Promise<void> {
     pdf.setDrawColor(...GOLD);
     pdf.setLineWidth(0.25);
     pdf.line(x + 1.4, 114, x + colWidth - 1.4, 114);
-    text(label, x + 3, 117.5, 8, paleta.escura, true);
-    text(value, x + 3, 128.5, 15, index === 1 ? paleta.cor : DARK, true);
+    text(rotulo, x + 2.5, 117.5, 7.5, paleta.escura, true);
+    text(valor, x + 2.5, 128, index === 3 ? 12.2 : 15, index === 1 ? paleta.cor : DARK, true);
   });
   text(`HP atual: __________ / ${ficha.hp}`, M + 4, 137.8, 9, DARK);
-  text(`${ficha.elemento === "neutro" ? "Foco" : "Mana"} atual: __________ / ${ficha.mana}`, M + 95, 137.8, 9, DARK);
+  text(`EN atual: __________ / ${ficha.energia} (pode acumular acima da base)`,
+    M + 89, 137.8, 8.4, DARK);
 
   sectionHeading("Ataque básico", 143);
   pdf.setDrawColor(...paleta.cor);
@@ -535,32 +545,31 @@ export async function exportarFichaPdf(ficha: FichaPDF): Promise<void> {
   pdf.setDrawColor(...GOLD);
   pdf.setLineWidth(0.25);
   pdf.line(M + 2, 156, W - M - 2, 156);
-  text(hasText(ficha.ataqueBasico.nome) || "Ataque sem nome", M + 4, 160.4, 10.2, DARK, true);
+  text(clampLines(pdf, hasText(ficha.ataqueBasico.nome) || "Ataque sem nome", 112, 1)[0],
+    M + 4, 160.4, 10.2, DARK, true);
+  const dano = `${ficha.ataqueBasico.dano} · 0 EN`;
   pdf.setFont("times", "bold"); pdf.setFontSize(9);
-  const dano = `Dano: ${ficha.ataqueBasico.dano}   |   Custo: 0`;
-  text(dano, W - M - pdf.getTextWidth(dano) - 5, 160.4, 9, paleta.escura, true);
+  text(dano, W - M - pdf.getTextWidth(dano) - 4, 160.4, 9, paleta.escura, true);
   pdf.setFontSize(8.1);
-  const ataqueCurto = clampLines(pdf, hasText(ficha.ataqueBasico.descricao) || "Um ataque básico sem gasto de Mana.", W - 2 * M - 10, 2);
-  ataqueCurto.forEach((line, idx) => text(line, M + 4, 166.9 + idx * 3.7, 8.3, DARK));
+  clampLines(pdf, hasText(ficha.ataqueBasico.descricao) || "Ataque básico sem gasto de Energia.",
+    W - 2 * M - 10, 2).forEach((linha, i) => text(linha, M + 4, 166.9 + i * 3.7, 8.3, DARK));
 
-  sectionHeading("Técnicas ativas", 178);
-  const rowsY = 189;
-  ficha.habilidades.slice(0, 5).forEach((h, idx) => {
-    const yy = rowsY + idx * 13.1;
-    pdf.setFillColor(idx % 2 ? 245 : 251, idx % 2 ? 231 : 241, idx % 2 ? 208 : 220);
+  sectionHeading("Cinco técnicas ativas", 178);
+  ficha.ativas.slice(0, 5).forEach((a, index) => {
+    const yy = 189 + index * 13.1;
+    pdf.setFillColor(index % 2 ? 245 : 251, index % 2 ? 231 : 241, index % 2 ? 208 : 220);
     pdf.setDrawColor(...paleta.cor);
     pdf.setLineWidth(0.35);
     pdf.roundedRect(M, yy, W - 2 * M, 12.7, 1.3, 1.3, "FD");
     pdf.setFillColor(...paleta.cor);
     pdf.roundedRect(M + 2, yy + 2, 10, 8.8, 1.4, 1.4, "F");
-    text(String(idx + 1), M + 5.2, yy + 8.3, 11, CREAM, true);
+    text(String(index + 1), M + 5.2, yy + 8.3, 11, CREAM, true);
     pdf.setFont("times", "bold"); pdf.setFontSize(9.6);
-    const skillName = clampLines(pdf, hasText(h.nome) || `Habilidade ${idx + 1}`, 85, 1)[0];
-    text(skillName, M + 15, yy + 5.6, 9.6, DARK, true);
+    text(clampLines(pdf, hasText(a.nome) || `Habilidade ${index + 1}`, 142, 1)[0],
+      M + 15, yy + 5.6, 9.6, DARK, true);
+    const info = `${nomeEfeito(a.efeito)} · ${resumoAtiva(a)} · ${custoEnergia(a)} · ${custoPC(a)} PC`;
     pdf.setFontSize(7.7);
-    const details = `${h.categoria} • ${h.custo} Mana • ${h.rotuloValor}: ${h.valor}`;
-    const detailsShort = clampLines(pdf, details, W - 2 * M - 22, 1)[0];
-    text(detailsShort, M + 15, yy + 10.2, 7.7, paleta.escura);
+    text(clampLines(pdf, info, W - 2 * M - 22, 1)[0], M + 15, yy + 10.2, 7.7, paleta.escura);
   });
 
   sectionHeading("Dom passivo", 256);
@@ -569,57 +578,152 @@ export async function exportarFichaPdf(ficha: FichaPDF): Promise<void> {
   pdf.setLineWidth(0.5);
   pdf.roundedRect(M, 267, W - 2 * M, 12.2, 1.2, 1.2, "FD");
   diamond(W - M - 4, 272.9, 1.2, GOLD);
-  text(hasText(ficha.passiva.nome) || ficha.passiva.modelo, M + 4, 272.2, 9.1, DARK, true);
-  pdf.setFont("times", "normal"); pdf.setFontSize(8);
-  const previaPassiva = clampLines(pdf, ficha.passiva.efeito, W - M * 2 - 10, 1);
-  text(previaPassiva[0] || "Sem efeito definido", M + 4, 277, 7.8, DARK);
+  text(clampLines(pdf, hasText(ficha.passiva.nome) || "Passiva não definida", W - 2 * M - 15, 1)[0],
+    M + 4, 272.2, 9.1, DARK, true);
+  text(clampLines(pdf, `${textoPassiva(ficha.passiva)} · ${custoPassiva(ficha.passiva)} PC`,
+    W - 2 * M - 15, 1)[0], M + 4, 277, 7.8, DARK);
 
-  // SEGUNDA PÁGINA: cada técnica em cartão próprio e não em múltiplas
-  // caixas de rótulo. Com pouco texto, as cinco técnicas, a passiva e a
-  // história cabem em UMA página adicional. Com muito texto, continuam.
-  novaPaginaTecnicas(false);
-  for (const [index, habilidade] of ficha.habilidades.entries()) {
-    const campos: CampoDetalhe[] = [
-      {
-        rotulo: "Efeito",
-        valor: `${habilidade.rotuloValor}: ${habilidade.valor}${habilidade.valorAdicional ? `; ${habilidade.rotuloAdicional || "Adicional"}: ${habilidade.valorAdicional}` : ""}`,
-      },
-      { rotulo: "Regra", valor: habilidade.regra },
-    ];
-    if (hasText(habilidade.condicao)) campos.push({ rotulo: "Condição", valor: habilidade.condicao! });
-    if (hasText(habilidade.arma)) campos.push({ rotulo: "Arma", valor: habilidade.arma! });
-    if (hasText(habilidade.efeitoNarrativo)) campos.push({ rotulo: "Narrativa", valor: habilidade.efeitoNarrativo });
-    if (hasText(habilidade.observacoes)) campos.push({ rotulo: "Mestre", valor: habilidade.observacoes });
-    if (habilidade.experimental) campos.push({ rotulo: "Playtest", valor: "Modelo experimental: requer avaliação do mestre." });
-    const recurso = ficha.elemento === "neutro" ? "Foco" : "Mana";
-    cartaoDetalhado(
-      hasText(habilidade.nome) || `Habilidade ${index + 1}`,
-      `${habilidade.categoria}  •  ${habilidade.acao === "Pré-combate" ? "Antes da iniciativa" : habilidade.acao === "Buff" ? "Buff opcional" : "Ação principal"}  •  ${habilidade.custo} ${recurso}  •  ${habilidade.alvos} alvo(s)`,
-      campos,
-      index + 1,
-    );
-  }
+  // PÁGINA 2 — Atributos, 16 perícias e escolhas narrativas.
+  newPage("Atributos, perícias e escolhas");
+  sectionHeading("Oito atributos", 39);
+  const anchoAtributo = (W - 2 * M - 12) / 4;
+  ficha.atributos.slice(0, 8).forEach((a, i) => {
+    const col = i % 4, linha = Math.floor(i / 4);
+    const xx = M + col * (anchoAtributo + 4);
+    const yy = 50 + linha * 15.5;
+    pdf.setFillColor(251, 240, 216);
+    pdf.setDrawColor(...paleta.cor);
+    pdf.roundedRect(xx, yy, anchoAtributo, 13.4, 1.1, 1.1, "FD");
+    text(a.nome, xx + 2, yy + 4.5, 8.1, paleta.escura, true);
+    text(String(a.valor), xx + anchoAtributo - 11, yy + 10.8, 12, DARK, true);
+  });
+  text(`PA: ${ficha.orcamentos.pa.usados} / ${ficha.orcamentos.pa.total} usados`,
+    M + 3, 80.3, 8.8, DARK);
 
-  const passiva = ficha.passiva;
-  const camposPassiva: CampoDetalhe[] = [
-    { rotulo: "Ativação", valor: passiva.ativacao },
-    { rotulo: "Efeito", valor: passiva.efeito },
-    { rotulo: "Limitações", valor: passiva.limites },
+  sectionHeading("Dezesseis perícias", 84);
+  const periciaLargura = (W - 2 * M - 5) / 2;
+  ficha.pericias.slice(0, 16).forEach((pericia, i) => {
+    const col = Math.floor(i / 8), linha = i % 8;
+    const xx = M + col * (periciaLargura + 5);
+    const yy = 96 + linha * 7.8;
+    pdf.setFillColor(linha % 2 ? 249 : 243, linha % 2 ? 237 : 229, 211);
+    pdf.setDrawColor(...paleta.clara);
+    pdf.roundedRect(xx, yy, periciaLargura, 7.2, .6, .6, "FD");
+    text(pericia.nome, xx + 2, yy + 4.65, 8.2, DARK, true);
+    const status = `${pericia.grau} (+${pericia.bonus})`;
+    pdf.setFont("times", "normal"); pdf.setFontSize(7.3);
+    text(clampLines(pdf, status, 36, 1)[0], xx + periciaLargura - 38, yy + 4.65, 7.3, paleta.escura);
+  });
+
+  sectionHeading("Orçamentos e investimentos", 163);
+  const pontos = [
+    `PA ${ficha.orcamentos.pa.usados}/${ficha.orcamentos.pa.total}`,
+    `PR ${ficha.orcamentos.pr.usados}/${ficha.orcamentos.pr.total}`,
+    `PT ${ficha.orcamentos.pt.usados}/${ficha.orcamentos.pt.total}`,
+    `PC ${ficha.orcamentos.pc.usados}/${ficha.orcamentos.pc.total}`,
+    `PX ${ficha.orcamentos.px.usados}/${ficha.orcamentos.px.total}`,
   ];
-  if (hasText(passiva.descricao)) camposPassiva.push({ rotulo: "Narrativa", valor: passiva.descricao });
-  if (hasText(passiva.aviso)) camposPassiva.push({ rotulo: "Atenção", valor: passiva.aviso || "" });
-  cartaoDetalhado(
-    hasText(passiva.nome) || passiva.modelo,
-    `DOM PASSIVO  •  ${passiva.modelo}  •  0 Mana / Foco  •  Não consome ação`,
-    camposPassiva,
-  );
+  pdf.setFillColor(251, 240, 215);
+  pdf.setDrawColor(...paleta.cor);
+  pdf.roundedRect(M, 174, W - 2 * M, 20, 1.3, 1.3, "FD");
+  text(pontos.join("     ·     "), M + 4, 181.6, 9, DARK, true);
+  const inv = ficha.investimento;
+  text(`Investimentos: HP ${inv.hp} PR · EN ${inv.energia} PR · CA ${inv.ca}`,
+    M + 4, 189.1, 8.2, paleta.escura);
 
-  // História completa com fluxo por linhas; cria novas páginas apenas quando
-  // o campo for realmente grande, sem reduzir a fonte até ficar ilegível.
-  cartaoDetalhado(
-    "História do personagem",
-    `REGISTRO NARRATIVO  •  ${hasText(ficha.nome) || "Personagem sem nome"}`,
-    [{ rotulo: "História", valor: ficha.historia || "História não informada." }],
-  );
+  sectionHeading("Escolhas do personagem", 198);
+  const quadroEscolha = (yy: number, rotulo: string, titulo: string, detalhe: string) => {
+    pdf.setFillColor(250, 240, 216);
+    pdf.setDrawColor(...paleta.cor);
+    pdf.roundedRect(M, yy, W - 2 * M, 21.2, 1.4, 1.4, "FD");
+    pdf.setDrawColor(...GOLD);
+    pdf.line(M + 2, yy + 2.3, W - M - 2, yy + 2.3);
+    text(rotulo.toUpperCase(), M + 4, yy + 6, 7.5, paleta.escura, true);
+    text(clampLines(pdf, titulo, W - 2 * M - 9, 1)[0], M + 4, yy + 12.5, 10, DARK, true);
+    text(clampLines(pdf, detalhe, W - 2 * M - 9, 1)[0], M + 4, yy + 18.5, 8.5, DARK);
+  };
+  quadroEscolha(210, "Talento de arquétipo",
+    ficha.talento?.nome || "Nenhum talento escolhido",
+    ficha.talento?.efeito || "Uma escolha opcional do arquétipo T02.");
+  quadroEscolha(232.5, "Vantagem universal V01",
+    ficha.vantagem?.nome || "Nenhuma vantagem escolhida",
+    ficha.vantagem?.beneficio || "Sem vantagem V01.");
+  quadroEscolha(255, "Derivação D01",
+    ficha.derivacao ? `${ficha.derivacao.nome} · ${ficha.derivacao.atributo}` : "Nenhuma derivação escolhida",
+    ficha.derivacao?.beneficio || "Requer um atributo 12+.");
+  
+  // PÁGINA 3+ — cinco técnicas ativas + passiva com todo texto, sem cortes.
+  secaoDetalhada = "Livro de técnicas";
+  novaPaginaTecnicas(false);
+  ficha.ativas.slice(0, 5).forEach((ativa, i) => {
+    const campos: CampoDetalhe[] = [
+      { rotulo: "Efeito", valor: `${nomeEfeito(ativa.efeito)} — ${resumoAtiva(ativa)}` },
+      { rotulo: "Ação", valor: ativa.ativacao === "principal" ? "Ação principal" :
+        ativa.ativacao === "buff" ? "Buff opcional" : "Reação" },
+      { rotulo: "Alvos", valor: `${ativa.alvos} · ${ativa.distante ? "À distância" : "Próximo"}` },
+      { rotulo: "PC / EN", valor: `${custoPC(ativa)} PC na construção · ${custoEnergia(ativa)} por uso` },
+      { rotulo: "Duração", valor: `${ativa.rodadasExtras} rodada(s) adicional(is)` },
+      { rotulo: "Gatilho", valor: ativa.gatilho },
+      { rotulo: "Descrição", valor: ativa.descricao },
+      { rotulo: "Limites", valor: ativa.limites },
+    ];
+    if (ativa.empurraoAdicional) campos.push({ rotulo: "Adicional", valor: "Empurrão adicional comprado." });
+    if (ativa.referenciaAntiga) campos.push({ rotulo: "Referência", valor: ativa.referenciaAntiga });
+    cartaoDetalhado(hasText(ativa.nome) || `Habilidade ${i + 1}`,
+      `${nomeEfeito(ativa.efeito)} · ${custoEnergia(ativa)} · ${custoPC(ativa)} PC`, campos, i + 1);
+  });
+  const passivaCampos: CampoDetalhe[] = [
+    { rotulo: "Efeito", valor: textoPassiva(ficha.passiva) },
+    { rotulo: "Usos", valor: `${ficha.passiva.usos} ativação(ões) automática(s) por combate` },
+    { rotulo: "Custo", valor: `${custoPassiva(ficha.passiva)} PC na construção · 0 EN` },
+    { rotulo: "Gatilho", valor: ficha.passiva.gatilho },
+    { rotulo: "Descrição", valor: ficha.passiva.descricao },
+    { rotulo: "Limites", valor: ficha.passiva.limites },
+  ];
+  if (ficha.passiva.referenciaAntiga) passivaCampos.push({ rotulo: "Referência", valor: ficha.passiva.referenciaAntiga });
+  cartaoDetalhado(hasText(ficha.passiva.nome) || "Passiva não definida",
+    "PASSIVA · Automática · Não ocupa ação principal", passivaCampos);
+
+  // PÁGINA 4+ — Técnicas PX e história integral.
+  secaoDetalhada = "Exploração e história";
+  novaPaginaTecnicas(false);
+  if (!ficha.exploracao.length) {
+    cartaoDetalhado("Técnicas de exploração",
+      "PX · Nenhuma técnica adicional comprada",
+      [{ rotulo: "Exploração", valor: "O personagem não possui técnicas adicionais de exploração." }]);
+  } else {
+    ficha.exploracao.slice(0, 3).forEach((tecnica, i) => {
+      const campos: CampoDetalhe[] = [
+        { rotulo: "Categoria", valor: tecnica.categoria },
+        { rotulo: "Potência", valor: tecnica.classe },
+        { rotulo: "Pontos", valor: `${custoPX(tecnica)} PX na construção · ${custoEnergiaExploracao(tecnica)} por uso` },
+        { rotulo: "Alcance", valor: tecnica.alcance },
+        { rotulo: "Alvos", valor: String(tecnica.alvos) },
+        { rotulo: "Duração", valor: tecnica.duracao },
+        { rotulo: "Usos", valor: tecnica.automatica ? "Automática" : String(tecnica.usos) },
+        { rotulo: "Teste", valor: tecnica.teste },
+        { rotulo: "Descrição", valor: tecnica.descricao },
+        { rotulo: "Limites", valor: tecnica.limites },
+      ];
+      cartaoDetalhado(hasText(tecnica.nome) || `Exploração ${i + 1}`,
+        `Técnica PX · ${tecnica.classe} · ${custoPX(tecnica)} PX · ${custoEnergiaExploracao(tecnica)}`,
+        campos, i + 1);
+    });
+  }
+  if (ficha.talento) cartaoDetalhado("Talento de arquétipo T02", ficha.arquetipo,
+    [{ rotulo: "Talento", valor: ficha.talento.nome }, { rotulo: "Benefício", valor: ficha.talento.efeito }]);
+  if (ficha.vantagem) cartaoDetalhado("Vantagem universal V01", "Vantagem independente",
+    [{ rotulo: "Vantagem", valor: ficha.vantagem.nome }, { rotulo: "Benefício", valor: ficha.vantagem.beneficio }]);
+  if (ficha.derivacao) cartaoDetalhado("Derivação D01", "Atributo 12+ · Módulo opcional",
+    [
+      { rotulo: "Derivação", valor: ficha.derivacao.nome },
+      { rotulo: "Atributo", valor: ficha.derivacao.atributo },
+      { rotulo: "Benefício", valor: ficha.derivacao.beneficio },
+      { rotulo: "Justificativa", valor: ficha.derivacao.justificativa },
+    ]);
+  cartaoDetalhado("História do personagem",
+    `REGISTRO NARRATIVO · ${hasText(ficha.nome) || "Personagem sem nome"}`,
+    [{ rotulo: "História", valor: ficha.historia || "História não informada." }]);
+
   pdf.save(`Hexatombe_Avatar_${safeFileName(ficha.nome)}.pdf`);
 }
