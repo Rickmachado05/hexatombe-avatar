@@ -328,14 +328,20 @@ const regrasPassivas: Record<ModeloPassivaId, RegraPassiva> = {
   },
 };
 
-type AbaEditor = "identidade" | "combate" | "habilidades" | "previa";
+type AbaEditor = "identidade" | "arquetipo" | "atributos" | "pericias" | "habilidades" | "previa";
 
 const abasEditor: { id: AbaEditor; nome: string }[] = [
   { id: "identidade", nome: "Identidade" },
-  { id: "combate", nome: "Combate" },
+  { id: "arquetipo", nome: "Arquétipo" },
+  { id: "atributos", nome: "Atributos" },
+  { id: "pericias", nome: "Perícias" },
   { id: "habilidades", nome: "Habilidades" },
   { id: "previa", nome: "Prévia" },
 ];
+
+function normalizarAbaEditor(aba: AbaEditor | "combate" | undefined): AbaEditor {
+  return aba === "combate" ? "atributos" : aba ?? "identidade";
+}
 
 
 type PassivaEditavel = {
@@ -466,14 +472,60 @@ function validarEscolhaT02(arquetipo: unknown, talento: unknown): boolean {
     ARQUETIPOS_T02[arquetipo as ArquetipoImpeto].talentos.some((t) => t.id === talento);
 }
 
+
+const GRUPOS_PERICIAS_IMPETO = [
+  { nome: "Físicas", pericias: ["Atletismo", "Acrobacia", "Furtividade", "Precisão Manual"] },
+  { nome: "Exploração", pericias: ["Atenção", "Investigação", "Sobrevivência", "Condução"] },
+  { nome: "Conhecimento", pericias: ["Conhecimento", "Engenharia", "Medicina"] },
+  { nome: "Sociais", pericias: ["Persuasão", "Enganação", "Intimidação", "Empatia", "Liderança"] },
+] as const;
+
+type NomePericiaImpeto = (typeof GRUPOS_PERICIAS_IMPETO)[number]["pericias"][number];
+type GrauPericiaImpeto = 0 | 1 | 2;
+type PericiasImpeto = Record<NomePericiaImpeto, GrauPericiaImpeto>;
+
+const PT_INICIAL_REFERENCIA = 4;
+const PERICIAS_PADRAO_IMPETO: PericiasImpeto = {
+  Atletismo: 0, Acrobacia: 0, Furtividade: 0, "Precisão Manual": 0,
+  Atenção: 0, Investigação: 0, Sobrevivência: 0, Condução: 0,
+  Conhecimento: 0, Engenharia: 0, Medicina: 0,
+  Persuasão: 0, Enganação: 0, Intimidação: 0, Empatia: 0, Liderança: 0,
+};
+const NOMES_PERICIAS_IMPETO: NomePericiaImpeto[] =
+  GRUPOS_PERICIAS_IMPETO.flatMap((grupo) => [...grupo.pericias]);
+
+function pontosGastosPericias(pericias: PericiasImpeto): number {
+  return NOMES_PERICIAS_IMPETO.reduce((total, pericia) => total + pericias[pericia], 0);
+}
+
+function validarPericiasImpeto(valor: unknown): valor is PericiasImpeto {
+  if (!valor || typeof valor !== "object" || Array.isArray(valor)) return false;
+  const dados = valor as Record<string, unknown>;
+  return Object.keys(dados).length === NOMES_PERICIAS_IMPETO.length &&
+    NOMES_PERICIAS_IMPETO.every((nome) =>
+      Object.prototype.hasOwnProperty.call(dados, nome) &&
+      (dados[nome] === 0 || dados[nome] === 1 || dados[nome] === 2)
+    ) &&
+    pontosGastosPericias(dados as PericiasImpeto) <= PT_INICIAL_REFERENCIA;
+}
+
+function nomeGrauPericia(grau: GrauPericiaImpeto): string {
+  return grau === 2 ? "Especialista" : grau === 1 ? "Treinado" : "Não treinado";
+}
+
+function bonusGrauPericia(grau: GrauPericiaImpeto): number {
+  return grau * 2;
+}
+
 type RascunhoFicha = {
   versao: 1;
   // Etapa visual opcional para manter compatibilidade com rascunhos anteriores.
   editorAberto?: boolean;
-  abaAtiva?: AbaEditor;
+  abaAtiva?: AbaEditor | "combate";
   elemento: Elemento;
   // Opcional para importar fichas JSON produzidas antes desta atualização.
   atributosImpeto?: AtributosImpeto;
+  periciasImpeto?: PericiasImpeto;
   // Módulo T02: campos opcionais para importar fichas JSON mais antigas.
   arquetipoImpeto?: ArquetipoImpeto | "";
   talentoArquetipo?: TalentoArquetipoId | "";
@@ -512,9 +564,10 @@ function validarFicha(valor: unknown): valor is RascunhoFicha {
 
   return dados.versao === 1 &&
     (dados.editorAberto === undefined || typeof dados.editorAberto === "boolean") &&
-    (dados.abaAtiva === undefined || abasEditor.some((aba) => aba.id === dados.abaAtiva)) &&
+    (dados.abaAtiva === undefined || dados.abaAtiva === "combate" || abasEditor.some((aba) => aba.id === dados.abaAtiva)) &&
     elementos.some((item) => item.id === dados.elemento) &&
     (dados.atributosImpeto === undefined || validarAtributosImpeto(dados.atributosImpeto)) &&
+    (dados.periciasImpeto === undefined || validarPericiasImpeto(dados.periciasImpeto)) &&
     validarEscolhaT02(dados.arquetipoImpeto, dados.talentoArquetipo) &&
     Object.prototype.hasOwnProperty.call(atributosPorClasse, dados.classe ?? "") &&
     typeof dados.nome === "string" &&
@@ -567,6 +620,9 @@ function App() {
   const [atributosImpeto, setAtributosImpeto] = useState<AtributosImpeto>(
     rascunhoInicial?.atributosImpeto ?? { ...ATRIBUTOS_PADRAO_IMPETO }
   );
+  const [periciasImpeto, setPericiasImpeto] = useState<PericiasImpeto>(
+    rascunhoInicial?.periciasImpeto ?? { ...PERICIAS_PADRAO_IMPETO }
+  );
   const [arquetipoImpeto, setArquetipoImpeto] = useState<ArquetipoImpeto | "">(
     rascunhoInicial?.arquetipoImpeto ?? ""
   );
@@ -584,7 +640,7 @@ function App() {
   const [classe, setClasse] = useState<Classe>(rascunhoInicial?.classe ?? "Lutador");
   const [historia, setHistoria] = useState(rascunhoInicial?.historia ?? "");
   const [foto, setFoto] = useState(rascunhoInicial?.foto ?? "");
-  const [abaAtiva, setAbaAtiva] = useState<AbaEditor>(rascunhoInicial?.abaAtiva ?? "identidade");
+  const [abaAtiva, setAbaAtiva] = useState<AbaEditor>(normalizarAbaEditor(rascunhoInicial?.abaAtiva));
   const [exportandoPdf, setExportandoPdf] = useState(false);
   const [habilidadeAberta, setHabilidadeAberta] = useState<number | "passiva" | null>(0);
 
@@ -619,6 +675,7 @@ function App() {
       abaAtiva,
       elemento,
       atributosImpeto,
+      periciasImpeto,
       arquetipoImpeto,
       talentoArquetipo,
       nome,
@@ -634,7 +691,7 @@ function App() {
     } catch (erro) {
       console.warn("Não foi possível salvar o rascunho neste navegador.", erro);
     }
-  }, [mostrandoIdentidade, abaAtiva, elemento, atributosImpeto, arquetipoImpeto, talentoArquetipo, nome, classe, historia, foto, ataqueBasico, habilidades, passiva]);
+  }, [mostrandoIdentidade, abaAtiva, elemento, atributosImpeto, periciasImpeto, arquetipoImpeto, talentoArquetipo, nome, classe, historia, foto, ataqueBasico, habilidades, passiva]);
 
 
   const exportarJson = () => {
@@ -646,6 +703,7 @@ function App() {
       abaAtiva,
       elemento,
       atributosImpeto,
+      periciasImpeto,
       arquetipoImpeto,
       talentoArquetipo,
       nome,
@@ -708,6 +766,7 @@ function App() {
 
       setElemento(ficha.elemento);
       setAtributosImpeto(ficha.atributosImpeto ?? { ...ATRIBUTOS_PADRAO_IMPETO });
+      setPericiasImpeto(ficha.periciasImpeto ?? { ...PERICIAS_PADRAO_IMPETO });
       setArquetipoImpeto(ficha.arquetipoImpeto ?? "");
       setTalentoArquetipo(ficha.talentoArquetipo ?? "");
       setNome(ficha.nome);
@@ -717,7 +776,7 @@ function App() {
       setAtaqueBasico({ ...ficha.ataqueBasico });
       setHabilidades(ficha.habilidades.map((habilidade) => ({ ...habilidade })));
       setPassiva({ ...ficha.passiva });
-      setAbaAtiva(ficha.abaAtiva ?? "identidade");
+      setAbaAtiva(normalizarAbaEditor(ficha.abaAtiva));
       setHabilidadeAberta(0);
       setMostrandoIdentidade(true);
       window.alert("Ficha importada! Você pode continuar editando ou gerar o PDF.");
@@ -731,6 +790,18 @@ function App() {
   const talentoT02Escolhido = arquetipoImpeto
     ? ARQUETIPOS_T02[arquetipoImpeto].talentos.find((item) => item.id === talentoArquetipo)
     : undefined;
+
+  const ptGastos = pontosGastosPericias(periciasImpeto);
+  const ptRestantes = PT_INICIAL_REFERENCIA - ptGastos;
+  const alterarGrauPericia = (pericia: NomePericiaImpeto, delta: -1 | 1) => {
+    setPericiasImpeto((anterior) => {
+      const grau = anterior[pericia];
+      const proximo = grau + delta;
+      if (proximo < 0 || proximo > 2) return anterior;
+      if (delta === 1 && pontosGastosPericias(anterior) >= PT_INICIAL_REFERENCIA) return anterior;
+      return { ...anterior, [pericia]: proximo as GrauPericiaImpeto };
+    });
+  };
   const paGastos = pontosGastosAtributos(atributosImpeto);
   const paDisponiveis = PA_INICIAL_REFERENCIA - paGastos;
 
@@ -1070,10 +1141,9 @@ function App() {
               </section>
             )}
 
-            {abaAtiva === "combate" && (
-              <section className="conteudo-aba" aria-labelledby="aba-combate">
-                <h2>Combate</h2>
-
+            {abaAtiva === "arquetipo" && (
+              <section className="conteudo-aba aba-arquetipo" aria-labelledby="aba-arquetipo">
+                <h2>Arquétipo</h2>
                 <section className="painel-arquetipo-impeto" aria-label="Arquétipo e talento T02 do Ímpeto">
                   <div className="cabecalho-arquetipo-impeto">
                     <span className="rotulo-impeto">ÍMPETO RPG 1.0 · ARQUÉTIPOS T02</span>
@@ -1134,6 +1204,13 @@ function App() {
                     </p>
                   )}
                 </section>
+
+              </section>
+            )}
+
+            {abaAtiva === "atributos" && (
+              <section className="conteudo-aba" aria-labelledby="aba-atributos">
+                <h2>Atributos</h2>
 
                 <section className="painel-atributos-impeto" aria-label="Oito atributos do Ímpeto RPG">
                   <div className="painel-impeto-topo">
@@ -1225,6 +1302,77 @@ function App() {
                 />
               </div>
             </section>
+              </section>
+            )}
+
+
+            {abaAtiva === "pericias" && (
+              <section className="conteudo-aba aba-pericias" aria-labelledby="aba-pericias">
+                <h2>Perícias</h2>
+                <div className="painel-pericias-impeto">
+                  <div className="painel-pericias-topo">
+                    <div>
+                      <span className="rotulo-impeto">ÍMPETO RPG 1.0 · TREINAMENTO</span>
+                      <h3>Treinamento do personagem</h3>
+                      <p>Distribua PT para especializar seu personagem. Perícias não treinadas
+                        continuam disponíveis para testes comuns.</p>
+                    </div>
+                    <div className="saldo-pt" aria-live="polite">
+                      <strong>{ptRestantes}</strong>
+                      <span>PT restantes</span>
+                      <small>{ptGastos} de {PT_INICIAL_REFERENCIA} usados</small>
+                    </div>
+                  </div>
+
+                  <div className="referencia-treinamento">
+                    <span>Não treinado <strong>+0</strong> · 0 PT</span>
+                    <span>Treinado <strong>+2</strong> · 1 PT total</span>
+                    <span>Especialista <strong>+4</strong> · 2 PT totais</span>
+                  </div>
+
+                  <div className="grupos-pericias-impeto">
+                    {GRUPOS_PERICIAS_IMPETO.map((grupo) => (
+                      <section key={grupo.nome} className="grupo-pericias-impeto">
+                        <h3>{grupo.nome}</h3>
+                        <div className="lista-pericias-impeto">
+                          {grupo.pericias.map((pericia) => {
+                            const grau = periciasImpeto[pericia];
+                            return (
+                              <div className="linha-pericia-impeto" key={pericia}>
+                                <div className="info-pericia-impeto">
+                                  <strong>{pericia}</strong>
+                                  <small>{nomeGrauPericia(grau)} · bônus +{bonusGrauPericia(grau)}</small>
+                                </div>
+                                <div className="controle-pericia-impeto">
+                                  <button
+                                    type="button"
+                                    aria-label={`Reduzir treinamento em ${pericia}`}
+                                    onClick={() => alterarGrauPericia(pericia, -1)}
+                                    disabled={grau === 0}
+                                  >−</button>
+                                  <span aria-label={`${pericia}: ${nomeGrauPericia(grau)}`}>{grau}/2</span>
+                                  <button
+                                    type="button"
+                                    aria-label={`Aumentar treinamento em ${pericia}`}
+                                    onClick={() => alterarGrauPericia(pericia, 1)}
+                                    disabled={grau === 2 || ptRestantes === 0}
+                                  >+</button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </section>
+                    ))}
+                  </div>
+                  <p className="nota-pericias-impeto">
+                    Testes: 1d20 + atributo adequado + bônus da perícia.
+                    A combinação depende da situação, não de uma associação fixa.
+                    Os 4 PT são a referência inicial do livro e poderão ser adaptados
+                    à escala de personagens experientes da campanha.
+                    Esta distribuição já é salva no navegador e no JSON.
+                  </p>
+                </div>
               </section>
             )}
 
@@ -1598,6 +1746,7 @@ function App() {
                     <div className="previa-chips">
                       <span className="previa-chip-elemento">{selecionado.simbolo} {selecionado.nome}</span>
                       <span>{classe}</span>
+                      {arquetipoImpeto && <span>{arquetipoImpeto}</span>}
                     </div>
                     <div className="previa-historia">
                       <strong>História</strong>
@@ -1609,14 +1758,14 @@ function App() {
                   </div>
                 </section>
 
-                <section className="previa-secao" aria-labelledby="previa-titulo-combate">
+
+                <section className="previa-secao" aria-label="Arquétipo Ímpeto">
                   <div className="previa-secao-topo">
-                    <h3 id="previa-titulo-combate">Atributos de combate</h3>
-                    <button className="previa-editar" type="button" onClick={() => setAbaAtiva("combate")}>
-                      Editar combate
+                    <h3>Arquétipo e talento</h3>
+                    <button className="previa-editar" type="button" onClick={() => setAbaAtiva("arquetipo")}>
+                      Editar arquétipo
                     </button>
                   </div>
-
                   <div className="previa-arquetipo-impeto">
                     <strong>Ímpeto RPG · Arquétipo T02</strong>
                     <p>{arquetipoImpeto || "Ainda não escolhido"}</p>
@@ -1627,6 +1776,16 @@ function App() {
                     )}
                     <small>Talento independente das cinco ativas e da passiva. Não incluído no PDF legado nesta etapa.</small>
                   </div>
+                </section>
+
+                <section className="previa-secao" aria-labelledby="previa-titulo-combate">
+                  <div className="previa-secao-topo">
+                    <h3 id="previa-titulo-combate">Atributos e recursos de combate</h3>
+                    <button className="previa-editar" type="button" onClick={() => setAbaAtiva("atributos")}>
+                      Editar atributos
+                    </button>
+                  </div>
+
                   <div className="previa-impeto-atributos">
                     <strong>Ímpeto RPG · Atributos universais</strong>
                     <p>{NOMES_ATRIBUTOS_IMPETO.map((chave) =>
@@ -1664,6 +1823,25 @@ function App() {
                       <span>{danoBasicoPorClasse[classe]} dano</span>
                       <span>0 Mana</span>
                     </div>
+                  </div>
+                </section>
+
+
+                <section className="previa-secao previa-pericias-impeto" aria-label="Perícias do Ímpeto">
+                  <div className="previa-secao-topo">
+                    <h3>Perícias</h3>
+                    <button className="previa-editar" type="button" onClick={() => setAbaAtiva("pericias")}>
+                      Editar perícias
+                    </button>
+                  </div>
+                  <p>PT: {ptGastos} de {PT_INICIAL_REFERENCIA} usados · {ptRestantes} restantes</p>
+                  <div className="previa-lista-pericias">
+                    {NOMES_PERICIAS_IMPETO.filter((pericia) => periciasImpeto[pericia] > 0).map((pericia) => (
+                      <span key={pericia}>
+                        {pericia}: {nomeGrauPericia(periciasImpeto[pericia])} (+{bonusGrauPericia(periciasImpeto[pericia])})
+                      </span>
+                    ))}
+                    {ptGastos === 0 && <small>Não há perícias treinadas ainda.</small>}
                   </div>
                 </section>
 
