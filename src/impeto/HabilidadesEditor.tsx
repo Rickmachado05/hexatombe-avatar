@@ -141,11 +141,15 @@ export function CombateImpeto(props:Props){
               </select>
             </label>
           </div>
-          <label className="impeto-check">
-            <input type="checkbox" checked={a.distante}
-              onChange={e=>editarAtiva(i,{distante:e.target.checked})}/>
-            <span>Alcance narrativo distante (+25% no subtotal, H03 opcional)</span>
-          </label>
+          <div className="impeto-opcao-alcance">
+            <label className="impeto-check">
+              <input type="checkbox" checked={a.distante}
+                onChange={e=>editarAtiva(i,{distante:e.target.checked})}/>
+              <span>Alcance à distância (+25% no custo em PC)</span>
+            </label>
+            <small>Permite usar a habilidade contra alvos mais afastados do que o alcance próximo.
+              A distância é definida pelo mestre conforme a cena; não é ilimitada nem medida em metros fixos.</small>
+          </div>
           {a.ativacao==="reacao"&&<CampoTexto titulo="Gatilho da reação" valor={a.gatilho}
             alterar={v=>editarAtiva(i,{gatilho:v})}
             ajuda="Proteções reativas normalmente são declaradas após acerto, antes do dano."/>}
