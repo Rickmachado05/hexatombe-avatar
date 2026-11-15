@@ -8,7 +8,7 @@
 
 **[Abrir Hexatombe: Avatar — versão online](https://hexatombe-avatar.vercel.app/)**
 
-Sem instalação: crie seu personagem no navegador e exporte sua ficha em PDF. O código-fonte está disponível neste repositório.
+Sem instalação: crie seu personagem no navegador, exporte o pergaminho em PDF ou salve a ficha editável em JSON. O código-fonte está disponível neste repositório.
 
 ## Funcionalidades
 
@@ -20,6 +20,7 @@ Sem instalação: crie seu personagem no navegador e exporte sua ficha em PDF. O
 - **Passiva:** personalização narrativa com modelos de ativação e efeito.
 - **Prévia:** consulta da ficha montada antes da exportação.
 - **PDF dinâmico:** geração no navegador, em formato A4, com aparência de pergaminho, identidade visual do elemento e páginas adicionais para textos extensos.
+- **JSON editável:** exporte a ficha completa (incluindo elemento, retrato, cinco técnicas e passiva) e importe-a novamente no editor, em outro navegador ou dispositivo.
 
 ## Tecnologias
 
@@ -64,9 +65,12 @@ npm run lint
 3. Consulte os atributos na aba **Combate**.
 4. Personalize as cinco técnicas e a habilidade passiva.
 5. Revise o resultado em **Prévia**.
-6. Clique em **Gerar ficha em PDF** para exportar o pergaminho.
+6. Clique em **Gerar ficha em PDF** para exportar o pergaminho ou em **Exportar JSON** para salvar uma cópia editável.
+7. Para recuperar uma ficha, clique em **Importar ficha JSON** na página inicial (ou **Importar JSON** no editor) e escolha o arquivo exportado. A importação substitui o rascunho atual após confirmação.
 
-**Salvamento de rascunho:** o editor salva automaticamente a ficha em edição no armazenamento local deste navegador, incluindo retrato, técnicas e passiva. Ao reabrir o site no mesmo navegador, é possível continuar a edição. Isso não é backup em nuvem: limpar os dados do navegador pode apagar o rascunho. Exporte o PDF para consulta ou impressão; ele ainda não permite importar a ficha para o editor.
+**Salvamento de rascunho:** o editor salva automaticamente a ficha em edição no armazenamento local deste navegador, incluindo retrato, técnicas e passiva. Ao reabrir o site no mesmo navegador, é possível continuar a edição. Isso não é backup em nuvem: limpar os dados do navegador pode apagar o rascunho. **Exporte JSON para manter um arquivo editável independente**; o PDF serve para consulta e impressão, não para reimportação.
+
+**Formato do JSON:** arquivo identificado por `formato: "hexatombe-avatar-ficha"`, `versaoFormato: 1` e o objeto `ficha`. O editor valida a estrutura antes de substituir os dados atuais e aceita também o objeto de rascunho v1 sem invólucro. O limite de importação é 8 MB. A compatibilidade automática com o **Portal do Mestre** depende de integração específica no importador daquela plataforma.
 
 ## Organização
 
@@ -77,8 +81,8 @@ npm run lint
 
 ## Próximas melhorias
 
-- [x] Salvamento local automático e recuperação da ficha em edição (primeiro rascunho; aguardando teste).
-- [ ] Exportação/importação de dados da ficha em JSON.
+- [x] Salvamento local automático e recuperação da ficha em edição.
+- [x] Exportação/importação de dados da ficha em JSON (aguardando testes manuais).
 - [ ] Refinamentos de acessibilidade e experiência em telas menores.
 - [ ] Testes adicionais de compatibilidade e impressão dos PDFs.
 - [x] Publicação de uma demonstração online na Vercel.
